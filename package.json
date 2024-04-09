@@ -1,47 +1,28 @@
 {
-  "name": "2jeonghoon.github.io",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@studio-freight/lenis": "^1.0.42",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "gasp": "^0.0.2",
-    "gh-pages": "^6.1.1",
-    "gsap": "^3.12.5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3",
-    "react-scripts": "5.0.1",
-    "sass": "^1.72.0",
-    "web-vitals": "^2.1.4"
-  },
+  "name": "long-haul",
+  "version": "0.0.0",
+  "description": "A minimal, type-focused Jekyll theme. ",
+  "main": "gulpfile.js",
   "scripts": {
-    "predeploy": "npm rum build",
-    "deploy": "gh-pages -d build",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "author": "Brian Maier Jr.",
+  "license": "MIT",
+  "devDependencies": {
+    "browser-sync": "^2.29.1",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "8.0.0",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-sass": "^5.1.0"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brianmaierjr/long-haul.git"
   },
-  "homepate": "https://2jeonghoon.github.io/"
+  "keywords": [
+    "jekyll",
+    "gulp",
+    "sass",
+    "browsersync"
+  ]
 }
