@@ -23,7 +23,7 @@ const greeting = {
   username: "2jeonghoon",
   title: "Hi all, I'm 2jeonghoon",
   subTitle: emoji(
-    "A passionate Full Stack Software Developer 🚀 having an experience of building Web and Mobile applications with JavaScript / Reactjs / Nodejs / React Native and some other cool libraries and frameworks."
+    "A passionate Game Developer 🎮 specializing in game engine development, game server architecture, and performance optimization. Experienced in Unreal Engine, Unity, C++, and high-performance computing."
   ),
   resumeLink:
     "", // Set to empty to hide the button
@@ -49,15 +49,15 @@ const socialMediaLinks = {
 
 const skillsSection = {
   title: "What I do",
-  subTitle: "CRAZY FULL STACK DEVELOPER WHO WANTS TO EXPLORE EVERY TECH STACK",
+  subTitle: "PASSIONATE GAME DEVELOPER SPECIALIZAING IN GAME ENGINE, SERVER ARCHITECTURE, AND PERFORMANCE OPTIMIZATION",
   skills: [
     emoji(
-      "⚡ Develop highly interactive Front end / User Interfaces for your web and mobile applications"
+      " 🎮 Develop high-performance game engines and interactive gameplay systems"
     ),
-    emoji("⚡ Progressive Web Applications ( PWA ) in normal and SPA Stacks"),
-    emoji(
-      "⚡ Integration of third party services such as Firebase/ AWS / Digital Ocean"
-    )
+    emoji("⚡ Optimize game servers for multiplayer networking and low-latency performance"),
+    emoji("🖥️ Build and integrate real-time physics, AI, and rendering pipelines"),
+    emoji("⚡ Improve system performance through Linux Kernel and multithreading optimization"),
+    emoji("🔧 Work with backend technologies to create scalable and efficient game architectures")
   ],
 
   /* Make Sure to include correct Font Awesome Classname to view your icon
@@ -65,57 +65,49 @@ https://fontawesome.com/icons?d=gallery */
 
   softwareSkills: [
     {
-      skillName: "html-5",
-      fontAwesomeClassname: "fab fa-html5"
+      skillName: "C++",
+      fontAwesomeClassname: "fab fa-code"
     },
     {
-      skillName: "css3",
-      fontAwesomeClassname: "fab fa-css3-alt"
+      skillName: "C#",
+      fontAwesomeClassname: "fab fa-hashtag"
     },
     {
-      skillName: "sass",
-      fontAwesomeClassname: "fab fa-sass"
+      skillName: "Unreal Engine",
+      fontAwesomeClassname: "fab fa-gamepad"
     },
     {
-      skillName: "JavaScript",
-      fontAwesomeClassname: "fab fa-js"
+      skillName: "Unity",
+      fontAwesomeClassname: "fab fa-unity"
     },
     {
-      skillName: "reactjs",
-      fontAwesomeClassname: "fab fa-react"
+      skillName: "Game Server",
+      fontAwesomeClassname: "fab fa-server"
     },
     {
-      skillName: "nodejs",
-      fontAwesomeClassname: "fab fa-node"
+      skillName: "Linux Kernel",
+      fontAwesomeClassname: "fab fa-linux"
     },
     {
-      skillName: "swift",
-      fontAwesomeClassname: "fab fa-swift"
+      skillName: "Multithreading",
+      fontAwesomeClassname: "fab fa-tasks"
     },
     {
-      skillName: "npm",
-      fontAwesomeClassname: "fab fa-npm"
+      skillName: "Networking",
+      fontAwesomeClassname: "fab fa-network-wired"
     },
     {
-      skillName: "sql-database",
+      skillName: "MySQL",
       fontAwesomeClassname: "fas fa-database"
     },
     {
-      skillName: "aws",
+      skillName: "AWS",
       fontAwesomeClassname: "fab fa-aws"
-    },
-    {
-      skillName: "firebase",
-      fontAwesomeClassname: "fas fa-fire"
     },
     {
       skillName: "python",
       fontAwesomeClassname: "fab fa-python"
     },
-    {
-      skillName: "docker",
-      fontAwesomeClassname: "fab fa-docker"
-    }
   ],
   display: true // Set false to hide this section, defaults to true
 };
@@ -154,12 +146,12 @@ const techStack = {
   viewSkillBars: true, //Set it to true to show Proficiency Section
   experience: [
     {
-      Stack: "Frontend/Design", //Insert stack or technology you have experience in
+      Stack: "Unity", //Insert stack or technology you have experience in
       progressPercentage: "90%" //Insert relative proficiency in percentage
     },
     {
-      Stack: "Backend",
-      progressPercentage: "70%"
+      Stack: "Unreal",
+      progressPercentage: "90%"
     },
     {
       Stack: "Programming",
@@ -175,10 +167,10 @@ const workExperiences = {
   display: true, //Set it to true to show workExperiences Section
   experience: [
     {
-      role: "Software Engineer",
-      company: "Facebook",
+      role: "Undergraduate Researcher",
+      company: "ISSLAB",
       companylogo: require("./assets/images/facebookLogo.png"),
-      date: "June 2018 – Present",
+      date: "July 2022 – August 2024",
       desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       descBullets: [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
@@ -186,17 +178,10 @@ const workExperiences = {
       ]
     },
     {
-      role: "Front-End Developer",
-      company: "Quora",
+      role: "Graduate Researcher",
+      company: "ISSLAB",
       companylogo: require("./assets/images/quoraLogo.png"),
-      date: "May 2017 – May 2018",
-      desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    },
-    {
-      role: "Software Engineer Intern",
-      company: "Airbnb",
-      companylogo: require("./assets/images/airbnbLogo.png"),
-      date: "Jan 2015 – Sep 2015",
+      date: "September 2024 – Febuaray 2026",
       desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
     }
   ]
