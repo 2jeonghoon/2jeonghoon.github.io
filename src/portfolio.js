@@ -169,20 +169,23 @@ const workExperiences = {
     {
       role: "Undergraduate Researcher",
       company: "ISSLAB",
-      companylogo: require("./assets/images/facebookLogo.png"),
+      companylogo: require("./assets/images/isslabLogo.png"),
       date: "July 2022 – August 2024",
-      desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      desc: "Conducted research on optimizing Massively Multiplayer Online Role-Playing Game (MMORPG) servers to handle high concurrent user loads efficiently. Focoused on multi-threaded server design and process synchronization techniques to minimize latency and enhance user experience.",
       descBullets: [
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+	      "Developed a multi-threaded game server design to ensure stable response times under high concurrent user loads",
+	      "Designed a task system to handle user state changes dynamically",
+	      "Applied bot lock-based and lock-free algorithms to mitigate contention issues in process synchronization",
+	      "Published research on game server performance optimization: [DBpia](https://www.dbpia.co.kr/Journal/articleDetail?nodeId=NODE11738020)",
+	      "Optimized server performance using **io_uring**, significantly reducing I/O overhead and improving efficiency"
       ]
     },
     {
       role: "Graduate Researcher",
       company: "ISSLAB",
-      companylogo: require("./assets/images/quoraLogo.png"),
+      companylogo: require("./assets/images/isslabLogo.png"),
       date: "September 2024 – Febuaray 2026",
-      desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+      desc: "Conducted advanced research on optimizing the Linux kernel's io_uring mechanism to enhance I/O efficiency. Focused on modifying the submission queue entry buffer to support adaptive sizing rather than a fixed size, allowing dynamic resource allocation based on workload demands. This approach significantly improved I/O scalability and reduced memory overhead in high-performance systems."
     }
   ]
 };
@@ -198,29 +201,41 @@ const openSource = {
 // Some big projects you have worked on
 
 const bigProjects = {
-  title: "Big Projects",
-  subtitle: "SOME STARTUPS AND COMPANIES THAT I HELPED TO CREATE THEIR TECH",
+  title: "Projects",
+  subtitle: "GAME DEVELOPMENT",
   projects: [
     {
-      image: require("./assets/images/saayaHealthLogo.webp"),
-      projectName: "Saayahealth",
-      projectDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      image: require("./assets/images/arkadiaLogo.png"),
+      projectName: "Arkadia",
+      genre: "Turn-based stratgy RPG"
+      projectDesc: "A turn-based stratgy RPG with deep tactical gameplay, character progression, and immersive storytelling.",
+      role: "Developed the inventory system, game's UI, asynchronous loading system, translation features, and settings management.",
       footerLink: [
         {
-          name: "Visit Website",
-          url: "http://saayahealth.com/"
-        }
-        //  you can add extra buttons here.
-      ]
+          name: "Watch Gameplay",
+          url: "https://youtu.be/Rt0eyI-Z2Wc?si=YJYinejTZI6-MRRm"
+        },
+        {
+	  name: "Visit Website",
+	  url: "https://store.steampowered.com/app/3122380/Arkadia/"
+	}
+      ],
+     challenges: [
+	     "Due to time constraints, the project was not completed as initially envisioned, with only about 25% of the planned content fully developed.",
+             "Frequent bugs in the core gameplay mechanics led to negative feedback from early players.",
+             "Although I was not responsible for the core gameplay development, I was involved in the finalization process, which was rushed due to limited time.",
+             "It was disappointing not to see the project fully realized, but it was a valuable learning experience in game development and project management."
+     ],
     },
     {
-      image: require("./assets/images/nextuLogo.webp"),
-      projectName: "Nextu",
-      projectDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      image: require("./assets/images/necroechoLogo.webp"),
+      projectName: "Necro Echo",
+      genre: "3D Puzzle Adventure"
+      role: "main game developer"
       footerLink: [
         {
-          name: "Visit Website",
-          url: "http://nextu.se/"
+          name: "",
+          url: ""
         }
       ]
     }
