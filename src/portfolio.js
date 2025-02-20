@@ -169,7 +169,7 @@ const workExperiences = {
     {
       role: "Undergraduate Researcher",
       company: "ISSLAB",
-      companylogo: require("./assets/images/isslabLogo.png"),
+      companylogo: require("./assets/images/isslabLogo.jpg"),
       date: "July 2022 – August 2024",
       desc: "Conducted research on optimizing Massively Multiplayer Online Role-Playing Game (MMORPG) servers to handle high concurrent user loads efficiently. Focoused on multi-threaded server design and process synchronization techniques to minimize latency and enhance user experience.",
       descBullets: [
@@ -183,7 +183,7 @@ const workExperiences = {
     {
       role: "Graduate Researcher",
       company: "ISSLAB",
-      companylogo: require("./assets/images/isslabLogo.png"),
+      companylogo: require("./assets/images/isslabLogo.jpg"),
       date: "September 2024 – Febuaray 2026",
       desc: "Conducted advanced research on optimizing the Linux kernel's io_uring mechanism to enhance I/O efficiency. Focused on modifying the submission queue entry buffer to support adaptive sizing rather than a fixed size, allowing dynamic resource allocation based on workload demands. This approach significantly improved I/O scalability and reduced memory overhead in high-performance systems."
     }
@@ -205,9 +205,9 @@ const bigProjects = {
   subtitle: "GAME DEVELOPMENT",
   projects: [
     {
-      image: require("./assets/images/arkadiaLogo.png"),
+      image: require("./assets/images/arkadiaLogo.jpg"),
       projectName: "Arkadia",
-      genre: "Turn-based stratgy RPG"
+      genre: "Turn-based stratgy RPG",
       projectDesc: "A turn-based stratgy RPG with deep tactical gameplay, character progression, and immersive storytelling.",
       role: "Developed the inventory system, game's UI, asynchronous loading system, translation features, and settings management.",
       footerLink: [
@@ -228,10 +228,10 @@ const bigProjects = {
      ],
     },
     {
-      image: require("./assets/images/necroechoLogo.webp"),
+      // image: require("./assets/images/necroechoLogo.webp"),
       projectName: "Necro Echo",
-      genre: "3D Puzzle Adventure"
-      role: "main game developer"
+      genre: "3D Puzzle Adventure",
+      role: "main game developer",
       footerLink: [
         {
           name: "",
