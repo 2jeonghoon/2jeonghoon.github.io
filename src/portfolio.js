@@ -184,8 +184,8 @@ const workExperiences = {
       role: "Graduate Researcher",
       company: "ISSLAB",
       companylogo: require("./assets/images/isslabLogo.jpg"),
-      date: "September 2024 – February 2026",
-      desc: "Conducted advanced research on optimizing the Linux kernel's io_uring mechanism to enhance I/O efficiency. Focused on modifying the submission queue entry buffer to support adaptive sizing rather than a fixed size, allowing dynamic resource allocation based on workload demands. This approach significantly improved I/O scalability and reduced memory overhead in high-performance systems."
+      date: "September 2024 – August 2026",
+      desc: "Developed Nazgul, a Linux kernel mechanism for dynamically managing effective submission capacity in SQPOLL-based io_uring. Nazgul expands capacity during bursts, reclaims unused blocks as load falls, and transparently remaps submission paths without changing existing io_uring applications."
     }
   ]
 };
