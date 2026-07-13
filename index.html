@@ -127,9 +127,9 @@
             <div class="nazgul-research">
               <h3>Nazgul: Adaptive SQ Management</h3>
               <p class="research-role">Graduate Researcher / Linux Kernel</p>
-              <p><code>io_uring</code>은 애플리케이션과 Linux 커널이 공유 메모리로 매핑된 큐를 통해 I/O 요청과 완료를 주고받는 비동기 I/O 인터페이스입니다.</p>
-              <p>SQPOLL 모드에서는 커널이 애플리케이션의 I/O 요청을 폴링해 I/O 지연시간과 시스템 콜 비용을 줄입니다. 그러나 I/O 부하가 증가하면 큐가 포화되어 애플리케이션의 I/O 제출과 커널의 I/O 처리 병렬성이 저하될 수 있고, 애플리케이션은 제출 가능 여부를 확인하기 위해 큐 상태를 반복적으로 확인하며 CPU cycle을 낭비하게 됩니다.</p>
-              <p>Nazgul은 Linux 커널에서 유효 Submission Queue 용량을 부하에 맞춰 동적으로 확장·회수하고, 애플리케이션 코드 변경 없이 요청 경로를 투명하게 리매핑합니다. 이를 통해 SQPOLL의 낮은 제출 오버헤드는 유지하면서 큐 포화로 인한 병목과 불필요한 CPU 사용을 줄였습니다.</p>
+              <p><code>io_uring</code>은 애플리케이션과 Linux 커널이 공유 메모리로 매핑된 queue를 통해 I/O 요청과 완료를 주고받는 비동기 I/O 인터페이스입니다.</p>
+              <p><code>io_uring</code>은 SQPOLL 모드를 통해 애플리케이션의 I/O submission과 커널의 I/O issuance를 병렬적으로 수행하게 하여 I/O latency와 system call 비용을 줄입니다. 하지만 Submission Queue (SQ) depth는 정적인 크기로 생성됩니다. 작은 queue depth는 cache locality를 보존하는 대신 병렬성을 해치는 submission stall과 애플리케이션이 큐 상태를 확인함으로 인해 발생하는 CPU cycle 낭비 문제가 발생합니다. 큰 queue depth는 burst를 흡수하는 대신 cache pressure를 증가시켜 효율을 감소시킵니다.</p>
+              <p>본 논문은 SQPOLL 모드의 <code>io_uring</code>에서 SQ capacity를 동적으로 관리하는 user-transparent mechanism인 Nazgul을 제안합니다. Nazgul은 기존 <code>io_uring</code> 인터페이스를 유지하면서도 SQ가 포화되었을 때 submission capacity를 동적으로 확장하고, 부하가 감소하면 사용되지 않는 SQ block을 회수합니다.</p>
               <div class="research-results"><span>~1%</span><p>SQPOLL 제출 경로 오버헤드</p><span>77.2%p</span><p>최대 CPU 사용량 감소</p><span>21.4%</span><p>e-sports trace 최대 지연시간 감소</p></div>
               <img class="nazgul-figure" src="assets/nazgul-architecture.png" alt="Nazgul의 동적 Submission Queue 관리 및 투명 리매핑 구조" />
             </div>
