@@ -116,12 +116,19 @@
       <section id="experience" class="section experience-section">
         <div class="section-heading">
           <div><p class="section-kicker">03 / EXPERIENCE</p><h2>Research</h2></div>
-          <p>Intelligent Software Systems Laboratory</p>
+          <p>Intelligent Software Systems Laboratory / Linux Kernel Research</p>
         </div>
         <ol class="timeline">
           <li>
             <p class="timeline-date">2024.09 - 2026.08</p>
-            <div><h3>Graduate Researcher</h3><p>Linux <code>io_uring</code>의 I/O 효율을 연구했습니다. 워크로드에 맞춰 submission queue entry buffer를 동적으로 조정하는 방식으로 확장성과 메모리 효율을 개선했습니다.</p></div>
+            <div class="nazgul-research">
+              <h3>Nazgul: Adaptive SQ Management</h3>
+              <p class="research-role">Graduate Researcher / Linux Kernel</p>
+              <p><code>io_uring</code>은 애플리케이션과 Linux 커널이 공유 큐로 I/O 요청과 완료를 주고받는 비동기 I/O 인터페이스입니다. 그중 SQPOLL은 커널 스레드가 요청 큐를 직접 폴링해 시스템 콜 비용을 줄입니다.</p>
+              <p>Nazgul은 트래픽 급증 시 작은 고정 큐가 가득 차 요청 제출이 멈추는 문제와, 큰 고정 큐가 캐시 효율을 떨어뜨리는 문제를 해결합니다. Linux 커널에서 유효 Submission Queue 용량을 동적으로 확장·회수하고, 애플리케이션 코드 변경 없이 요청 경로를 리매핑하도록 구현했습니다.</p>
+              <div class="research-results"><span>~1%</span><p>SQPOLL 제출 경로 오버헤드</p><span>77.2%p</span><p>최대 CPU 사용량 감소</p><span>21.4%</span><p>e-sports trace 최대 지연시간 감소</p></div>
+              <img class="nazgul-figure" src="assets/nazgul-architecture.png" alt="Nazgul의 동적 Submission Queue 관리 및 투명 리매핑 구조" />
+            </div>
           </li>
           <li>
             <p class="timeline-date">2022.07 - 2024.08</p>
