@@ -21,7 +21,7 @@ const illustration = {
 
 const greeting = {
   username: "2jeonghoon",
-  title: "Hi all, I'm 2jeonghoon",
+  title: "Hi, I'm Jeonghoon Lee",
   subTitle: emoji(
     "A passionate Game Developer 🎮 specializing in game engine development, game server architecture, and performance optimization. Experienced in Unreal Engine, Unity, C++, and high-performance computing."
   ),
@@ -49,7 +49,7 @@ const socialMediaLinks = {
 
 const skillsSection = {
   title: "What I do",
-  subTitle: "PASSIONATE GAME DEVELOPER SPECIALIZAING IN GAME ENGINE, SERVER ARCHITECTURE, AND PERFORMANCE OPTIMIZATION",
+  subTitle: "PASSIONATE GAME DEVELOPER SPECIALIZING IN GAME ENGINE, SERVER ARCHITECTURE, AND PERFORMANCE OPTIMIZATION",
   skills: [
     emoji(
       " 🎮 Develop high-performance game engines and interactive gameplay systems"
@@ -121,7 +121,7 @@ const educationInfo = {
       schoolName: "Sangmyung University",
       logo: require("./assets/images/sangmyungLogo.jpg"),
       subHeader: "Bachelor and Master of Game Development and Design",
-      duration: "March 2019 - Feburary 2026",
+      duration: "March 2019 - February 2026",
       desc: "Published 2 papers.",
       descBullets: [
         "A Study on Parallel Programming Approach for MMO Game Server, 2023"
@@ -131,7 +131,7 @@ const educationInfo = {
       schoolName: "Sangmyung University",
       logo: require("./assets/images/sangmyungLogo.jpg"),
       subHeader: "Bachelor of Science in Computer Science",
-      duration: "March 2023 - Feburary 2025",
+      duration: "March 2023 - February 2025",
       desc: "Published 1 papers.",
       descBullets: [
 	      "Optimal Power Allocation and Sub-optimal Channel Assignment for Downlink NOMA System Using DRL, 2025"
@@ -171,7 +171,7 @@ const workExperiences = {
       company: "ISSLAB",
       companylogo: require("./assets/images/isslabLogo.jpg"),
       date: "July 2022 – August 2024",
-      desc: "Conducted research on optimizing Massively Multiplayer Online Role-Playing Game (MMORPG) servers to handle high concurrent user loads efficiently. Focoused on multi-threaded server design and process synchronization techniques to minimize latency and enhance user experience.",
+      desc: "Conducted research on optimizing Massively Multiplayer Online Role-Playing Game (MMORPG) servers to handle high concurrent user loads efficiently. Focused on multi-threaded server design and process synchronization techniques to minimize latency and enhance user experience.",
       descBullets: [
 	      "Developed a multi-threaded game server design to ensure stable response times under high concurrent user loads",
 	      "Designed a task system to handle user state changes dynamically",
@@ -184,7 +184,7 @@ const workExperiences = {
       role: "Graduate Researcher",
       company: "ISSLAB",
       companylogo: require("./assets/images/isslabLogo.jpg"),
-      date: "September 2024 – Febuaray 2026",
+      date: "September 2024 – February 2026",
       desc: "Conducted advanced research on optimizing the Linux kernel's io_uring mechanism to enhance I/O efficiency. Focused on modifying the submission queue entry buffer to support adaptive sizing rather than a fixed size, allowing dynamic resource allocation based on workload demands. This approach significantly improved I/O scalability and reduced memory overhead in high-performance systems."
     }
   ]
@@ -207,8 +207,8 @@ const bigProjects = {
     {
       image: require("./assets/images/arkadiaLogo.jpg"),
       projectName: "Arkadia",
-      genre: "Turn-based stratgy RPG",
-      projectDesc: "A turn-based stratgy RPG with deep tactical gameplay, character progression, and immersive storytelling.",
+      genre: "Turn-based strategy RPG",
+      projectDesc: "A turn-based strategy RPG with deep tactical gameplay, character progression, and immersive storytelling.",
       role: "Developed the inventory system, game's UI, asynchronous loading system, translation features, and settings management.",
       footerLink: [
         {
@@ -301,7 +301,7 @@ const achievementSection = {
       ]
     }
   ],
-  display: true // Set false to hide this section, defaults to true
+  display: false // Set false to hide this section, defaults to true
 };
 
 // Blogs Section
@@ -325,7 +325,7 @@ const blogSection = {
         "React is a JavaScript library for building User Interface. It is maintained by Facebook and a community of individual developers and companies."
     }
   ],
-  display: true // Set false to hide this section, defaults to true
+  display: false // Set false to hide this section, defaults to true
 };
 
 // Talks Sections
@@ -344,7 +344,7 @@ const talkSection = {
       event_url: "https://www.facebook.com/events/2339906106275053/"
     }
   ],
-  display: true // Set false to hide this section, defaults to true
+  display: false // Set false to hide this section, defaults to true
 };
 
 // Podcast Section
@@ -357,7 +357,7 @@ const podcastSection = {
   podcast: [
     "https://anchor.fm/codevcast/embed/episodes/DevStory---Saad-Pasta-from-Karachi--Pakistan-e9givv/a-a15itvo"
   ],
-  display: true // Set false to hide this section, defaults to true
+  display: false // Set false to hide this section, defaults to true
 };
 
 // Resume Section
@@ -372,16 +372,16 @@ const resumeSection = {
 const contactInfo = {
   title: emoji("Contact Me ☎️"),
   subtitle:
-    "Discuss a project or just want to say hi? My Inbox is open for all.",
-  number: "+92-0000000000",
-  email_address: "saadpasta70@gmail.com"
+    "Discuss a game development project, performance work, or research collaboration.",
+  number: "",
+  email_address: "lee.jonghoon26@gmail.com"
 };
 
 // Twitter Section
 
 const twitterDetails = {
   userName: "twitter", //Replace "twitter" with your twitter username without @
-  display: true // Set true to display this section, defaults to false
+  display: false // Set true to display this section, defaults to false
 };
 
 const isHireable = false; // Set false if you are not looking for a job. Also isHireable will be display as Open for opportunities: Yes/No in the GitHub footer

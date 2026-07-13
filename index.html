@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="이정훈(Junghoon Lee)의 게임 개발 및 시스템 연구 포트폴리오"
+    />
+    <title>Junghoon Lee | Game Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="홈으로 이동">JH.L</a>
+      <nav aria-label="주요 메뉴">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <p class="eyebrow">GAME DEVELOPER / SYSTEMS RESEARCHER</p>
+        <h1>이정훈<span>Junghoon Lee</span></h1>
+        <p class="hero-copy">
+          게임 경험을 더 안정적이고 매끄럽게 만드는 개발자입니다. 게임 클라이언트,
+          서버 아키텍처, Linux I/O 성능 최적화를 연구하고 구현합니다.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="mailto:2jh0926@naver.com">
+            <i data-lucide="mail" aria-hidden="true"></i> E-mail
+          </a>
+          <a
+            class="button button-secondary"
+            href="https://github.com/2jeonghoon"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i data-lucide="github" aria-hidden="true"></i> GitHub
+          </a>
+        </div>
+        <dl class="hero-facts" aria-label="핵심 정보">
+          <div><dt>Focus</dt><dd>Game systems & performance</dd></div>
+          <div><dt>Based in</dt><dd>Seoul, Republic of Korea</dd></div>
+          <div><dt>Education</dt><dd>Sangmyung University</dd></div>
+        </dl>
+      </section>
+
+      <section id="about" class="section split-section">
+        <div>
+          <p class="section-kicker">01 / ABOUT</p>
+          <h2>만드는 것과<br />빠르게 하는 것</h2>
+        </div>
+        <div class="section-content">
+          <p>
+            Unity와 Unreal Engine을 기반으로 게임 플레이 기능과 사용자 경험을 구현해 왔습니다.
+            동시에 MMORPG 서버의 동시성 제어와 Linux <code>io_uring</code> 기반 I/O를 연구하며,
+            높은 부하에서도 예측 가능한 응답성을 만드는 방법을 탐구합니다.
+          </p>
+          <div class="skill-groups">
+            <div><span>LANGUAGES</span><p>C/C++, C#, Python</p></div>
+            <div><span>GAME ENGINES</span><p>Unreal Engine, Unity</p></div>
+            <div><span>SYSTEMS</span><p>Linux, Multithreading, Networking, MySQL</p></div>
+            <div><span>WORKFLOW</span><p>Git, Git LFS, Notion, GitHub Projects & Issues</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" class="section projects-section">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">02 / SELECTED WORK</p>
+            <h2>Projects</h2>
+          </div>
+          <p>게임 개발과 성능 연구에서 쌓은 결과물입니다.</p>
+        </div>
+        <article class="project-featured">
+          <div class="project-art">
+            <img src="src/assets/images/arkadiaLogo.jpg" alt="Arkadia 게임 로고" />
+          </div>
+          <div class="project-copy">
+            <p class="project-index">01 / GAME DEVELOPMENT</p>
+            <h3>Arkadia</h3>
+            <p class="project-type">Turn-based Strategy RPG</p>
+            <p>
+              전술적 전투와 성장 요소를 중심으로 만든 턴제 전략 RPG입니다. 인벤토리,
+              UI, 비동기 로딩, 번역, 설정 관리 기능을 담당했습니다.
+            </p>
+            <div class="tags"><span>Unreal Engine</span><span>C++</span><span>UI/UX</span></div>
+            <div class="text-links">
+              <a href="https://store.steampowered.com/app/3122380/Arkadia/" target="_blank" rel="noopener noreferrer">Steam <i data-lucide="arrow-up-right"></i></a>
+              <a href="https://youtu.be/Rt0eyI-Z2Wc?si=YJYinejTZI6-MRRm" target="_blank" rel="noopener noreferrer">Gameplay <i data-lucide="arrow-up-right"></i></a>
+            </div>
+          </div>
+        </article>
+        <article class="project-row">
+          <p class="project-index">02</p>
+          <div><h3>MMORPG Server Optimization</h3><p>멀티스레드 서버 설계와 동기화 기법을 통한 고동시성 환경 최적화 연구</p></div>
+          <div class="tags"><span>C++</span><span>io_uring</span><span>Concurrency</span></div>
+        </article>
+        <article class="project-row">
+          <p class="project-index">03</p>
+          <div><h3>Downlink NOMA with DRL</h3><p>강화학습을 활용한 하향링크 NOMA 시스템의 전력 할당 및 채널 배정 연구</p></div>
+          <div class="tags"><span>Python</span><span>DRL</span><span>Research</span></div>
+        </article>
+      </section>
+
+      <section id="experience" class="section experience-section">
+        <div class="section-heading">
+          <div><p class="section-kicker">03 / EXPERIENCE</p><h2>Research</h2></div>
+          <p>Intelligent Software Systems Laboratory</p>
+        </div>
+        <ol class="timeline">
+          <li>
+            <p class="timeline-date">2024.09 - 2026.02</p>
+            <div><h3>Graduate Researcher</h3><p>Linux <code>io_uring</code>의 I/O 효율을 연구했습니다. 워크로드에 맞춰 submission queue entry buffer를 동적으로 조정하는 방식으로 확장성과 메모리 효율을 개선했습니다.</p></div>
+          </li>
+          <li>
+            <p class="timeline-date">2022.07 - 2024.08</p>
+            <div><h3>Undergraduate Researcher</h3><p>MMORPG 서버의 고동시성 처리를 위한 멀티스레드 설계, 태스크 시스템, lock-based 및 lock-free 동기화 기법을 연구했습니다.</p></div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section education-awards">
+        <div class="education-block">
+          <p class="section-kicker">04 / EDUCATION</p>
+          <h2>Sangmyung<br />University</h2>
+          <div class="education-item"><span>2025.03 - 2026.02</span><p>Master's degree<br /><strong>Game - Computer Systems</strong></p></div>
+          <div class="education-item"><span>2019.03 - 2025.02</span><p>Bachelor's degree<br /><strong>Game / Computer Science</strong></p></div>
+        </div>
+        <div class="awards-block">
+          <p class="section-kicker">05 / RECOGNITION</p>
+          <ul>
+            <li><span>2024</span>캡스톤디자인 경진대회 우수상, Arkadia</li>
+            <li><span>2024</span>컴퓨터과학전공 캡스톤디자인 최우수상, Downlink NOMA with DRL</li>
+            <li><span>2023</span>제12회 게임전공 교내 게임잼 우수상</li>
+            <li><span>2022</span>제11회 게임전공 교내 게임잼 대상</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="contact" class="contact-section">
+        <p class="section-kicker">06 / CONTACT</p>
+        <h2>함께 만들<br />이야기가 있나요?</h2>
+        <a class="contact-email" href="mailto:2jh0926@naver.com">2jh0926@naver.com <i data-lucide="arrow-up-right"></i></a>
+      </section>
+    </main>
+
+    <footer><span>© 2026 JUNGHOON LEE</span><a href="#top">BACK TO TOP <i data-lucide="arrow-up"></i></a></footer>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+  </body>
+</html>
