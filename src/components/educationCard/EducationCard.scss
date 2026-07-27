@@ -78,6 +78,19 @@
   margin-top: 0.5rem;
 }
 
+.education-bullet-link {
+  color: $buttonColor;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.education-bullet-url {
+  display: block;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
 /* Media Query */
 
 @media (max-width: 1380px) {

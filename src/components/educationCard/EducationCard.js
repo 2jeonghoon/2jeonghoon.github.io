@@ -10,7 +10,23 @@ export default function EducationCard({school}) {
     return descBullets
       ? descBullets.map((item, i) => (
           <li key={i} className="subTitle">
-            {item}
+            {typeof item === "string" ? (
+              item
+            ) : item.url ? (
+              <>
+                <a
+                  className="education-bullet-link"
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {item.text || item.name || item.url}
+                </a>
+                <span className="education-bullet-url">({item.url})</span>
+              </>
+            ) : (
+              item.text || item.name
+            )}
           </li>
         ))
       : null;

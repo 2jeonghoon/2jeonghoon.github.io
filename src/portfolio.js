@@ -134,7 +134,10 @@ const educationInfo = {
       duration: "March 2023 - February 2025",
       desc: "Published 1 papers.",
       descBullets: [
-	      "Optimal Power Allocation and Sub-optimal Channel Assignment for Downlink NOMA System Using DRL, 2025"
+        {
+          text: "Optimal Power Allocation and Sub-optimal Channel Assignment for Downlink NOMA System Using DRL, 2025",
+          url: "https://arxiv.org/abs/2601.12242"
+        }
       ]
     }
   ]
@@ -216,9 +219,10 @@ const bigProjects = {
           url: "https://youtu.be/Rt0eyI-Z2Wc?si=YJYinejTZI6-MRRm"
         },
         {
-	  name: "Visit Website",
-	  url: "https://store.steampowered.com/app/3122380/Arkadia/"
-	}
+          name: "Visit Website",
+          url: "https://store.steampowered.com/app/3122380/Arkadia/",
+          showUrl: true
+        }
       ],
      challenges: [
 	     "Due to time constraints, the project was not completed as initially envisioned, with only about 25% of the planned content fully developed.",

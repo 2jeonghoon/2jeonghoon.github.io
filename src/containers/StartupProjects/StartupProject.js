@@ -76,7 +76,12 @@ export default function StartupProject() {
                               }
                               onClick={() => openUrlInNewTab(link.url)}
                             >
-                              {link.name}
+                              <span>{link.name}</span>
+                              {link.showUrl ? (
+                                <span className="project-tag-url">
+                                  ({link.url})
+                                </span>
+                              ) : null}
                             </span>
                           );
                         })}
