@@ -24,7 +24,23 @@ export default function ExperienceCard({cardInfo, isDark}) {
             key={i}
             className={isDark ? "subTitle dark-mode-text" : "subTitle"}
           >
-            {item}
+            {typeof item === "string" ? (
+              item
+            ) : item.url ? (
+              <>
+                <a
+                  className="experience-bullet-link"
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {item.text || item.name || item.url}
+                </a>
+                <span className="experience-bullet-url">({item.url})</span>
+              </>
+            ) : (
+              item.text || item.name
+            )}
           </li>
         ))
       : null;

@@ -116,6 +116,19 @@
   text-align: center;
 }
 
+.experience-bullet-link {
+  color: $buttonColor;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.experience-bullet-url {
+  display: block;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
 .experience-text-details {
   padding: 1.5rem;
   margin-top: 2rem;

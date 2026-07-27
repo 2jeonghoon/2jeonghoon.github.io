@@ -124,7 +124,10 @@ const educationInfo = {
       duration: "March 2019 - February 2026",
       desc: "Published 2 papers.",
       descBullets: [
-        "A Study on Parallel Programming Approach for MMO Game Server, 2023"
+        {
+          text: "A Study on Parallel Programming Approach for MMO Game Server, 2023",
+          url: "https://db.koreascholar.com/Article/Detail/427710"
+        }
       ]
     },
     {
@@ -179,7 +182,10 @@ const workExperiences = {
 	      "Developed a multi-threaded game server design to ensure stable response times under high concurrent user loads",
 	      "Designed a task system to handle user state changes dynamically",
 	      "Applied bot lock-based and lock-free algorithms to mitigate contention issues in process synchronization",
-	      "Published research on game server performance optimization: [DBpia](https://www.dbpia.co.kr/Journal/articleDetail?nodeId=NODE11738020)",
+          {
+            text: "Published research on game server performance optimization",
+            url: "https://db.koreascholar.com/Article/Detail/427710"
+          },
 	      "Optimized server performance using **io_uring**, significantly reducing I/O overhead and improving efficiency"
       ]
     },
