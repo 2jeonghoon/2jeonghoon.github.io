@@ -217,7 +217,7 @@ const bigProjects = {
       image: require("./assets/images/arkadiaLogo.jpg"),
       projectName: "Arkadia",
       genre: "Turn-based strategy RPG",
-      projectDesc: "A turn-based strategy RPG with deep tactical gameplay, character progression, and immersive storytelling.",
+      projectDesc: "A turn-based strategy RPG developed as a graduation project and exhibited at PlayX4, with deep tactical gameplay, character progression, and immersive storytelling.",
       role: "Developed the inventory system, game's UI, asynchronous loading system, translation features, and settings management.",
       footerLink: [
         {
@@ -230,12 +230,25 @@ const bigProjects = {
           showUrl: true
         }
       ],
-     challenges: [
-	     "Due to time constraints, the project was not completed as initially envisioned, with only about 25% of the planned content fully developed.",
-             "Frequent bugs in the core gameplay mechanics led to negative feedback from early players.",
-             "Although I was not responsible for the core gameplay development, I was involved in the finalization process, which was rushed due to limited time.",
-             "It was disappointing not to see the project fully realized, but it was a valuable learning experience in game development and project management."
-     ],
+      challenges: [
+        "Due to time constraints, the project was not completed as initially envisioned, with only about 25% of the planned content fully developed.",
+        "Frequent bugs in the core gameplay mechanics led to negative feedback from early players.",
+        "Although I was not responsible for the core gameplay development, I was involved in the finalization process, which was rushed due to limited time.",
+        "It was disappointing not to see the project fully realized, but it was a valuable learning experience in game development and project management."
+      ],
+    },
+    {
+      projectName: "Epula",
+      genre: "Web Service",
+      projectDesc: "A web service project built with AWS deployment and MySQL-backed data storage for managing user and content data.",
+      role: "Developed service deployment and database integration features using AWS and MySQL.",
+      footerLink: [
+        {
+          name: "View Repository",
+          url: "https://github.com/2jeonghoon/Epula",
+          showUrl: true
+        }
+      ]
     },
     {
       // image: require("./assets/images/necroechoLogo.webp"),
