@@ -247,6 +247,11 @@ const bigProjects = {
           name: "View Repository",
           url: "https://github.com/2jeonghoon/Epula",
           showUrl: true
+        },
+        {
+          name: "Watch Video",
+          url: "https://www.youtube.com/watch?v=V86dpKgRMfs",
+          showUrl: true
         }
       ]
     },
