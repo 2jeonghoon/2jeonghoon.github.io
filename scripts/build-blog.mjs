@@ -57,6 +57,25 @@ async function listFiles(directory, prefix = "") {
   return files;
 }
 
+async function copyStaticDirectory(source, destination, relativeRoot) {
+  await mkdir(destination, {recursive: true});
+  const entries = await readdir(source, {withFileTypes: true});
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    const relative = path.posix.join(relativeRoot, entry.name);
+    const sourcePath = path.join(source, entry.name);
+    const destinationPath = path.join(destination, entry.name);
+    if (entry.isSymbolicLink()) {
+      throw new Error(`Refusing symbolic link in static files: ${relative}`);
+    }
+    if (entry.name.startsWith(".")) continue;
+    if (entry.isDirectory()) {
+      await copyStaticDirectory(sourcePath, destinationPath, relative);
+    } else if (entry.isFile()) {
+      await cp(sourcePath, destinationPath);
+    }
+  }
+}
+
 function assertSafeOutDir(projectRoot, outDir) {
   const root = path.resolve(projectRoot);
   const output = path.resolve(outDir);
@@ -109,7 +128,7 @@ export async function buildSite({projectRoot, outDir, syncPreview = false}) {
   for (const relative of STATIC_DIRECTORIES) {
     const source = path.join(projectRoot, relative);
     if (await exists(source)) {
-      await cp(source, path.join(outDir, relative), {recursive: true});
+      await copyStaticDirectory(source, path.join(outDir, relative), relative);
     }
   }
 

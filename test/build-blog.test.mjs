@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import {afterEach, beforeEach, test} from "node:test";
-import {mkdtemp, mkdir, readFile, rm, writeFile} from "node:fs/promises";
+import {
+  lstat,
+  mkdtemp,
+  mkdir,
+  readFile,
+  rm,
+  symlink,
+  writeFile
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -46,7 +54,10 @@ beforeEach(async () => {
   fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "jh-blog-build-"));
   outDir = path.join(fixtureRoot, "_site");
   await Promise.all([
-    put("index.html", '<link rel="stylesheet" href="styles.css">'),
+    put(
+      "index.html",
+      '<link rel="stylesheet" href="styles.css"><link rel="icon" href="public/favicon.ico"><script src="posts.js"></script><script src="blog.config.js"></script><script src="blog.js"></script>'
+    ),
     put("styles.css", "body {}"),
     put("blog.js", "window.app = true;"),
     put("blog.config.js", "window.BLOG_CONFIG = {};"),
@@ -54,6 +65,7 @@ beforeEach(async () => {
     put("assets/cover.png", "png"),
     put("assets/nested/diagram.png", "nested"),
     put("public/favicon.ico", "ico"),
+    put("public/.index.html.swp", "editor state"),
     put("src/private.js", "do not deploy"),
     put("tmp/private.txt", "do not deploy"),
     put("posts/published.md", published),
@@ -85,6 +97,42 @@ test("copies only declared static inputs including nested assets", async () => {
   assert(files.includes("public/favicon.ico"));
   assert(!files.some(file => file.startsWith("src/")));
   assert(!files.some(file => file.startsWith("tmp/")));
+});
+
+test("produces the exact deployable artifact and resolves local references", async () => {
+  const {files} = await buildSite({projectRoot: fixtureRoot, outDir});
+  assert.deepEqual(files, [
+    "assets/cover.png",
+    "assets/nested/diagram.png",
+    "blog.config.js",
+    "blog.js",
+    "feed.xml",
+    "index.html",
+    "posts.js",
+    "public/favicon.ico",
+    "robots.txt",
+    "sitemap.xml",
+    "styles.css"
+  ]);
+  const html = await read("_site/index.html");
+  const references = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)]
+    .map(match => match[1])
+    .filter(value => !/^(?:https?:|mailto:|[?#])/i.test(value));
+  for (const reference of references) {
+    const localPath = reference.split(/[?#]/, 1)[0];
+    await lstat(path.join(outDir, localPath));
+  }
+  assert(!files.some(file => /(^|\/)\.(?!\.)/.test(file)));
+  assert(!files.some(file => /(^|\/)(?:posts|test|\.github|tmp|src)(\/|$)/.test(file)));
+  assert(!files.some(file => /(?:package(?:-lock)?\.json|\.env)$/i.test(file)));
+});
+
+test("rejects symlinks in static inputs", async () => {
+  await symlink(path.join(fixtureRoot, "assets/cover.png"), path.join(fixtureRoot, "assets/linked.png"));
+  await assert.rejects(
+    buildSite({projectRoot: fixtureRoot, outDir}),
+    /symbolic link.*assets\/linked\.png/i
+  );
 });
 
 test("names the post when a referenced local image is missing", async () => {
