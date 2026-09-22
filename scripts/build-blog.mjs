@@ -87,7 +87,7 @@ function assertSafeOutDir(projectRoot, outDir) {
 async function loadSourceRecords(projectRoot) {
   const postsDir = path.join(projectRoot, "posts");
   const entries = (await readdir(postsDir, {withFileTypes: true}))
-    .filter(entry => entry.isFile() && entry.name.endsWith(".md"))
+    .filter(entry => entry.isFile() && path.extname(entry.name) === ".md")
     .sort((left, right) => left.name.localeCompare(right.name));
   return Promise.all(
     entries.map(async entry => ({

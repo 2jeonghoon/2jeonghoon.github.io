@@ -69,7 +69,8 @@ beforeEach(async () => {
     put("src/private.js", "do not deploy"),
     put("tmp/private.txt", "do not deploy"),
     put("posts/published.md", published),
-    put("posts/unfinished.md", draft)
+    put("posts/unfinished.md", draft),
+    put("posts/_template.md.example", published.replace("Published", "Template"))
   ]);
 });
 
@@ -85,6 +86,7 @@ test("builds only published posts into every artifact", async () => {
   );
   assert.match(await read("_site/posts.js"), /published/);
   assert.doesNotMatch(await read("_site/posts.js"), /unfinished/);
+  assert.doesNotMatch(await read("_site/posts.js"), /Template/);
   assert.doesNotMatch(await read("_site/feed.xml"), /unfinished/);
   assert.doesNotMatch(await read("_site/sitemap.xml"), /unfinished/);
 });

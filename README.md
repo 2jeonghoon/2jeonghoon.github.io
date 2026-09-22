@@ -1,4 +1,72 @@
-# Software Developer Folio ⚡️ [![GitHub](https://img.shields.io/github/license/saadpasta/developer-portfolio?color=blue)](https://github.com/saadpasta/developerFolio/blob/master/LICENSE) [![GitHub stars](https://img.shields.io/github/stars/saadpasta/developerFolio)](https://github.com/saadpasta/developerFolio/stargazers)  [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors)
+# JH.LOG
+
+게임 클라이언트, 서버 아키텍처, Linux I/O에 관한 이정훈의 개발 블로그입니다.
+
+## 블로그 운영 가이드
+
+### 새 글 작성과 미리보기
+
+글의 원본은 `posts/` 안의 Markdown 파일입니다. 템플릿을 복사한 다음 내용을
+수정하세요.
+
+```bash
+cp posts/_template.md.example posts/my-new-post.md
+npm run test:blog
+npm run build:blog -- --sync-preview
+python3 -m http.server 4173 -d _site
+```
+
+브라우저에서 `http://localhost:4173`을 열면 실제 배포물과 같은 결과를 확인할 수
+있습니다. 글 상세 주소는 `?post=my-new-post` 형식입니다.
+
+파일명에서 `.md`를 뺀 값이 글의 고유한 `slug`가 됩니다. 영문 소문자, 숫자,
+하이픈만 사용할 수 있으며 게시 후 파일명을 바꾸면 글 주소와 댓글 연결도
+달라지므로 그대로 유지해야 합니다. `_template.md.example`은 확장자가 정확히
+`.md`가 아니어서 빌드 대상에 포함되지 않습니다.
+
+### Front matter 필드
+
+- `title`: 글 제목
+- `description`: 목록, 검색 결과, RSS에 표시할 요약
+- `date`: `YYYY-MM-DD` 형식의 게시일
+- `category`: 하나의 카테고리 이름
+- `tags`: 하나 이상의 태그 배열
+- `readingTime`: 선택 사항인 예상 읽기 시간. 생략하면 자동 계산됩니다.
+- `image`: 선택 사항인 대표 이미지 경로. `assets/...`처럼 저장소 루트 기준의
+  상대 경로만 사용할 수 있습니다.
+- `featured`: 대표 글 후보 여부. 여러 글이 `true`이면 가장 최근 글이 선택되고,
+  하나도 없으면 전체 글 중 가장 최근 글이 선택됩니다.
+- `draft`: `true`이면 목록, 검색, 직접 글 데이터, RSS, 사이트맵에서 모두 제외됩니다.
+- `aiGenerated`: Agent가 제공된 정보를 바탕으로 작성한 글이면 `true`로 설정합니다.
+  이때 글 아래에 `이 글은 Agent가 제공된 정보를 기반으로 작성했습니다.`라는
+  문구가 자동으로 표시됩니다. 실제 작성 방식과 일치하도록 정확히 설정하세요.
+
+Markdown 안에서는 HTML이 실행되지 않습니다. 이미지는 먼저 `assets/`에 추가한 뒤
+`![설명](assets/파일명.png)` 형식으로 참조하세요.
+
+### GitHub에서 게시하기
+
+GitHub 웹 화면에서도 `posts/*.md`를 추가하거나 수정할 수 있습니다. 먼저
+`_template.md.example`의 내용을 복사하고, `draft: false`로 바꾼 뒤 `main` 브랜치에
+커밋하세요. GitHub Actions의 Pages 워크플로가 테스트와 빌드를 통과한 결과만
+`_site/` 배포물로 게시합니다. 로컬에서 만든 `posts.js`, `feed.xml`, `sitemap.xml`은
+`--sync-preview`가 갱신하며, 게시 시에도 워크플로가 다시 생성합니다.
+
+### 댓글 관리
+
+방문자는 각 글 아래의 Giscus에서 GitHub 계정으로 댓글과 답글을 남길 수 있습니다.
+댓글은 이 저장소의 GitHub Discussions 안 `Blog Comments` 카테고리에 저장되므로
+그곳에서 수정, 숨김, 잠금, 삭제 등 관리 작업을 할 수 있습니다. 글 파일을
+삭제해도 연결된 Discussion은 자동으로 삭제되지 않으므로 필요하면 GitHub에서
+별도로 정리하세요.
+
+---
+
+## Legacy React portfolio
+
+아래 내용과 `src/` 디렉터리는 이전 React 포트폴리오 구현에 관한 기록입니다. 현재 GitHub Pages는 저장소 루트의 정적 블로그를 사용합니다.
+
+# Software Developer Folio ⚡️ [![GitHub](https://img.shields.io/github/license/saadpasta/developer-portfolio?color=blue)](https://github.com/saadpasta/developerFolio/blob/master/LICENSE)
 
 ## A clean, beautiful and responsive portfolio template for Developers!
 

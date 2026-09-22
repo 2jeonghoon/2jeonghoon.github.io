@@ -1,0 +1,24 @@
+---
+title: 새 글 제목
+description: "목록과 검색 결과에 표시할 한두 문장 설명"
+date: "2026-09-22"
+category: Engineering
+tags: [JavaScript, GitHub Pages]
+readingTime: 3 min read
+image: assets/example-cover.png
+featured: false
+draft: true
+aiGenerated: false
+---
+
+글의 도입부를 작성합니다.
+
+## 첫 번째 소제목
+
+본문은 Markdown으로 작성합니다. 저장소 안의 이미지는 `assets/파일명.png`처럼
+저장소 루트 기준 상대 경로로 연결합니다.
+
+`aiGenerated: true`로 설정한 글에는 다음 문구가 글 아래에 자동으로 표시됩니다.
+
+> 이 글은 Agent가 제공된 정보를 기반으로 작성했습니다.
+
