@@ -30,6 +30,7 @@ global.document = {
 };
 
 const {
+  escapeHtml,
   mountGiscus,
   renderAiDisclosure,
   renderCommentsShell
@@ -48,7 +49,13 @@ const completeConfig = {
 };
 
 function commentFixture() {
-  const status = {textContent: ""};
+  const status = {
+    textContent: "",
+    removed: false,
+    remove() {
+      this.removed = true;
+    }
+  };
   let script;
   const ownerDocument = {
     createElement(tagName) {
@@ -90,6 +97,13 @@ test("shows the exact disclosure for Agent-generated posts", () => {
     /이 글은 Agent가 제공된 정보를 기반으로 작성했습니다\./
   );
   assert.equal(renderAiDisclosure({aiGenerated: false}), "");
+});
+
+test("escapes front matter before inserting it into HTML", () => {
+  assert.equal(
+    escapeHtml('<img src=x onerror="alert(1)"> & notes'),
+    "&lt;img src=x onerror=&quot;alert(1)&quot;&gt; &amp; notes"
+  );
 });
 
 test("renders an accessible comments shell", () => {
@@ -151,4 +165,11 @@ test("shows load failure without removing article content", () => {
   mountGiscus(fixture.container, {slug: "post"}, completeConfig);
   fixture.script.onerror();
   assert.match(fixture.status.textContent, /댓글을 불러오지 못했습니다/);
+});
+
+test("removes the loading status after Giscus loads", () => {
+  const fixture = commentFixture();
+  mountGiscus(fixture.container, {slug: "post"}, completeConfig);
+  fixture.script.onload();
+  assert.equal(fixture.status.removed, true);
 });

@@ -10,6 +10,15 @@
   const AI_DISCLOSURE =
     "이 글은 Agent가 제공된 정보를 기반으로 작성했습니다.";
 
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
   function renderAiDisclosure(post) {
     if (!post.aiGenerated) return "";
     return `<aside class="ai-disclosure" aria-label="AI 작성 안내">
@@ -62,6 +71,9 @@
     script.dataset.loading = "lazy";
     script.crossOrigin = "anonymous";
     script.async = true;
+    script.onload = function () {
+      if (status) status.remove();
+    };
     script.onerror = function () {
       if (status) {
         status.textContent =
@@ -79,7 +91,7 @@
       .sort((a, b) => b.date.localeCompare(a.date));
     const postUrl = slug => `?post=${encodeURIComponent(slug)}`;
     const meta = post =>
-      `<div class="meta"><span class="category">${post.category}</span><span>·</span><time>${post.date}</time><span>·</span><span>${post.readingTime}</span></div>`;
+      `<div class="meta"><span class="category">${escapeHtml(post.category)}</span><span>·</span><time>${escapeHtml(post.date)}</time><span>·</span><span>${escapeHtml(post.readingTime)}</span></div>`;
 
     function updateMeta(title, description) {
       page.title = title;
@@ -108,13 +120,13 @@
           <h1>게임을 만들고,<br />시스템을 <em>탐구합니다.</em></h1>
           <div class="hero-bottom"><p class="hero-note">GAME CLIENT · SERVER · LINUX</p><p class="hero-intro">게임 경험을 더 안정적이고 매끄럽게 만드는 과정에서 배운 것들을 기록합니다. 구현의 결과보다 그 사이의 판단과 실패를 오래 남깁니다.</p></div>
         </section>
-        ${featured ? `<a class="featured" href="${postUrl(featured.slug)}" aria-label="대표 글 읽기: ${featured.title}">
-          <div class="featured-visual"><img src="${featured.image}" alt="" /><span class="featured-label">FEATURED NOTE</span></div>
-          <div class="featured-copy">${meta(featured)}<h2>${featured.title}</h2><p>${featured.description}</p><span class="read-link">READ ARTICLE <span>→</span></span></div>
+        ${featured ? `<a class="featured" href="${postUrl(featured.slug)}" aria-label="대표 글 읽기: ${escapeHtml(featured.title)}">
+          <div class="featured-visual"><img src="${escapeHtml(featured.image)}" alt="" /><span class="featured-label">FEATURED NOTE</span></div>
+          <div class="featured-copy">${meta(featured)}<h2>${escapeHtml(featured.title)}</h2><p>${escapeHtml(featured.description)}</p><span class="read-link">READ ARTICLE <span>→</span></span></div>
         </a>` : ""}
         <section class="writing" id="writing">
           <div class="section-head"><div><p class="section-kicker">01 / WRITING</p><h2>Latest notes</h2></div><span class="post-count">${String(posts.length).padStart(2, "0")} POSTS</span></div>
-          <div class="filters"><div class="filter-list" role="group" aria-label="글 카테고리">${categories.map((category, index) => `<button class="filter${index === 0 ? " active" : ""}" data-category="${category}">${category}</button>`).join("")}</div><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div>
+          <div class="filters"><div class="filter-list" role="group" aria-label="글 카테고리">${categories.map((category, index) => `<button class="filter${index === 0 ? " active" : ""}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`).join("")}</div><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div>
           <div class="post-list" aria-live="polite"></div>
         </section>
         <section class="about" id="about"><div class="about-inner">
@@ -146,7 +158,7 @@
           ? filtered
               .map(
                 post =>
-                  `<a class="post-card" href="${postUrl(post.slug)}">${meta(post)}<h3>${post.title}</h3><p class="post-description">${post.description}</p><span class="post-arrow" aria-hidden="true">↗</span></a>`
+                  `<a class="post-card" href="${postUrl(post.slug)}">${meta(post)}<h3>${escapeHtml(post.title)}</h3><p class="post-description">${escapeHtml(post.description)}</p><span class="post-arrow" aria-hidden="true">↗</span></a>`
               )
               .join("")
           : '<p class="empty">조건에 맞는 기록이 없습니다.</p>';
@@ -179,7 +191,7 @@
       }
       const next = posts[(posts.indexOf(post) + 1) % posts.length];
       updateMeta(`${post.title} — JH.LOG`, post.description);
-      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a><header class="article-header">${meta(post)}<h1>${post.title}</h1><p class="lead">${post.description}</p></header>${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${post.image}" alt="${post.title}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${tag}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${next.title}</strong></a>` : ""}${renderCommentsShell()}</article>`;
+      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a><header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>` : ""}${renderCommentsShell()}</article>`;
       mountGiscus(
         app.querySelector("[data-comments]"),
         post,
@@ -193,6 +205,7 @@
 
   return {
     bootstrap,
+    escapeHtml,
     mountGiscus,
     renderAiDisclosure,
     renderCommentsShell
