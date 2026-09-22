@@ -3,211 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="이정훈(Junghoon Lee)의 게임 개발 및 시스템 연구 포트폴리오"
-    />
-    <title>Junghoon Lee | Game Developer</title>
+    <meta name="theme-color" content="#f4f0e8" />
+    <meta name="description" content="게임과 시스템을 만드는 이정훈의 개발 기록" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://2jeonghoon.github.io/" />
+    <meta property="og:title" content="JH.LOG — 이정훈의 개발 기록" />
+    <meta property="og:description" content="게임 클라이언트, 서버 아키텍처, Linux I/O에 관한 기록" />
+    <title>JH.LOG — 이정훈의 개발 기록</title>
+    <link rel="icon" href="public/favicon.ico" />
+    <link rel="alternate" type="application/rss+xml" title="JH.LOG RSS" href="feed.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="홈으로 이동">JH.L</a>
+      <a class="brand" href="./" aria-label="JH.LOG 홈">JH<span>.</span>LOG</a>
       <nav aria-label="주요 메뉴">
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#experience">Experience</a>
-        <a href="#contact">Contact</a>
+        <a href="./#writing">Writing</a>
+        <a href="./#about">About</a>
+        <a href="https://github.com/2jeonghoon" target="_blank" rel="noreferrer">GitHub ↗</a>
       </nav>
     </header>
 
-    <main id="top">
-      <section class="hero">
-        <p class="eyebrow">GAME DEVELOPER / SYSTEMS RESEARCHER</p>
-        <h1>이정훈<span>Junghoon Lee</span></h1>
-        <img class="profile-photo" src="assets/profile-jeonghoon-lee.jpg" alt="이정훈 프로필 사진" />
-        <p class="hero-copy">
-          게임 경험을 더 안정적이고 매끄럽게 만드는 개발자입니다. 게임 클라이언트,
-          서버 아키텍처, Linux I/O 성능 최적화를 연구하고 구현합니다.
-        </p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="mailto:lee.jonghoon26@gmail.com">
-            <i data-lucide="mail" aria-hidden="true"></i> E-mail
-          </a>
-          <a
-            class="button button-secondary"
-            href="https://github.com/2jeonghoon"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <i data-lucide="github" aria-hidden="true"></i> GitHub
-          </a>
-        </div>
-        <dl class="hero-facts" aria-label="핵심 정보">
-          <div><dt>Focus</dt><dd>Game systems & performance</dd></div>
-          <div><dt>Based in</dt><dd>Seoul, Republic of Korea</dd></div>
-          <div><dt>Education</dt><dd>Sangmyung University</dd></div>
-        </dl>
-      </section>
+    <main id="app"><div class="loading">기록을 불러오는 중…</div></main>
 
-      <section id="about" class="section split-section">
-        <div>
-          <p class="section-kicker">01 / ABOUT</p>
-          <h2>게임 경험을<br />완성합니다</h2>
-        </div>
-        <div class="section-content">
-          <p>
-            Unity와 Unreal Engine을 기반으로 게임 플레이 기능과 사용자 경험을 구현해 왔습니다.
-            동시에 MMORPG 서버의 동시성 제어와 Linux <code>io_uring</code> 기반 I/O를 연구하며,
-            높은 부하에서도 예측 가능한 응답성을 만드는 방법을 탐구합니다.
-          </p>
-          <div class="skill-groups">
-            <div><span>LANGUAGES</span><p>C/C++, C#, Python</p></div>
-            <div><span>GAME ENGINES</span><p>Unreal Engine, Unity</p></div>
-            <div><span>SYSTEMS</span><p>Linux, Multithreading, Networking, MySQL</p></div>
-            <div><span>WORKFLOW</span><p>Git, Notion, GitHub Projects & Issues</p></div>
-          </div>
-        </div>
-      </section>
+    <footer>
+      <div><strong>JH.LOG</strong><p>게임과 시스템을 만들며 배운 것을 기록합니다.</p></div>
+      <div class="footer-links"><a href="mailto:lee.jonghoon26@gmail.com">Email</a><a href="https://github.com/2jeonghoon" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+      <p class="copyright">© 2026 JUNGHOON LEE</p>
+    </footer>
 
-      <section id="projects" class="section projects-section">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">02 / SELECTED WORK</p>
-            <h2>Projects</h2>
-          </div>
-          <p>게임 개발과 성능 연구에서 쌓은 결과물입니다.</p>
-        </div>
-        <article class="project-featured">
-          <div class="project-art project-art-necro">
-            <img class="necroecho-header" src="assets/necroecho-header.png" alt="NecroEcho 게임 장면과 로고" />
-          </div>
-          <div class="project-copy">
-            <p class="project-index">01 / GAME DEVELOPMENT</p>
-            <h3>NecroEcho</h3>
-            <p class="project-type">COMING SOON / Unity / Main Programmer</p>
-            <p>
-              대학생연합 게임제작동아리 'Bridge'에서 진행한 3D 퍼즐 슈팅 어드벤처 게임입니다. 메인 프로그래머로서 퍼즐 시스템,
-              슈팅 시스템, 플레이어 캐릭터와 몬스터 개발을 담당했습니다.
-            </p>
-            <div class="tags"><span>Unity</span><span>3D Puzzle Shooter</span><span>Coming Soon</span></div>
-            <div class="text-links">
-              <a href="https://store.steampowered.com/app/4727250/Necro_Echo/" target="_blank" rel="noopener noreferrer">Steam <i data-lucide="arrow-up-right"></i></a>
-            </div>
-          </div>
-        </article>
-        <article class="project-row">
-          <div class="project-marker">
-            <p class="project-index">02</p>
-            <img class="project-thumbnail" src="assets/arkadia-logo.jpg" alt="Arkadia 게임 로고" />
-          </div>
-          <div>
-            <h3>Arkadia</h3>
-            <p>게임전공 졸업 프로젝트로 진행한 턴제 전략 RPG. 인벤토리 시스템, 비동기 로딩, 번역, 설정 관리와 함께 게임 내 모든 UI를 개발했고, PlayX4에 출품하며 외부 관람객 대상 시연 경험을 쌓았습니다.</p>
-            <div class="text-links">
-              <a href="https://store.steampowered.com/app/3122380/Arkadia/" target="_blank" rel="noopener noreferrer">Steam <i data-lucide="arrow-up-right"></i></a>
-            </div>
-            <p class="plain-url">(https://store.steampowered.com/app/3122380/Arkadia/)</p>
-          </div>
-          <div class="tags"><span>Unreal Engine</span><span>C++</span><span>UI/UX</span></div>
-        </article>
-        <article class="project-row">
-          <div class="project-marker">
-            <p class="project-index">03</p>
-            <div class="project-thumbnail project-badge" aria-hidden="true">EP</div>
-          </div>
-          <div>
-            <h3>Epula</h3>
-            <p>콘텐츠서비스개발 과목에서 진행한 웹 서비스 프로젝트입니다. AWS 환경에 서비스를 배포하고 MySQL 데이터베이스를 연동해 사용자와 콘텐츠 데이터를 저장·관리하는 기능을 개발했습니다.</p>
-            <div class="text-links">
-              <a href="https://github.com/2jeonghoon/Epula" target="_blank" rel="noopener noreferrer">GitHub <i data-lucide="arrow-up-right"></i></a>
-              <a href="https://www.youtube.com/watch?v=V86dpKgRMfs" target="_blank" rel="noopener noreferrer">Video <i data-lucide="arrow-up-right"></i></a>
-            </div>
-            <p class="plain-url">(https://github.com/2jeonghoon/Epula)</p>
-            <p class="plain-url">(https://www.youtube.com/watch?v=V86dpKgRMfs)</p>
-          </div>
-          <div class="tags"><span>PHP</span><span>AWS</span><span>MySQL</span></div>
-        </article>
-        <article class="project-row">
-          <div class="project-marker">
-            <p class="project-index">04</p>
-            <img class="project-thumbnail" src="assets/downlink-noma-jra.webp" alt="강화학습 기반 NOMA 채널 할당 구조" />
-          </div>
-          <div>
-            <h3>Downlink NOMA with DRL</h3>
-            <p>컴퓨터과학전공 졸업 프로젝트로 진행한 강화학습 기반 Downlink NOMA 시스템의 전력 할당 및 채널 배정 연구</p>
-            <div class="text-links">
-              <a href="https://arxiv.org/abs/2601.12242" target="_blank" rel="noopener noreferrer">arXiv <i data-lucide="arrow-up-right"></i></a>
-            </div>
-            <p class="plain-url">(https://arxiv.org/abs/2601.12242)</p>
-          </div>
-          <div class="tags"><span>Python</span><span>DRL</span><span>Research</span></div>
-        </article>
-      </section>
-
-      <section id="experience" class="section experience-section">
-        <div class="section-heading">
-          <div><p class="section-kicker">03 / EXPERIENCE</p><h2>Research</h2></div>
-          <p>Intelligent Software Systems Laboratory / Linux Kernel Research</p>
-        </div>
-        <ol class="timeline">
-          <li>
-            <p class="timeline-date">2024.09 - 2026.08</p>
-            <div class="nazgul-research">
-              <h3>Nazgul: Adaptive SQ Management</h3>
-              <p class="research-role">Graduate Researcher / Linux Kernel</p>
-              <p><code>io_uring</code>은 애플리케이션과 Linux 커널이 공유 메모리로 매핑된 queue를 통해 I/O 요청과 완료를 주고받는 비동기 I/O 인터페이스입니다.</p>
-              <p><code>io_uring</code>은 SQPOLL 모드를 통해 애플리케이션의 I/O submission과 커널의 I/O issuance를 병렬적으로 수행하게 하여 I/O latency와 system call 비용을 줄입니다. 하지만 Submission Queue (SQ) depth는 정적인 크기로 생성됩니다. 작은 queue depth는 cache locality를 보존하는 대신 병렬성을 해치는 submission stall과 애플리케이션이 큐 상태를 확인함으로 인해 발생하는 CPU cycle 낭비 문제가 발생합니다. 큰 queue depth는 burst를 흡수하는 대신 cache pressure를 증가시켜 효율을 감소시킵니다.</p>
-              <p>본 논문은 SQPOLL 모드의 <code>io_uring</code>에서 SQ capacity를 동적으로 관리하는 user-transparent mechanism인 Nazgul을 제안합니다. Nazgul은 기존 <code>io_uring</code> 인터페이스를 유지하면서도 SQ가 포화되었을 때 submission capacity를 동적으로 확장하고, 부하가 감소하면 사용되지 않는 SQ block을 회수합니다.</p>
-              <img class="nazgul-figure" src="assets/nazgul-architecture.png" alt="Nazgul의 동적 Submission Queue 관리 및 투명 리매핑 구조" />
-            </div>
-          </li>
-          <li>
-            <p class="timeline-date">2022.07 - 2024.08</p>
-            <div class="undergrad-research">
-              <h3>Undergraduate Researcher</h3>
-              <p><strong>MMORPG Server Optimization.</strong> C 기반의 멀티스레드 서버 설계와 동기화 기법을 연구해 고동시성 환경의 응답성과 안정성을 개선했습니다. 태스크 시스템, lock-based 및 lock-free 동기화 기법을 적용했습니다.</p>
-              <a class="research-link" href="https://db.koreascholar.com/Article/Detail/427710" target="_blank" rel="noopener noreferrer">A Study on Parallel Programming Approach for MMO Game Server <i data-lucide="arrow-up-right"></i></a>
-              <p class="research-url">(https://db.koreascholar.com/Article/Detail/427710)</p>
-              <img class="undergrad-figure" src="assets/mmorpg-server-architecture.png" alt="MMORPG 서버의 소켓, 동기화, 태스크 시스템 구조" />
-            </div>
-          </li>
-        </ol>
-      </section>
-
-      <section class="section education-awards">
-        <div class="education-block">
-          <p class="section-kicker">04 / EDUCATION</p>
-          <h2>Sangmyung<br />University</h2>
-          <div class="education-item"><span>2024.09 - 2026.08</span><p>Master's degree<br /><strong>Game - Computer Systems</strong></p></div>
-          <div class="education-item"><span>2019.03 - 2025.02</span><p>Bachelor's degree<br /><strong>Game / Computer Science</strong></p></div>
-        </div>
-        <div class="awards-block">
-          <p class="section-kicker">05 / RECOGNITION</p>
-          <ul>
-            <li><span>2024</span>캡스톤디자인 경진대회 우수상, Arkadia</li>
-            <li><span>2024</span>컴퓨터과학전공 캡스톤디자인 최우수상, Downlink NOMA with DRL</li>
-            <li><span>2023</span>제12회 게임전공 교내 게임잼 우수상</li>
-            <li><span>2022</span>제11회 게임전공 교내 게임잼 대상</li>
-          </ul>
-        </div>
-      </section>
-
-      <section id="contact" class="contact-section">
-        <p class="section-kicker">06 / CONTACT</p>
-        <h2>함께 만들<br />이야기가 있나요?</h2>
-        <a class="contact-email" href="mailto:lee.jonghoon26@gmail.com">lee.jonghoon26@gmail.com <i data-lucide="arrow-up-right"></i></a>
-      </section>
-    </main>
-
-    <footer><span>© 2026 JUNGHOON LEE</span><a href="#top">BACK TO TOP <i data-lucide="arrow-up"></i></a></footer>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>lucide.createIcons();</script>
+    <script src="posts.js"></script>
+    <script src="blog.config.js"></script>
+    <script src="blog.js"></script>
   </body>
 </html>
