@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>JH.LOG</title>
+    <link>https://2jeonghoon.github.io/</link>
+    <description>게임과 시스템을 만드는 이정훈의 개발 기록</description>
+    <language>ko</language>
+    <item>
+      <title>Nazgul: io_uring의 Submission Queue를 동적으로 관리하기</title>
+      <link>https://2jeonghoon.github.io/?post=nazgul-adaptive-io-uring-sq</link>
+      <guid>https://2jeonghoon.github.io/?post=nazgul-adaptive-io-uring-sq</guid>
+      <pubDate>Sun, 20 Sep 2026 15:00:00 GMT</pubDate>
+      <description>고정된 SQ depth가 만드는 병렬성과 캐시 효율의 딜레마를 풀기 위해, 부하에 따라 capacity를 확장하고 회수하는 커널 메커니즘을 설계한 기록입니다.</description>
+    </item>
+    <item>
+      <title>MMORPG 서버의 병렬 처리 구조를 설계하며 배운 것</title>
+      <link>https://2jeonghoon.github.io/?post=parallel-mmorpg-server</link>
+      <guid>https://2jeonghoon.github.io/?post=parallel-mmorpg-server</guid>
+      <pubDate>Fri, 30 Aug 2024 15:00:00 GMT</pubDate>
+      <description>많은 사용자의 상태 변경을 안정적으로 처리하기 위해 태스크 시스템과 lock-based, lock-free 동기화 방식을 비교하고 적용한 과정입니다.</description>
+    </item>
+    <item>
+      <title>Arkadia 개발 회고: 완성도를 만드는 것은 무엇이었나</title>
+      <link>https://2jeonghoon.github.io/?post=arkadia-development-retrospective</link>
+      <guid>https://2jeonghoon.github.io/?post=arkadia-development-retrospective</guid>
+      <pubDate>Sat, 25 May 2024 15:00:00 GMT</pubDate>
+      <description>턴제 전략 RPG를 졸업 작품으로 만들고 PlayX4에서 시연하기까지, UI와 비동기 로딩을 담당하며 얻은 현실적인 교훈을 정리했습니다.</description>
+    </item>
+  </channel>
+</rss>
