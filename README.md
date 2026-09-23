@@ -446,15 +446,91 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-## JH.LOG blog administration
+## JH.LOG 관리자 운영 가이드
 
-The public site stays static on GitHub Pages. `/admin/` hands off only to a configured HTTPS `*.workers.dev` origin; while `adminUrl` is empty it shows an unavailable message. Posts remain recoverable Markdown files under `posts/`.
+공개 사이트는 GitHub Pages의 정적 사이트로 유지되고, `/admin/`은 설정된 HTTPS
+`*.workers.dev` 관리자 주소로만 연결됩니다. 글 원본은 계속 `posts/*.md`와 Git
+기록에 남습니다.
 
-- Admin origin: `https://jh-log-admin.2jeonghoon.workers.dev`
-- GitHub App: private, installed only on `2jeonghoon/2jeonghoon.github.io`
-- Permissions: Metadata read (mandatory) and Contents read/write only; webhooks and device flow are disabled
-- Rotate credentials with `wrangler secret put`; rotating `SESSION_SIGNING_KEY` signs out every session
-- Revoke repository access by uninstalling the GitHub App; restore deleted posts from Git history
-- Keep generated `.pem` keys outside this repository and monitor the Cloudflare Workers free-tier dashboard
+- 관리자 주소: `https://jh-log-admin.2jeonghoon.workers.dev`
+- GitHub App: 비공개 `JH.LOG Admin`, `2jeonghoon/2jeonghoon.github.io`에만 설치
+- 권한: Metadata 읽기(필수), Contents 읽기/쓰기만 허용
+- Webhook과 device flow는 사용하지 않음
+
+### 일상적인 글 관리
+
+1. 공개 블로그의 `Write` 또는 관리자 주소를 열고 GitHub 소유자 계정으로
+   로그인합니다.
+2. 새 글은 먼저 `초안 저장`으로 보관합니다. 초안은 공개 글 목록, RSS,
+   사이트맵에 포함되지 않습니다.
+3. 공개할 때 필수 메타데이터를 채우고 `발행`을 누릅니다. Agent가 제공된 정보를
+   기반으로 작성한 글에만 `Agent 작성 글`을 선택합니다.
+4. 기존 글은 목록에서 선택해 수정합니다. 다른 탭이나 GitHub에서 먼저 변경되어
+   충돌 메시지가 나오면 새로고침 후 최신 내용을 기준으로 다시 편집합니다.
+5. 삭제할 때는 확인란에 표시된 슬러그를 정확히 다시 입력합니다. 삭제도 Git
+   커밋이므로 복구할 수 있습니다.
+
+저장 후 GitHub Actions의 `Deploy blog to Pages`가 성공해야 공개 사이트에
+반영됩니다. 실패하면 Actions 로그에서 테스트 또는 빌드 오류를 먼저 확인하고,
+글의 front matter와 이미지 경로를 로컬 `npm run test:blog`로 재현합니다.
+
+### 삭제한 글 복구
+
+삭제 전 기록을 찾고 해당 커밋의 부모에서 파일을 복구한 다음 커밋·푸시합니다.
+
+```bash
+git log --all -- posts/<slug>.md
+git restore --source=<delete-commit>^ -- posts/<slug>.md
+git add posts/<slug>.md
+git commit -m "blog: restore <slug>"
+git push origin main
+```
+
+### 배포 및 인증 문제 점검
+
+- Worker 공개 화면은 열리지만 로그인되지 않으면 GitHub App callback URL이
+  `https://jh-log-admin.2jeonghoon.workers.dev/auth/callback`과 정확히 같은지 확인합니다.
+- 로그인 후 글 목록이 실패하면 App이 대상 저장소에만 설치됐는지, Contents 권한이
+  읽기/쓰기인지, 설치 ID와 Worker 비밀 바인딩 이름이 맞는지 확인합니다.
+- GitHub에서 내려받은 App 키는 PKCS#1 형식일 수 있습니다. Worker Web Crypto용
+  PKCS#8로 임시 변환해 `GITHUB_APP_PRIVATE_KEY`로 올린 뒤 임시 사본을 즉시
+  삭제합니다. 원본 `.pem`도 저장소 밖에만 둡니다.
+- `npx wrangler tail --config worker/wrangler.toml`로 요청 ID에 대응하는 런타임
+  오류를 확인합니다. 비밀값이나 OAuth code를 로그에 출력하지 않습니다.
+- 설정 변경 후 `npm run deploy:admin`을 실행하고 `/api/session`, 로그아웃 상태의
+  `/api/posts`, 잘못된 OAuth state가 각각 정상 응답, `401`, `403`인지 확인합니다.
+
+### 자격 증명과 접근 권한 관리
+
+Cloudflare에는 `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`,
+`GITHUB_APP_CLIENT_SECRET`, `GITHUB_APP_PRIVATE_KEY`,
+`SESSION_SIGNING_KEY`를 `wrangler secret put`으로 저장합니다. 값은 코드,
+`wrangler.toml`, 브라우저 저장소에 넣지 않습니다.
+
+- App 개인 키: GitHub에서 새 키를 만든 뒤 PKCS#8로 변환해 Worker 비밀값을 먼저
+  교체하고 로그인/목록 조회를 확인한 후 이전 GitHub 키를 삭제합니다.
+- Client secret: 새 secret을 Worker에 먼저 반영하고 로그인 확인 후 이전 secret을
+  폐기합니다.
+- Session key: 32바이트 이상의 새 난수로 교체합니다. 기존 관리자 세션은 모두
+  즉시 로그아웃됩니다.
+- 긴급 차단: GitHub App 설치를 제거하면 저장소 접근이 즉시 중단됩니다. 필요하면
+  App의 모든 키와 client secret도 폐기합니다.
+
+### 남용 방지와 사용량 모니터링
+
+인증, 읽기, 변경 요청 제한은 `worker/wrangler.toml`의 `[[ratelimits]]`에서
+조정합니다. 값을 바꾼 뒤 Worker를 재배포하고 `429` 동작을 확인합니다. 변경 API는
+소유자 세션, 정확한 Origin, CSRF 토큰, JSON 형식, 본문 크기, 슬러그, 최신 Git SHA를
+모두 검사하며 `posts/<slug>.md` 밖의 경로를 만들 수 없습니다.
+
+Cloudflare의 Rate Limiting API는 위치별·eventually consistent 방식이라 짧은 burst가
+설정 수치를 일시적으로 넘을 수 있습니다. 따라서 정확한 사용량 계산이나 인증을
+대신하는 장치가 아니라 보조 방어선으로 취급하고, 실제 접근 제어는 위의 세션과
+요청 검증에 의존합니다.
+
+Cloudflare 대시보드에서 Worker 요청 수, 오류율, CPU 시간과 무료 사용량을
+정기적으로 확인합니다. GitHub에서는 App 설치 범위와 Actions 실패 알림을
+확인합니다. 예상치 못한 증가가 있으면 먼저 App 설치를 해제하고 Worker를
+일시 중지한 뒤 로그의 요청 ID와 rate-limit 상태를 조사합니다.
 
 ---

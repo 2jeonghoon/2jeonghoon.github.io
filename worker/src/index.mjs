@@ -3,7 +3,7 @@ import {GitHubError, createGitHubContentsClient, createInstallationToken, exchan
 import {createPostService} from "./post-service.mjs";
 import {
   SecurityError, assertMutationRequest, createOAuthState, expireSessionCookie,
-  issueSession, jsonResponse, serializeSessionCookie, verifySession
+  issueSession, jsonResponse, securityHeaders, serializeSessionCookie, verifySession
 } from "./security.mjs";
 
 const BODY_LIMIT = 256 * 1024;
@@ -11,7 +11,12 @@ const OAUTH_COOKIE = "__Host-jh_oauth";
 
 function now(env) { return env.NOW ? env.NOW() : Date.now(); }
 function requestId() { return createOAuthState().slice(0, 22); }
-function withRequestId(response, id) { const copy = new Response(response.body, response); copy.headers.set("X-Request-Id", id); return copy; }
+function withRequestId(response, id) {
+  const copy = new Response(response.body, response);
+  copy.headers.set("X-Request-Id", id);
+  for (const [name, value] of Object.entries(securityHeaders())) copy.headers.set(name, value);
+  return copy;
+}
 function oauthCookie(value) { return `${OAUTH_COOKIE}=${value}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600`; }
 function expireOAuthCookie() { return `${OAUTH_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`; }
 function cookie(request, name) {
@@ -22,6 +27,27 @@ async function rateLimit(binding, key) {
   if (!binding) return;
   const result = await binding.limit({key});
   if (!result.success) throw new SecurityError("rate limit exceeded", 429);
+}
+
+async function hashedRateLimitKey(value) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function auditRequest(env, request, url, id, status) {
+  const entry = {
+    requestId: id,
+    method: request.method,
+    path: url.pathname,
+    status,
+    addressHash: await hashedRateLimitKey(request.headers.get("cf-connecting-ip") || "unknown")
+  };
+  try {
+    if (env.AUDIT_LOG) await env.AUDIT_LOG(entry);
+    else console.log(JSON.stringify(entry));
+  } catch {
+    // Audit transport must never change the request result.
+  }
 }
 
 function requireConfig(env) {
@@ -82,7 +108,8 @@ function routeSlug(pathname) {
 
 async function handleAuth(request, env, url) {
   if (url.pathname === "/auth/login" && request.method === "GET") {
-    await rateLimit(env.AUTH_RATE_LIMITER, request.headers.get("cf-connecting-ip") || "unknown");
+    const address = request.headers.get("cf-connecting-ip") || "unknown";
+    await rateLimit(env.AUTH_RATE_LIMITER, await hashedRateLimitKey(address));
     const state = createOAuthState();
     const signed = await issueSession({ownerId: state, now: now(env), secret: env.SESSION_SIGNING_KEY});
     const location = new URL("https://github.com/login/oauth/authorize");
@@ -129,7 +156,10 @@ async function handleApi(request, env, url) {
   }
   const current = await session(request, env);
   const mutation = ["POST", "PUT", "DELETE"].includes(request.method);
-  await rateLimit(mutation ? env.MUTATION_RATE_LIMITER : env.READ_RATE_LIMITER, current.sessionId);
+  await rateLimit(
+    mutation ? env.MUTATION_RATE_LIMITER : env.READ_RATE_LIMITER,
+    `${current.ownerId}:${current.sessionId}`
+  );
   if (mutation) assertMutationRequest(request, current, env.ADMIN_ORIGIN);
   const client = await githubClient(env);
   const service = createPostService(client);
@@ -157,16 +187,20 @@ async function fetchHandler(request, env) {
   const id = requestId();
   const url = new URL(request.url);
   try {
-    if (!url.pathname.startsWith("/api/") && !url.pathname.startsWith("/auth/")) return env.ASSETS.fetch(request);
+    if (!url.pathname.startsWith("/api/") && !url.pathname.startsWith("/auth/")) {
+      return withRequestId(await env.ASSETS.fetch(request), id);
+    }
     requireConfig(env);
     const response = url.pathname.startsWith("/auth/")
       ? await handleAuth(request, env, url)
       : await handleApi(request, env, url);
     if (!response) throw new SecurityError("not found", 404);
+    await auditRequest(env, request, url, id, response.status);
     return withRequestId(response, id);
   } catch (error) {
     const status = error instanceof ContractError ? 422 : error.status || 500;
     const body = {error: {code: error.code || (status === 422 ? "validation" : "request_failed"), message: status >= 500 ? "Request failed" : error.message}, requestId: id};
+    await auditRequest(env, request, url, id, status);
     return withRequestId(jsonResponse(body, {status, headers: error.responseHeaders}), id);
   }
 }

@@ -41,6 +41,7 @@ function env(overrides = {}) {
     AUTH_RATE_LIMITER: {limit: async () => ({success: true})},
     READ_RATE_LIMITER: {limit: async () => ({success: true})},
     MUTATION_RATE_LIMITER: {limit: async () => ({success: true})},
+    AUDIT_LOG: async () => {},
     ASSETS: {fetch: async () => new Response("asset")},
     NOW: () => now,
     ...overrides
@@ -68,7 +69,10 @@ async function request(path, {method = "GET", body, authenticated = true, header
 
 test("serves assets without secrets but protects API configuration", async () => {
   const bindings = env({SESSION_SIGNING_KEY: undefined});
-  assert.equal((await request("/", {authenticated: false}, bindings)).status, 200);
+  const asset = await request("/", {authenticated: false}, bindings);
+  assert.equal(asset.status, 200);
+  assert.match(asset.headers.get("content-security-policy"), /script-src 'self'/);
+  assert.equal(asset.headers.get("x-content-type-options"), "nosniff");
   assert.equal((await request("/api/session", {authenticated: false}, bindings)).status, 503);
 });
 
@@ -159,4 +163,33 @@ test("enforces rate limits and emits no-store request-correlated errors", async 
   assert.equal(response.status, 429);
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.match(response.headers.get("x-request-id"), /^[A-Za-z0-9_-]+$/);
+});
+
+test("uses privacy-preserving, owner-scoped rate-limit keys", async () => {
+  let authKey = "";
+  const authBindings = env({AUTH_RATE_LIMITER: {limit: async ({key}) => { authKey = key; return {success: true}; }}});
+  await worker.fetch(new Request(`${origin}/auth/login`, {headers: {"cf-connecting-ip": "203.0.113.9"}}), authBindings);
+  assert.notEqual(authKey, "203.0.113.9");
+  assert.match(authKey, /^[a-f0-9]{64}$/);
+
+  let readKey = "";
+  const readBindings = env({READ_RATE_LIMITER: {limit: async ({key}) => { readKey = key; return {success: true}; }}});
+  await request("/api/posts", {}, readBindings);
+  assert.match(readKey, /^51705815:[A-Za-z0-9_-]+$/);
+});
+
+test("audits auth failures without logging OAuth codes or query strings", async () => {
+  const entries = [];
+  const bindings = env({AUDIT_LOG: async entry => entries.push(entry)});
+  const response = await worker.fetch(new Request(
+    `${origin}/auth/callback?code=must-not-appear&state=wrong`,
+    {headers: {"cf-connecting-ip": "203.0.113.9"}}
+  ), bindings);
+  assert.equal(response.status, 403);
+  assert.equal(entries.length, 1);
+  assert.deepEqual(Object.keys(entries[0]).sort(), ["addressHash", "method", "path", "requestId", "status"]);
+  assert.equal(entries[0].path, "/auth/callback");
+  assert.equal(entries[0].status, 403);
+  assert.match(entries[0].addressHash, /^[a-f0-9]{64}$/);
+  assert.doesNotMatch(JSON.stringify(entries[0]), /must-not-appear|state=wrong/);
 });

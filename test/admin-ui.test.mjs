@@ -37,15 +37,25 @@ test("locks an existing slug and requires exact delete confirmation", () => {
 test("ships accessible external-script UI and responsive editor styles", async () => {
   const html = await readFile(new URL("../worker/public/index.html", import.meta.url), "utf8");
   const css = await readFile(new URL("../worker/public/admin.css", import.meta.url), "utf8");
+  const headers = await readFile(new URL("../worker/public/_headers", import.meta.url), "utf8");
   assert.match(html, /<main[^>]*id="app"/);
   assert.match(html, /<label[^>]*for="post-title"/);
   assert.match(html, /<dialog[^>]*id="delete-dialog"/);
   assert.match(html, /src="\.\/admin\.js"/);
   assert.doesNotMatch(html, /<script(?![^>]*src=)[^>]*>/);
   assert.match(css, /@media\s*\(max-width:\s*720px\)/);
+  assert.match(headers, /Content-Security-Policy:.*script-src 'self'/);
+  assert.match(headers, /X-Content-Type-Options:\s*nosniff/);
+  assert.match(headers, /X-Robots-Tag:\s*noindex/);
 });
 
 test("does not persist credentials or editor content in browser storage", async () => {
   const source = await readFile(new URL("../worker/public/admin.js", import.meta.url), "utf8");
   assert.doesNotMatch(source, /localStorage|sessionStorage|GITHUB_APP_PRIVATE_KEY|CLIENT_SECRET/);
+});
+
+test("renders repository-controlled post titles as text", async () => {
+  const source = await readFile(new URL("../worker/public/admin.js", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /b\.innerHTML\s*=/);
+  assert.match(source, /b\.append\(document\.createTextNode/);
 });

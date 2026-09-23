@@ -57,7 +57,7 @@
     }
     async function loadList() {
       const data=await api("/api/posts"); const filter=get("post-filter").value; const list=get("post-list"); list.textContent="";
-      data.posts.filter(p=>filter==="all"||(filter==="draft")===p.draft).forEach(p=>{const li=document.createElement("li");const b=document.createElement("button");b.type="button";b.innerHTML=`${p.title||p.slug} <span class="badge">${p.draft?"초안":"발행"}</span>`;b.addEventListener("click",()=>loadPost(p.slug));li.append(b);list.append(li);});
+      data.posts.filter(p=>filter==="all"||(filter==="draft")===p.draft).forEach(p=>{const li=document.createElement("li");const b=document.createElement("button");const badge=document.createElement("span");b.type="button";badge.className="badge";badge.textContent=p.draft?"초안":"발행";b.append(document.createTextNode(`${p.title||p.slug} `),badge);b.addEventListener("click",()=>loadPost(p.slug));li.append(b);list.append(li);});
     }
     async function loadPost(slug) { writeForm(await api(`/api/posts/${encodeURIComponent(slug)}`)); schedulePreview(); }
     function showError(error) { model=withRequestError(model,error);get("validation").textContent=`${error.message}${error.requestId?` (${error.requestId})`:""}`; }
