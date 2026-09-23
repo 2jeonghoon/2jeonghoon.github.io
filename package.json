@@ -26,7 +26,10 @@
     "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "test:blog": "node --test test/*.test.mjs",
+    "test:admin": "node --test test/admin-*.test.mjs",
     "build:blog": "node scripts/build-blog.mjs",
+    "dev:admin": "wrangler dev --config worker/wrangler.toml",
+    "deploy:admin": "wrangler deploy --config worker/wrangler.toml",
     "validate:blog": "node --test test/*.test.mjs && node scripts/build-blog.mjs",
     "eject": "react-scripts eject",
     "format": "prettier --write \"./**/*.{js,css,json,scss}\"",
@@ -59,7 +62,8 @@
     "gh-pages": "^6.3.0",
     "gray-matter": "^4.0.3",
     "markdown-it": "^14.1.0",
-    "prettier": "^2.3.1"
+    "prettier": "^2.3.1",
+    "wrangler": "4.36.0"
   },
   "overrides": {
     "enzyme": {
