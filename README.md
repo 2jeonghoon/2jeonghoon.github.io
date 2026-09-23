@@ -450,4 +450,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 The public site stays static on GitHub Pages. `/admin/` hands off only to a configured HTTPS `*.workers.dev` origin; while `adminUrl` is empty it shows an unavailable message. Posts remain recoverable Markdown files under `posts/`.
 
+- Admin origin: `https://jh-log-admin.2jeonghoon.workers.dev`
+- GitHub App: private, installed only on `2jeonghoon/2jeonghoon.github.io`
+- Permissions: Metadata read (mandatory) and Contents read/write only; webhooks and device flow are disabled
+- Rotate credentials with `wrangler secret put`; rotating `SESSION_SIGNING_KEY` signs out every session
+- Revoke repository access by uninstalling the GitHub App; restore deleted posts from Git history
+- Keep generated `.pem` keys outside this repository and monitor the Cloudflare Workers free-tier dashboard
+
 ---
