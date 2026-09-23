@@ -8,6 +8,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "jest-canvas-mock": "^2.3.1",
+    "js-yaml": "3.14.1",
     "lottie-react": "^2.4.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
