@@ -30,11 +30,18 @@ global.document = {
 };
 
 const {
+  createAdminUrl,
   escapeHtml,
   mountGiscus,
   renderAiDisclosure,
   renderCommentsShell
 } = require("../blog.js");
+
+test("creates only safe workers.dev admin edit URLs", () => {
+  assert.equal(createAdminUrl("https://jh-log.example.workers.dev", "safe-post"), "https://jh-log.example.workers.dev/?edit=safe-post");
+  for (const value of ["", "javascript:alert(1)", "http://bad.workers.dev", "https://example.com"]) assert.equal(createAdminUrl(value, "safe-post"), "");
+  assert.equal(createAdminUrl("https://jh-log.example.workers.dev", "../bad"), "");
+});
 
 after(() => {
   delete global.window;

@@ -1,4 +1,5 @@
 window.BLOG_CONFIG = {
+  adminUrl: "",
   giscus: {
     repo: "2jeonghoon/2jeonghoon.github.io",
     repoId: "R_kgDOLpDtrA",

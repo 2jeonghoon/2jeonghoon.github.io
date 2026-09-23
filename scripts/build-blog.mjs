@@ -27,7 +27,7 @@ const STATIC_FILES = [
   "blog.config.js",
   "robots.txt"
 ];
-const STATIC_DIRECTORIES = ["assets", "public"];
+const STATIC_DIRECTORIES = ["admin", "assets", "public"];
 const PREVIEW_ARTIFACTS = ["posts.js", "feed.xml", "sitemap.xml"];
 
 async function exists(target) {

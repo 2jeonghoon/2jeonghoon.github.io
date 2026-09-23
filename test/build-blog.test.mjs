@@ -61,6 +61,8 @@ beforeEach(async () => {
     put("styles.css", "body {}"),
     put("blog.js", "window.app = true;"),
     put("blog.config.js", "window.BLOG_CONFIG = {};"),
+    put("admin/index.html", '<script src="../blog.config.js"></script><script src="./admin.js"></script>'),
+    put("admin/admin.js", "window.admin = true;"),
     put("robots.txt", "User-agent: *"),
     put("assets/cover.png", "png"),
     put("assets/nested/diagram.png", "nested"),
@@ -104,6 +106,8 @@ test("copies only declared static inputs including nested assets", async () => {
 test("produces the exact deployable artifact and resolves local references", async () => {
   const {files} = await buildSite({projectRoot: fixtureRoot, outDir});
   assert.deepEqual(files, [
+    "admin/admin.js",
+    "admin/index.html",
     "assets/cover.png",
     "assets/nested/diagram.png",
     "blog.config.js",

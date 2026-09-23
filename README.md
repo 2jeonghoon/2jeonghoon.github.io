@@ -446,4 +446,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
+## JH.LOG blog administration
+
+The public site stays static on GitHub Pages. `/admin/` hands off only to a configured HTTPS `*.workers.dev` origin; while `adminUrl` is empty it shows an unavailable message. Posts remain recoverable Markdown files under `posts/`.
+
 ---

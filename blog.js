@@ -10,6 +10,20 @@
   const AI_DISCLOSURE =
     "이 글은 Agent가 제공된 정보를 기반으로 작성했습니다.";
 
+  function createAdminUrl(base, slug = "") {
+    if (typeof base !== "string" || !base) return "";
+    if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return "";
+    try {
+      const url = new URL(base);
+      if (url.protocol !== "https:" || !url.hostname.endsWith(".workers.dev")) return "";
+      url.pathname = "/";
+      url.search = "";
+      url.hash = "";
+      if (slug) url.searchParams.set("edit", slug);
+      return url.href;
+    } catch { return ""; }
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replaceAll("&", "&amp;")
@@ -190,8 +204,9 @@
         return;
       }
       const next = posts[(posts.indexOf(post) + 1) % posts.length];
+      const manageUrl = createAdminUrl(browser.BLOG_CONFIG && browser.BLOG_CONFIG.adminUrl, post.slug);
       updateMeta(`${post.title} — JH.LOG`, post.description);
-      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a><header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>` : ""}${renderCommentsShell()}</article>`;
+      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a>${manageUrl ? `<a class="manage-link" href="${escapeHtml(manageUrl)}" rel="nofollow">Manage post ↗</a>` : ""}<header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>` : ""}${renderCommentsShell()}</article>`;
       mountGiscus(
         app.querySelector("[data-comments]"),
         post,
@@ -205,6 +220,7 @@
 
   return {
     bootstrap,
+    createAdminUrl,
     escapeHtml,
     mountGiscus,
     renderAiDisclosure,
