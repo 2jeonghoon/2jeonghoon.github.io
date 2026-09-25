@@ -1,5 +1,9 @@
 import {ContractError} from "../../lib/post-contract.mjs";
 
+function key(value) {
+  return value.toLocaleLowerCase("ko");
+}
+
 export function normalizeCategoryName(value) {
   if (typeof value !== "string") throw new ContractError("category name is required", "name");
   const name = value.trim();
@@ -9,20 +13,64 @@ export function normalizeCategoryName(value) {
   return name;
 }
 
-export function mergeCategoryNames(...groups) {
+function normalizeNode(value) {
+  if (typeof value === "string") {
+    return {name: normalizeCategoryName(value), children: []};
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new ContractError("invalid category", "categories");
+  }
+  if (!Array.isArray(value.children)) {
+    throw new ContractError("invalid category children", "categories");
+  }
+  const children = value.children.map(child => {
+    if (!child || typeof child !== "object" || Array.isArray(child) || "children" in child) {
+      throw new ContractError("categories support only two levels", "categories");
+    }
+    return {name: normalizeCategoryName(child.name)};
+  });
+  return {name: normalizeCategoryName(value.name), children};
+}
+
+export function mergeCategoryTrees(...trees) {
   const categories = [];
-  const seen = new Set();
-  for (const group of groups) {
-    for (const value of group || []) {
-      if (typeof value === "string" && !value.trim()) continue;
-      const name = normalizeCategoryName(value);
-      const key = name.toLocaleLowerCase("ko");
-      if (seen.has(key)) continue;
-      seen.add(key);
-      categories.push(name);
+  const parents = new Map();
+  for (const tree of trees) {
+    if (!Array.isArray(tree)) throw new ContractError("categories must be an array", "categories");
+    for (const raw of tree) {
+      const node = normalizeNode(raw);
+      const parentKey = key(node.name);
+      let parent = parents.get(parentKey);
+      if (!parent) {
+        parent = {name: node.name, children: []};
+        parents.set(parentKey, parent);
+        categories.push(parent);
+      }
+      const children = new Set(parent.children.map(child => key(child.name)));
+      for (const child of node.children) {
+        const childKey = key(child.name);
+        if (children.has(childKey)) continue;
+        children.add(childKey);
+        parent.children.push({name: child.name});
+      }
     }
   }
   return categories;
+}
+
+export function normalizeCategoryTree(values) {
+  if (!Array.isArray(values)) throw new ContractError("categories must be an array", "categories");
+  return mergeCategoryTrees(values);
+}
+
+function treeFromPosts(posts) {
+  return (posts || []).flatMap(post => {
+    if (typeof post?.category !== "string" || !post.category.trim()) return [];
+    const children = typeof post.subcategory === "string" && post.subcategory.trim()
+      ? [{name: post.subcategory}]
+      : [];
+    return [{name: post.category, children}];
+  });
 }
 
 function commitResult(result, categories) {
@@ -40,7 +88,7 @@ export function createCategoryService(client, postService) {
       postService.list()
     ]);
     return {
-      categories: mergeCategoryNames(config.categories, posts.map(post => post.category)),
+      categories: mergeCategoryTrees(normalizeCategoryTree(config.categories), treeFromPosts(posts)),
       sha: config.sha
     };
   }
@@ -49,14 +97,34 @@ export function createCategoryService(client, postService) {
     list,
     async create(input) {
       const name = normalizeCategoryName(input?.name);
-      const current = await list();
-      if (current.categories.some(category => category.toLocaleLowerCase("ko") === name.toLocaleLowerCase("ko"))) {
-        throw new ContractError("category already exists", "name");
+      if (input?.parent !== undefined && input?.parent !== null && typeof input.parent !== "string") {
+        throw new ContractError("parent must be a string", "parent");
       }
+      const parentName = typeof input?.parent === "string" ? input.parent.trim() : "";
+      const current = await list();
+      let categories;
+
+      if (!parentName) {
+        if (current.categories.some(category => key(category.name) === key(name))) {
+          throw new ContractError("category already exists", "name");
+        }
+        categories = [...current.categories, {name, children: []}];
+      } else {
+        const normalizedParent = normalizeCategoryName(parentName);
+        const parentIndex = current.categories.findIndex(category => key(category.name) === key(normalizedParent));
+        if (parentIndex === -1) throw new ContractError("parent category does not exist", "parent");
+        const parent = current.categories[parentIndex];
+        if (parent.children.some(child => key(child.name) === key(name))) {
+          throw new ContractError("subcategory already exists", "name");
+        }
+        categories = current.categories.map((category, index) => index === parentIndex
+          ? {...category, children: [...category.children, {name}]}
+          : category);
+      }
+
       if (current.sha && (typeof input?.sha !== "string" || !input.sha)) {
         throw new ContractError("category sha is required", "sha");
       }
-      const categories = [...current.categories, name];
       const result = await client.writeCategoryConfig(categories, input?.sha || "");
       return commitResult(result, categories);
     }

@@ -110,6 +110,10 @@ test("encodes and decodes Unicode post bodies", async () => {
 
 test("reads and updates the root category catalog with SHA concurrency", async () => {
   const seen = [];
+  const categories = [
+    {name: "Systems", children: [{name: "Linux"}]},
+    {name: "Game Client", children: []}
+  ];
   const client = createGitHubContentsClient({
     token: "token",
     fetchImpl: async (url, init = {}) => {
@@ -117,7 +121,7 @@ test("reads and updates the root category catalog with SHA concurrency", async (
       if (!init.method) {
         return response({
           sha: "categories-old",
-          content: Buffer.from(JSON.stringify({categories: ["Systems", "Linux"]})).toString("base64")
+          content: Buffer.from(JSON.stringify({categories})).toString("base64")
         });
       }
       return response({content: {sha: "categories-new"}, commit: {sha: "category-commit"}});
@@ -126,18 +130,19 @@ test("reads and updates the root category catalog with SHA concurrency", async (
 
   assert.deepEqual(await client.getCategoryConfig(), {
     sha: "categories-old",
-    categories: ["Systems", "Linux"]
+    categories
   });
-  await client.writeCategoryConfig(["Systems", "Linux", "Game Client"], "categories-old");
+  await client.writeCategoryConfig(categories, "categories-old");
 
   assert.equal(seen[0].url, "https://api.github.com/repos/2jeonghoon/2jeonghoon.github.io/contents/categories.json?ref=main");
   assert.equal(seen[1].url, "https://api.github.com/repos/2jeonghoon/2jeonghoon.github.io/contents/categories.json");
   const payload = JSON.parse(seen[1].init.body);
   assert.equal(payload.sha, "categories-old");
   assert.equal(payload.branch, "main");
-  assert.deepEqual(JSON.parse(Buffer.from(payload.content, "base64").toString()), {
-    categories: ["Systems", "Linux", "Game Client"]
-  });
+  assert.equal(
+    Buffer.from(payload.content, "base64").toString(),
+    `${JSON.stringify({categories}, null, 2)}\n`
+  );
 });
 
 test("requires SHA for update and delete before making a request", async () => {

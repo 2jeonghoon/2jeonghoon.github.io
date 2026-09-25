@@ -5,6 +5,7 @@ import worker from "../worker/src/index.mjs";
 import {issueSession} from "../worker/src/security.mjs";
 import {serializePostSource} from "../lib/post-contract.mjs";
 import {GitHubError} from "../worker/src/github.mjs";
+import * as categoryService from "../worker/src/category-service.mjs";
 
 const origin = "https://admin.example";
 const secret = "test-only-session-secret-with-at-least-32-bytes";
@@ -101,7 +102,10 @@ test("lists configured categories and creates a normalized category", async () =
   const bindings = env();
   const listed = await request("/api/categories", {}, bindings);
   assert.equal(listed.status, 200);
-  assert.deepEqual(await listed.json(), {categories: ["Systems"], sha: "categories-sha"});
+  assert.deepEqual(await listed.json(), {
+    categories: [{name: "Systems", children: []}],
+    sha: "categories-sha"
+  });
 
   const created = await request("/api/categories", {
     method: "POST",
@@ -109,22 +113,86 @@ test("lists configured categories and creates a normalized category", async () =
   }, bindings);
   assert.equal(created.status, 201);
   assert.deepEqual(await created.json(), {
-    categories: ["Systems", "Game Client"],
+    categories: [
+      {name: "Systems", children: []},
+      {name: "Game Client", children: []}
+    ],
     sha: "categories-next",
     commitSha: "category-commit"
   });
   assert.deepEqual(bindings.GITHUB_CLIENT.calls, [
-    ["categories", ["Systems", "Game Client"], "categories-sha"]
+    ["categories", [
+      {name: "Systems", children: []},
+      {name: "Game Client", children: []}
+    ], "categories-sha"]
   ]);
 });
 
-test("keeps categories that are already used by repository posts", async () => {
+test("normalizes mixed legacy and nested categories without losing order", () => {
+  assert.equal(typeof categoryService.normalizeCategoryTree, "function");
+  assert.deepEqual(categoryService.normalizeCategoryTree([
+    "Systems",
+    {name: "Games", children: [{name: "Unity"}]}
+  ]), [
+    {name: "Systems", children: []},
+    {name: "Games", children: [{name: "Unity"}]}
+  ]);
+});
+
+test("rejects a third category level", () => {
+  assert.equal(typeof categoryService.normalizeCategoryTree, "function");
+  assert.throws(
+    () => categoryService.normalizeCategoryTree([{name: "Games", children: [{name: "Unity", children: []}]}]),
+    /two levels|invalid child/i
+  );
+});
+
+test("creates a child under an existing parent", async () => {
+  const bindings = env();
+  const response = await request("/api/categories", {
+    method: "POST",
+    body: {parent: " systems ", name: " Linux ", sha: "categories-sha"}
+  }, bindings);
+  assert.equal(response.status, 201);
+  assert.deepEqual((await response.json()).categories, [
+    {name: "Systems", children: [{name: "Linux"}]}
+  ]);
+});
+
+test("rejects an unknown child parent and a duplicate sibling", async () => {
+  const unknown = await request("/api/categories", {
+    method: "POST",
+    body: {parent: "Unknown", name: "Linux", sha: "categories-sha"}
+  });
+  assert.equal(unknown.status, 422);
+
+  const client = fakeClient();
+  client.getCategoryConfig = async () => ({
+    sha: "categories-sha",
+    categories: [{name: "Systems", children: [{name: "Linux"}]}]
+  });
+  const duplicate = await request("/api/categories", {
+    method: "POST",
+    body: {parent: "Systems", name: " linux ", sha: "categories-sha"}
+  }, env({GITHUB_CLIENT: client}));
+  assert.equal(duplicate.status, 422);
+  assert.deepEqual(client.calls, []);
+});
+
+test("keeps parent and child categories that are already used by repository posts", async () => {
   const client = fakeClient();
   client.getCategoryConfig = async () => ({sha: "categories-sha", categories: ["Linux"]});
+  client.getPost = async slug => ({
+    sha: "old",
+    source: serializePostSource(post({slug, category: "Systems", subcategory: "Networking"}))
+  });
   const response = await request("/api/categories", {}, env({GITHUB_CLIENT: client}));
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), {
-    categories: ["Linux", "Systems"],
+    categories: [
+      {name: "Linux", children: []},
+      {name: "Systems", children: [{name: "Networking"}]}
+    ],
     sha: "categories-sha"
   });
 });
