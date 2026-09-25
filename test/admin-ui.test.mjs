@@ -34,12 +34,29 @@ test("locks an existing slug and requires exact delete confirmation", () => {
   assert.equal(ui.canDelete("safe-post", "Safe-post"), false);
 });
 
-test("merges category choices without case-insensitive duplicates", () => {
-  assert.equal(typeof ui.mergeCategoryNames, "function");
-  assert.deepEqual(
-    ui.mergeCategoryNames(["Systems", " systems ", "Linux"], "Legacy"),
-    ["Systems", "Linux", "Legacy"]
-  );
+test("merges category trees and keeps an uncataloged current path", () => {
+  assert.equal(typeof ui.mergeCategoryTrees, "function");
+  assert.deepEqual(ui.mergeCategoryTrees(
+    [{name: "Systems", children: [{name: "Linux"}]}],
+    {category: "Legacy", subcategory: "Old"}
+  ), [
+    {name: "Systems", children: [{name: "Linux"}]},
+    {name: "Legacy", children: [{name: "Old"}]}
+  ]);
+});
+
+test("clears an incompatible child when the parent changes", () => {
+  assert.equal(typeof ui.nextCategorySelection, "function");
+  const tree = [
+    {name: "Systems", children: [{name: "Linux"}]},
+    {name: "Games", children: [{name: "Unity"}]}
+  ];
+  assert.deepEqual(ui.nextCategorySelection(tree, "Games", "Linux"), {
+    category: "Games", subcategory: ""
+  });
+  assert.deepEqual(ui.nextCategorySelection(tree, "Systems", "Linux"), {
+    category: "Systems", subcategory: "Linux"
+  });
 });
 
 test("ships accessible external-script UI and responsive editor styles", async () => {
@@ -49,8 +66,12 @@ test("ships accessible external-script UI and responsive editor styles", async (
   assert.match(html, /<main[^>]*id="app"/);
   assert.match(html, /<label[^>]*for="post-title"/);
   assert.match(html, /<select[^>]*id="post-category"[^>]*required/);
-  assert.match(html, /<input[^>]*id="new-category-name"/);
-  assert.match(html, /<button[^>]*id="add-category"/);
+  assert.match(html, /<select[^>]*id="post-subcategory"/);
+  assert.match(html, /<input[^>]*id="new-parent-name"/);
+  assert.match(html, /<select[^>]*id="child-parent"/);
+  assert.match(html, /<input[^>]*id="new-child-name"/);
+  assert.match(html, /<button[^>]*id="add-parent-category"/);
+  assert.match(html, /<button[^>]*id="add-child-category"/);
   assert.match(html, /<dialog[^>]*id="delete-dialog"/);
   assert.match(html, /src="\.\/admin\.js"/);
   assert.doesNotMatch(html, /<script(?![^>]*src=)[^>]*>/);
