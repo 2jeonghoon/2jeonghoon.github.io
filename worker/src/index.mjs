@@ -174,7 +174,11 @@ async function handleApi(request, env, url) {
 
   if (url.pathname === "/api/posts") {
     if (request.method === "GET") return jsonResponse({posts: await service.list()});
-    if (request.method === "POST") return jsonResponse(await service.create(await readBody(request)), {status: 201});
+    if (request.method === "POST") {
+      const input = await readBody(request);
+      await categories.assertPostSelection(input);
+      return jsonResponse(await service.create(input), {status: 201});
+    }
     throw new SecurityError("method not allowed", 405);
   }
   if (url.pathname === "/api/preview") {
@@ -184,7 +188,11 @@ async function handleApi(request, env, url) {
   const slug = routeSlug(url.pathname);
   if (slug) {
     if (request.method === "GET") return jsonResponse(await service.get(slug));
-    if (request.method === "PUT") return jsonResponse(await service.update(slug, await readBody(request)));
+    if (request.method === "PUT") {
+      const input = await readBody(request);
+      await categories.assertPostSelection(input);
+      return jsonResponse(await service.update(slug, input));
+    }
     if (request.method === "DELETE") return jsonResponse(await service.delete(slug, await readBody(request)));
     throw new SecurityError("method not allowed", 405);
   }

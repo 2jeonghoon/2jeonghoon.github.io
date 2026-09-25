@@ -232,6 +232,39 @@ test("creates, updates, and deletes only validated posts with SHA concurrency", 
   assert.equal((await request("/api/posts/%252e%252e", {authenticated: true}, bindings)).status, 422);
 });
 
+test("accepts parent-only, matching-child, and uncategorized draft post mutations", async () => {
+  const client = fakeClient();
+  client.getCategoryConfig = async () => ({
+    sha: "categories-sha",
+    categories: [{name: "Systems", children: [{name: "Linux"}]}]
+  });
+  const bindings = env({GITHUB_CLIENT: client});
+  assert.equal((await request("/api/posts", {
+    method: "POST", body: post({subcategory: ""})
+  }, bindings)).status, 201);
+  assert.equal((await request("/api/posts/safe-post", {
+    method: "PUT", body: {...post({subcategory: "Linux"}), sha: "old"}
+  }, bindings)).status, 200);
+  assert.equal((await request("/api/posts", {
+    method: "POST", body: post({draft: true, category: "", subcategory: ""})
+  }, bindings)).status, 201);
+});
+
+test("rejects unknown parents and mismatched children before writes", async () => {
+  for (const overrides of [
+    {category: "Unknown", subcategory: ""},
+    {category: "Systems", subcategory: "Unity"},
+    {draft: true, category: "", subcategory: "Linux"}
+  ]) {
+    const bindings = env();
+    const response = await request("/api/posts", {
+      method: "POST", body: post(overrides)
+    }, bindings);
+    assert.equal(response.status, 422);
+    assert.equal(bindings.GITHUB_CLIENT.calls.length, 0);
+  }
+});
+
 test("rejects missing SHA, wrong origin, oversized authenticated bodies, and unknown methods", async () => {
   assert.equal((await request("/api/posts/safe-post", {method: "PUT", body: post()})).status, 422);
   assert.equal((await request("/api/posts/safe-post", {method: "PUT", body: {...post(), sha: "old"}, headers: {origin: "https://evil.example"}})).status, 403);

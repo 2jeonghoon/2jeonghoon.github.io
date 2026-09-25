@@ -1,4 +1,4 @@
-import {ContractError} from "../../lib/post-contract.mjs";
+import {ContractError, validatePostInput} from "../../lib/post-contract.mjs";
 
 function key(value) {
   return value.toLocaleLowerCase("ko");
@@ -93,8 +93,20 @@ export function createCategoryService(client, postService) {
     };
   }
 
+  async function assertPostSelection(input) {
+    const post = validatePostInput(input);
+    if (!post.category && !post.subcategory) return;
+    const {categories} = await list();
+    const parent = categories.find(category => key(category.name) === key(post.category));
+    if (!parent) throw new ContractError("category does not exist", "category");
+    if (post.subcategory && !parent.children.some(child => key(child.name) === key(post.subcategory))) {
+      throw new ContractError("subcategory does not belong to category", "subcategory");
+    }
+  }
+
   return {
     list,
+    assertPostSelection,
     async create(input) {
       const name = normalizeCategoryName(input?.name);
       if (input?.parent !== undefined && input?.parent !== null && typeof input.parent !== "string") {
