@@ -16,6 +16,7 @@ function valid(overrides = {}) {
     description: "A bounded description",
     date: "2026-09-23",
     category: "Systems",
+    subcategory: "Linux",
     tags: ["Security", "GitHub"],
     image: "assets/blog/cover.png",
     readingTime: "4 min read",
@@ -55,6 +56,19 @@ test("published posts require complete metadata and real booleans", () => {
   assert.throws(() => validatePostInput(valid({date: "2026-02-30"})), /calendar day/i);
   assert.throws(() => validatePostInput(valid({draft: "false"})), /draft must be boolean/i);
   assert.doesNotThrow(() => validatePostInput(valid({draft: true, title: "", date: ""})));
+});
+
+test("allows a parent-only category and validates an optional child", () => {
+  assert.equal(validatePostInput(valid({subcategory: ""})).subcategory, "");
+  assert.equal(validatePostInput(valid({subcategory: "  Linux  "})).subcategory, "Linux");
+  assert.throws(
+    () => validatePostInput(valid({draft: true, category: "", subcategory: "Linux"})),
+    /subcategory.*category/i
+  );
+  assert.throws(
+    () => validatePostInput(valid({subcategory: "x".repeat(LIMITS.subcategory + 1)})),
+    /subcategory.*80/i
+  );
 });
 
 test("enforces field and body limits", () => {

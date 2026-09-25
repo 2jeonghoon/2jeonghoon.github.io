@@ -24,6 +24,7 @@ function source(overrides = {}, body = "## Heading\n\nBody") {
     description: "Valid description",
     date: "2026-01-01",
     category: "Systems",
+    subcategory: "Linux",
     tags: ["Linux", "I/O"],
     image: "assets/cover.png",
     featured: false,
@@ -37,6 +38,7 @@ function source(overrides = {}, body = "## Heading\n\nBody") {
     `description: ${data.description}`,
     `date: ${data.date}`,
     `category: ${data.category}`,
+    `subcategory: ${data.subcategory}`,
     `tags: [${data.tags.join(", ")}]`,
     `image: ${data.image}`,
     `featured: ${String(data.featured)}`,
@@ -58,6 +60,14 @@ test("compiles a published Markdown post", () => {
   assert.equal(post.slug, "valid-post");
   assert.equal(post.aiGenerated, true);
   assert.match(post.content, /<h2>Heading<\/h2>/);
+});
+
+test("carries an optional child category into generated post data", () => {
+  const child = parsePost(record("child.md", source({subcategory: "Linux"})));
+  const parentOnly = parsePost(record("parent.md", source({subcategory: ""})));
+  assert.equal(child.subcategory, "Linux");
+  assert.equal(parentOnly.subcategory, "");
+  assert.match(serializePosts([child]), /"subcategory": "Linux"/);
 });
 
 test("allows incomplete draft metadata", () => {
