@@ -19,7 +19,7 @@ export function createPostService(client) {
         const slug = validateSlug(entry.name.slice(0, -3));
         const item = await client.getPost(slug);
         const post = parsePostSource({filePath: `${slug}.md`, source: item.source});
-        return {slug, title: post.title, date: post.date, draft: post.draft, sha: item.sha};
+        return {slug, title: post.title, date: post.date, category: post.category, draft: post.draft, sha: item.sha};
       }));
     },
     async get(slug) {

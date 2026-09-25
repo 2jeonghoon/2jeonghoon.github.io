@@ -33,9 +33,57 @@ const {
   createAdminUrl,
   escapeHtml,
   mountGiscus,
+  mountAdSense,
+  renderArticleAd,
   renderAiDisclosure,
   renderCommentsShell
 } = require("../blog.js");
+
+const adsenseConfig = {
+  client: "ca-pub-1234567890123456",
+  articleTopSlot: "1234567890"
+};
+
+test("omits the article ad until valid AdSense IDs are configured", () => {
+  assert.equal(typeof renderArticleAd, "function");
+  assert.equal(renderArticleAd(), "");
+  assert.equal(renderArticleAd({client: "", articleTopSlot: ""}), "");
+  assert.equal(renderArticleAd({client: "ca-pub-bad", articleTopSlot: "123"}), "");
+});
+
+test("renders a labeled responsive article-top ad with account IDs", () => {
+  const output = renderArticleAd(adsenseConfig);
+  assert.match(output, /aria-label="광고"/);
+  assert.match(output, /data-ad-client="ca-pub-1234567890123456"/);
+  assert.match(output, /data-ad-slot="1234567890"/);
+  assert.match(output, /data-ad-format="auto"/);
+  assert.match(output, /data-full-width-responsive="true"/);
+});
+
+test("loads AdSense once and queues the rendered ad", () => {
+  let script;
+  const appended = [];
+  const ad = {dataset: {adClient: adsenseConfig.client, adSlot: adsenseConfig.articleTopSlot}};
+  const page = {
+    head: {appendChild(node) { appended.push(node); }},
+    createElement(tagName) { assert.equal(tagName, "script"); script = {dataset: {}}; return script; },
+    querySelector(selector) {
+      if (selector === ".adsbygoogle") return ad;
+      if (selector === "script[data-adsense-loader]") return null;
+      return null;
+    }
+  };
+  const browser = {};
+
+  assert.equal(typeof mountAdSense, "function");
+  mountAdSense(browser, page, adsenseConfig);
+
+  assert.equal(appended.length, 1);
+  assert.equal(script.async, true);
+  assert.equal(script.crossOrigin, "anonymous");
+  assert.equal(script.src, "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456");
+  assert.deepEqual(browser.adsbygoogle, [{}]);
+});
 
 test("creates only safe workers.dev admin edit URLs", () => {
   assert.equal(createAdminUrl("https://jh-log.example.workers.dev", "safe-post"), "https://jh-log.example.workers.dev/?edit=safe-post");

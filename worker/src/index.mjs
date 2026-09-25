@@ -1,6 +1,7 @@
 import {ContractError, validateSlug} from "../../lib/post-contract.mjs";
 import {GitHubError, createGitHubContentsClient, createInstallationToken, exchangeOAuthCode, fetchOAuthUser} from "./github.mjs";
 import {createPostService} from "./post-service.mjs";
+import {createCategoryService} from "./category-service.mjs";
 import {
   SecurityError, assertMutationRequest, createOAuthState, expireSessionCookie,
   issueSession, jsonResponse, securityHeaders, serializeSessionCookie, verifySession
@@ -163,6 +164,13 @@ async function handleApi(request, env, url) {
   if (mutation) assertMutationRequest(request, current, env.ADMIN_ORIGIN);
   const client = await githubClient(env);
   const service = createPostService(client);
+  const categories = createCategoryService(client, service);
+
+  if (url.pathname === "/api/categories") {
+    if (request.method === "GET") return jsonResponse(await categories.list());
+    if (request.method === "POST") return jsonResponse(await categories.create(await readBody(request)), {status: 201});
+    throw new SecurityError("method not allowed", 405);
+  }
 
   if (url.pathname === "/api/posts") {
     if (request.method === "GET") return jsonResponse({posts: await service.list()});

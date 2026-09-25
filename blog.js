@@ -41,6 +41,36 @@
     </aside>`;
   }
 
+  function validAdSenseConfig(config) {
+    return Boolean(
+      config &&
+      /^ca-pub-\d{16}$/.test(config.client || "") &&
+      /^\d{6,20}$/.test(config.articleTopSlot || "")
+    );
+  }
+
+  function renderArticleAd(config) {
+    if (!validAdSenseConfig(config)) return "";
+    return `<aside class="article-ad" aria-label="광고">
+      <span class="ad-label">ADVERTISEMENT</span>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="${config.client}" data-ad-slot="${config.articleTopSlot}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </aside>`;
+  }
+
+  function mountAdSense(browser, page, config) {
+    if (!validAdSenseConfig(config) || !page.querySelector(".adsbygoogle")) return;
+    if (!page.querySelector("script[data-adsense-loader]")) {
+      const script = page.createElement("script");
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.dataset.adsenseLoader = "true";
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.client}`;
+      page.head.appendChild(script);
+    }
+    browser.adsbygoogle = browser.adsbygoogle || [];
+    browser.adsbygoogle.push({});
+  }
+
   function renderCommentsShell() {
     return `<section class="comments" aria-labelledby="comments-title">
       <div class="comments-heading">
@@ -206,7 +236,9 @@
       const next = posts[(posts.indexOf(post) + 1) % posts.length];
       const manageUrl = createAdminUrl(browser.BLOG_CONFIG && browser.BLOG_CONFIG.adminUrl, post.slug);
       updateMeta(`${post.title} — JH.LOG`, post.description);
-      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a>${manageUrl ? `<a class="manage-link" href="${escapeHtml(manageUrl)}" rel="nofollow">Manage post ↗</a>` : ""}<header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>` : ""}${renderCommentsShell()}</article>`;
+      const adsense = browser.BLOG_CONFIG && browser.BLOG_CONFIG.adsense;
+      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a>${manageUrl ? `<a class="manage-link" href="${escapeHtml(manageUrl)}" rel="nofollow">Manage post ↗</a>` : ""}<header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderArticleAd(adsense)}${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>` : ""}${renderCommentsShell()}</article>`;
+      mountAdSense(browser, page, adsense);
       mountGiscus(
         app.querySelector("[data-comments]"),
         post,
@@ -223,6 +255,8 @@
     createAdminUrl,
     escapeHtml,
     mountGiscus,
+    mountAdSense,
+    renderArticleAd,
     renderAiDisclosure,
     renderCommentsShell
   };

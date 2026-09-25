@@ -22,6 +22,8 @@ function fakeClient() {
   const calls = [];
   return {
     calls,
+    async getCategoryConfig() { return {sha: "categories-sha", categories: ["Systems"]}; },
+    async writeCategoryConfig(categories, sha) { calls.push(["categories", categories, sha]); return {commit: {sha: "category-commit"}, content: {sha: "categories-next"}}; },
     async verifyRepository() {},
     async listPostEntries() { return [{name: "safe-post.md", path: "posts/safe-post.md", sha: "old"}]; },
     async getPost(slug) { return {sha: "old", source: serializePostSource(post({slug}))}; },
@@ -93,6 +95,64 @@ test("returns the session and supports list, get, and safe preview", async () =>
   const preview = await request("/api/preview", {method: "POST", body: post({body: "<script>x</script>"})});
   assert.equal(preview.status, 200);
   assert.doesNotMatch((await preview.json()).html, /<script>/);
+});
+
+test("lists configured categories and creates a normalized category", async () => {
+  const bindings = env();
+  const listed = await request("/api/categories", {}, bindings);
+  assert.equal(listed.status, 200);
+  assert.deepEqual(await listed.json(), {categories: ["Systems"], sha: "categories-sha"});
+
+  const created = await request("/api/categories", {
+    method: "POST",
+    body: {name: "  Game Client  ", sha: "categories-sha"}
+  }, bindings);
+  assert.equal(created.status, 201);
+  assert.deepEqual(await created.json(), {
+    categories: ["Systems", "Game Client"],
+    sha: "categories-next",
+    commitSha: "category-commit"
+  });
+  assert.deepEqual(bindings.GITHUB_CLIENT.calls, [
+    ["categories", ["Systems", "Game Client"], "categories-sha"]
+  ]);
+});
+
+test("keeps categories that are already used by repository posts", async () => {
+  const client = fakeClient();
+  client.getCategoryConfig = async () => ({sha: "categories-sha", categories: ["Linux"]});
+  const response = await request("/api/categories", {}, env({GITHUB_CLIENT: client}));
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    categories: ["Linux", "Systems"],
+    sha: "categories-sha"
+  });
+});
+
+test("rejects duplicate and unsafe category names without writing", async () => {
+  const bindings = env();
+  for (const name of [" systems ", "", "bad\nname", "x".repeat(81)]) {
+    const response = await request("/api/categories", {
+      method: "POST",
+      body: {name, sha: "categories-sha"}
+    }, bindings);
+    assert.equal(response.status, 422);
+  }
+  assert.deepEqual(bindings.GITHUB_CLIENT.calls, []);
+});
+
+test("preserves category SHA conflict semantics", async () => {
+  const client = fakeClient();
+  client.getCategoryConfig = async () => ({sha: "categories-new", categories: ["Systems"]});
+  client.writeCategoryConfig = async () => {
+    throw new GitHubError("stale", {status: 409, code: "conflict"});
+  };
+  const response = await request("/api/categories", {
+    method: "POST",
+    body: {name: "Linux", sha: "categories-old"}
+  }, env({GITHUB_CLIENT: client}));
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error.code, "conflict");
 });
 
 test("creates, updates, and deletes only validated posts with SHA concurrency", async () => {

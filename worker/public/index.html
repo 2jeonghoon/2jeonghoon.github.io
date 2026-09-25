@@ -11,14 +11,14 @@
   <main id="app">
     <section id="signed-out" class="panel" hidden><p>GitHub 소유자 계정으로 로그인해 글을 관리합니다.</p><a class="button" href="/auth/login">GitHub로 로그인</a></section>
     <section id="workspace" hidden>
-      <aside class="panel sidebar"><div class="row"><h1>글 관리</h1><button id="new-post" type="button">새 글</button></div><label for="post-filter">글 상태</label><select id="post-filter"><option value="all">전체</option><option value="published">발행</option><option value="draft">초안</option></select><ul id="post-list" aria-live="polite"></ul></aside>
+      <aside class="panel sidebar"><div class="row"><h1>글 관리</h1><button id="new-post" type="button">새 글</button></div><label for="post-filter">글 상태</label><select id="post-filter"><option value="all">전체</option><option value="published">발행</option><option value="draft">초안</option></select><ul id="post-list" aria-live="polite"></ul><section class="category-manager" aria-labelledby="category-title"><h2 id="category-title">카테고리</h2><label for="new-category-name">새 카테고리 이름</label><div class="category-add"><input id="new-category-name" maxlength="80" autocomplete="off"><button id="add-category" type="button">추가</button></div><p id="category-status" role="status"></p></section></aside>
       <section class="panel editor">
         <form id="post-form">
           <div class="row"><h2 id="editor-title">새 글</h2><span id="save-status" role="status"></span></div>
           <label for="post-slug">슬러그</label><input id="post-slug" name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*">
           <label for="post-title">제목</label><input id="post-title" name="title" maxlength="200">
           <label for="post-description">설명</label><textarea id="post-description" name="description" maxlength="600"></textarea>
-          <div class="fields"><div><label for="post-date">날짜</label><input id="post-date" name="date" type="date"></div><div><label for="post-category">분류</label><input id="post-category" name="category" maxlength="80"></div></div>
+          <div class="fields"><div><label for="post-date">날짜</label><input id="post-date" name="date" type="date"></div><div><label for="post-category">분류</label><select id="post-category" name="category" required><option value="">카테고리 선택</option></select></div></div>
           <label for="post-tags">태그 (쉼표 구분)</label><input id="post-tags" name="tags">
           <label for="post-image">이미지 경로</label><input id="post-image" name="image" placeholder="assets/cover.png">
           <div class="checks"><label><input id="post-featured" name="featured" type="checkbox"> 대표 글</label><label><input id="post-ai" name="aiGenerated" type="checkbox"> Agent 작성 글</label></div>

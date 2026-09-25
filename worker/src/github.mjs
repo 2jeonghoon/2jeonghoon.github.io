@@ -5,6 +5,7 @@ const OWNER = "2jeonghoon";
 const REPOSITORY = "2jeonghoon.github.io";
 const REPOSITORY_ID = 781249964;
 const BRANCH = "main";
+const CATEGORY_PATH = "categories.json";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -157,6 +158,35 @@ export function createGitHubContentsClient({token, fetchImpl = fetch}) {
       const entries = await request(`${API}/repos/${OWNER}/${REPOSITORY}/contents/posts?ref=${BRANCH}`);
       if (!Array.isArray(entries)) throw new GitHubError("invalid repository response");
       return entries.filter(entry => /^posts\/[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(entry.path));
+    },
+    async getCategoryConfig() {
+      try {
+        const item = await request(`${API}/repos/${OWNER}/${REPOSITORY}/contents/${CATEGORY_PATH}?ref=${BRANCH}`);
+        let parsed;
+        try {
+          parsed = JSON.parse(decoder.decode(decodeBase64(item.content ?? "")));
+        } catch (error) {
+          throw new GitHubError("invalid category configuration", {cause: error});
+        }
+        if (!Array.isArray(parsed?.categories)) throw new GitHubError("invalid category configuration");
+        return {sha: item.sha, categories: parsed.categories};
+      } catch (error) {
+        if (error instanceof GitHubError && error.code === "not_found") return {sha: "", categories: []};
+        throw error;
+      }
+    },
+    writeCategoryConfig(categories, sha) {
+      const payload = {
+        message: "blog: update categories",
+        content: encodeContent(`${JSON.stringify({categories}, null, 2)}\n`),
+        branch: BRANCH,
+        ...(sha ? {sha} : {})
+      };
+      return request(`${API}/repos/${OWNER}/${REPOSITORY}/contents/${CATEGORY_PATH}`, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      }, {mutation: true, create: !sha});
     },
     async getPost(slug) {
       const item = await request(`${API}/repos/${OWNER}/${REPOSITORY}/contents/${contentPath(slug)}?ref=${BRANCH}`);

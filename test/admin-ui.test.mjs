@@ -34,12 +34,23 @@ test("locks an existing slug and requires exact delete confirmation", () => {
   assert.equal(ui.canDelete("safe-post", "Safe-post"), false);
 });
 
+test("merges category choices without case-insensitive duplicates", () => {
+  assert.equal(typeof ui.mergeCategoryNames, "function");
+  assert.deepEqual(
+    ui.mergeCategoryNames(["Systems", " systems ", "Linux"], "Legacy"),
+    ["Systems", "Linux", "Legacy"]
+  );
+});
+
 test("ships accessible external-script UI and responsive editor styles", async () => {
   const html = await readFile(new URL("../worker/public/index.html", import.meta.url), "utf8");
   const css = await readFile(new URL("../worker/public/admin.css", import.meta.url), "utf8");
   const headers = await readFile(new URL("../worker/public/_headers", import.meta.url), "utf8");
   assert.match(html, /<main[^>]*id="app"/);
   assert.match(html, /<label[^>]*for="post-title"/);
+  assert.match(html, /<select[^>]*id="post-category"[^>]*required/);
+  assert.match(html, /<input[^>]*id="new-category-name"/);
+  assert.match(html, /<button[^>]*id="add-category"/);
   assert.match(html, /<dialog[^>]*id="delete-dialog"/);
   assert.match(html, /src="\.\/admin\.js"/);
   assert.doesNotMatch(html, /<script(?![^>]*src=)[^>]*>/);

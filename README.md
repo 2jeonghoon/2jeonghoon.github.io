@@ -470,6 +470,32 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 5. 삭제할 때는 확인란에 표시된 슬러그를 정확히 다시 입력합니다. 삭제도 Git
    커밋이므로 복구할 수 있습니다.
 
+### 카테고리 관리
+
+관리자 화면 왼쪽의 `카테고리` 영역에서 이름을 입력하고 `추가`를 누릅니다.
+카테고리는 저장소 루트의 `categories.json`에 Git 커밋으로 저장되며, 글 작성과
+수정 화면에서는 등록된 카테고리를 드롭다운으로 선택합니다. 기존 Markdown 글에서
+이미 사용 중인 카테고리도 목록에 자동으로 유지됩니다. 현재 관리자 화면은 안전한
+추가만 지원하며 이름 변경과 삭제는 GitHub에서 `categories.json`을 직접 수정합니다.
+
+### Google AdSense 준비
+
+글 상세 화면은 제목과 본문 사이에 반응형 광고 영역을 지원합니다. 기본 설정은
+비활성 상태이므로 AdSense 스크립트를 내려받거나 빈 광고 공간을 표시하지 않습니다.
+AdSense에서 사이트 승인을 받고 반응형 디스플레이 광고 단위를 만든 다음
+`blog.config.js`의 값을 채웁니다.
+
+```js
+adsense: {
+  client: "ca-pub-1234567890123456",
+  articleTopSlot: "1234567890"
+}
+```
+
+게시자 ID를 받으면 AdSense가 제공한 정확한 한 줄을 사이트 루트의 `ads.txt`에
+추가합니다. EEA, 영국, 스위스 방문자에게 광고를 제공한다면 AdSense의
+`Privacy & messaging`에서 Google 인증 CMP 기반 동의 메시지도 게시합니다.
+
 저장 후 GitHub Actions의 `Deploy blog to Pages`가 성공해야 공개 사이트에
 반영됩니다. 실패하면 Actions 로그에서 테스트 또는 빌드 오류를 먼저 확인하고,
 글의 front matter와 이미지 경로를 로컬 `npm run test:blog`로 재현합니다.
