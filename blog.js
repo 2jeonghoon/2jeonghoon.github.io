@@ -125,14 +125,14 @@
       const featured = posts.find(post => post.featured) || posts[0];
       const categories = ["All", ...new Set(posts.map(post => post.category))];
       updateMeta(
-        "JH.LOG — 이정훈의 개발 기록",
-        "게임 클라이언트, 서버 아키텍처, Linux I/O에 관한 이정훈의 개발 기록"
+        "JH.LOG — 2jeonghoon의 개발 기록",
+        "게임 클라이언트, 서버 아키텍처, Linux I/O에 관한 2jeonghoon의 기록"
       );
       app.innerHTML = `
         <section class="hero">
           <div class="hero-topline"><span class="live-dot"></span>DEVELOPER NOTES FROM SEOUL</div>
           <h1>게임을 만들고,<br />시스템을 <em>탐구합니다.</em></h1>
-          <div class="hero-bottom"><p class="hero-note">GAME CLIENT · SERVER · LINUX</p><p class="hero-intro">게임 경험을 더 안정적이고 매끄럽게 만드는 과정에서 배운 것들을 기록합니다. 구현의 결과보다 그 사이의 판단과 실패를 오래 남깁니다.</p></div>
+          <div class="hero-bottom"><p class="hero-note">GAME CLIENT · SERVER · LINUX</p><p class="hero-intro">게임 경험을 만드는 과정에서 배운 것들을 기록합니다.</p></div>
         </section>
         ${featured ? `<a class="featured" href="${postUrl(featured.slug)}" aria-label="대표 글 읽기: ${escapeHtml(featured.title)}">
           <div class="featured-visual"><img src="${escapeHtml(featured.image)}" alt="" /><span class="featured-label">FEATURED NOTE</span></div>
