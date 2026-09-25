@@ -70,6 +70,13 @@ test("parent filters include direct and descendant posts while child filters are
     filterPosts(categorizedPosts, {category: "Systems", subcategory: "Linux", query: ""}).map(post => post.title),
     ["Linux"]
   );
+  assert.deepEqual(
+    filterPosts([
+      ...categorizedPosts,
+      {title: "Lowercase", description: "", content: "", category: "systems", subcategory: "linux", tags: []}
+    ], {category: "Systems", subcategory: "Linux", query: ""}).map(post => post.title),
+    ["Linux", "Lowercase"]
+  );
 });
 
 test("search includes parent and child category names", () => {

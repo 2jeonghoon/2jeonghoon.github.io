@@ -57,6 +57,9 @@ test("clears an incompatible child when the parent changes", () => {
   assert.deepEqual(ui.nextCategorySelection(tree, "Systems", "Linux"), {
     category: "Systems", subcategory: "Linux"
   });
+  assert.deepEqual(ui.nextCategorySelection(tree, " systems ", " linux "), {
+    category: "Systems", subcategory: "Linux"
+  });
 });
 
 test("ships accessible external-script UI and responsive editor styles", async () => {

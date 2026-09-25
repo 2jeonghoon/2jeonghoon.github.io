@@ -69,8 +69,8 @@
   function filterPosts(posts, {category = "", subcategory = "", query = ""} = {}) {
     const needle = query.trim().toLocaleLowerCase("ko");
     return (posts || []).filter(post => {
-      const categoryMatch = !category || post.category === category;
-      const childMatch = !subcategory || post.subcategory === subcategory;
+      const categoryMatch = !category || categoryKey(post.category) === categoryKey(category);
+      const childMatch = !subcategory || categoryKey(post.subcategory) === categoryKey(subcategory);
       const searchable = [
         post.title,
         post.description,

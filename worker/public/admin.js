@@ -43,8 +43,9 @@
   }
   function nextCategorySelection(categories, category, subcategory) {
     const normalizedCategory=String(category||"").trim();const normalizedSubcategory=String(subcategory||"").trim();
-    const children=childNamesFor(categories,normalizedCategory);
-    return {category:normalizedCategory,subcategory:children.some(name=>categoryKey(name)===categoryKey(normalizedSubcategory))?normalizedSubcategory:""};
+    const parent=(categories||[]).find(item=>categoryKey(item.name)===categoryKey(normalizedCategory));
+    const child=parent?.children.find(item=>categoryKey(item.name)===categoryKey(normalizedSubcategory));
+    return {category:parent?.name||normalizedCategory,subcategory:child?.name||""};
   }
 
   function bootstrap(document) {
@@ -79,7 +80,7 @@
     function appendOption(select,value,label) { const option=document.createElement("option");option.value=value;option.textContent=label;select.appendChild(option); }
     function writeChildOptions(category,selected) {
       const select=get("post-subcategory");const names=childNamesFor(categoryTree,category);select.textContent="";appendOption(select,"","소분류 없음");
-      names.forEach(name=>appendOption(select,name,name));select.disabled=!category;select.value=names.some(name=>categoryKey(name)===categoryKey(selected))?selected:"";
+      names.forEach(name=>appendOption(select,name,name));select.disabled=!category;select.value=names.find(name=>categoryKey(name)===categoryKey(selected))||"";
     }
     function writeManagerParentOptions(selected) {
       const select=get("child-parent");select.textContent="";appendOption(select,"","대분류 선택");
@@ -87,9 +88,10 @@
     }
     function writeCategoryOptions(category,subcategory) {
       const current={category:category||"",subcategory:subcategory||""};categoryTree=mergeCategoryTrees(categoryTree,current);
+      const selection=nextCategorySelection(categoryTree,current.category,current.subcategory);
       const select=get("post-category");select.textContent="";appendOption(select,"","대분류 선택");
-      categoryTree.forEach(item=>appendOption(select,item.name,item.name));select.value=current.category;
-      writeChildOptions(current.category,current.subcategory);writeManagerParentOptions(get("child-parent").value||current.category);
+      categoryTree.forEach(item=>appendOption(select,item.name,item.name));select.value=selection.category;
+      writeChildOptions(selection.category,selection.subcategory);writeManagerParentOptions(get("child-parent").value||selection.category);
     }
     function writeForm(next) {
       model=createEditorModel(next); get("post-slug").value=model.slug; get("post-slug").disabled=!canEditSlug(model);
