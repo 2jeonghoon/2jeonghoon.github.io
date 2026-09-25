@@ -31,13 +31,65 @@ global.document = {
 
 const {
   createAdminUrl,
+  deriveCategoryTree,
   escapeHtml,
+  filterPosts,
+  formatCategoryPath,
   mountGiscus,
   mountAdSense,
   renderArticleAd,
   renderAiDisclosure,
-  renderCommentsShell
+  renderCommentsShell,
+  renderPostMeta
 } = require("../blog.js");
+
+const categorizedPosts = [
+  {title: "Parent", description: "", content: "", category: "Systems", subcategory: "", tags: []},
+  {title: "Linux", description: "", content: "", category: "Systems", subcategory: "Linux", tags: []},
+  {title: "Unity", description: "", content: "", category: "Games", subcategory: "Unity", tags: []}
+];
+
+test("derives a two-level tree and formats category paths", () => {
+  assert.equal(typeof deriveCategoryTree, "function");
+  assert.equal(typeof formatCategoryPath, "function");
+  assert.deepEqual(deriveCategoryTree(categorizedPosts), [
+    {name: "Systems", children: [{name: "Linux"}]},
+    {name: "Games", children: [{name: "Unity"}]}
+  ]);
+  assert.equal(formatCategoryPath(categorizedPosts[0]), "Systems");
+  assert.equal(formatCategoryPath(categorizedPosts[1]), "Systems / Linux");
+});
+
+test("parent filters include direct and descendant posts while child filters are exact", () => {
+  assert.equal(typeof filterPosts, "function");
+  assert.deepEqual(
+    filterPosts(categorizedPosts, {category: "Systems", subcategory: "", query: ""}).map(post => post.title),
+    ["Parent", "Linux"]
+  );
+  assert.deepEqual(
+    filterPosts(categorizedPosts, {category: "Systems", subcategory: "Linux", query: ""}).map(post => post.title),
+    ["Linux"]
+  );
+});
+
+test("search includes parent and child category names", () => {
+  assert.deepEqual(
+    filterPosts(categorizedPosts, {category: "", subcategory: "", query: "linux"}).map(post => post.title),
+    ["Linux"]
+  );
+});
+
+test("escapes parent and child category metadata", () => {
+  assert.equal(typeof renderPostMeta, "function");
+  const output = renderPostMeta({
+    category: "<img src=x>",
+    subcategory: "<script>x</script>",
+    date: "2026-09-26",
+    readingTime: "1 min read"
+  });
+  assert.match(output, /&lt;img src=x&gt; \/ &lt;script&gt;x&lt;\/script&gt;/);
+  assert.doesNotMatch(output, /<img|<script>/i);
+});
 
 const adsenseConfig = {
   client: "ca-pub-1234567890123456",

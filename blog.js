@@ -33,6 +33,60 @@
       .replaceAll("'", "&#39;");
   }
 
+  function categoryKey(value) {
+    return String(value || "").trim().toLocaleLowerCase("ko");
+  }
+
+  function formatCategoryPath(post) {
+    const category = String(post.category || "");
+    const subcategory = String(post.subcategory || "");
+    return subcategory ? `${category} / ${subcategory}` : category;
+  }
+
+  function deriveCategoryTree(posts) {
+    const categories = [];
+    const parents = new Map();
+    (posts || []).forEach(post => {
+      const name = String(post.category || "").trim();
+      if (!name) return;
+      const parentKey = categoryKey(name);
+      let parent = parents.get(parentKey);
+      if (!parent) {
+        parent = {name, children: []};
+        parents.set(parentKey, parent);
+        categories.push(parent);
+      }
+      const childName = String(post.subcategory || "").trim();
+      if (!childName) return;
+      const childKey = categoryKey(childName);
+      if (!parent.children.some(child => categoryKey(child.name) === childKey)) {
+        parent.children.push({name: childName});
+      }
+    });
+    return categories;
+  }
+
+  function filterPosts(posts, {category = "", subcategory = "", query = ""} = {}) {
+    const needle = query.trim().toLocaleLowerCase("ko");
+    return (posts || []).filter(post => {
+      const categoryMatch = !category || post.category === category;
+      const childMatch = !subcategory || post.subcategory === subcategory;
+      const searchable = [
+        post.title,
+        post.description,
+        post.content,
+        post.category,
+        post.subcategory,
+        ...(post.tags || [])
+      ].join(" ").toLocaleLowerCase("ko");
+      return categoryMatch && childMatch && (!needle || searchable.includes(needle));
+    });
+  }
+
+  function renderPostMeta(post) {
+    return `<div class="meta"><span class="category">${escapeHtml(formatCategoryPath(post))}</span><span>·</span><time>${escapeHtml(post.date)}</time><span>·</span><span>${escapeHtml(post.readingTime)}</span></div>`;
+  }
+
   function renderAiDisclosure(post) {
     if (!post.aiGenerated) return "";
     return `<aside class="ai-disclosure" aria-label="AI 작성 안내">
@@ -134,8 +188,7 @@
       .slice()
       .sort((a, b) => b.date.localeCompare(a.date));
     const postUrl = slug => `?post=${encodeURIComponent(slug)}`;
-    const meta = post =>
-      `<div class="meta"><span class="category">${escapeHtml(post.category)}</span><span>·</span><time>${escapeHtml(post.date)}</time><span>·</span><span>${escapeHtml(post.readingTime)}</span></div>`;
+    const meta = renderPostMeta;
 
     function updateMeta(title, description) {
       page.title = title;
@@ -153,7 +206,7 @@
 
     function renderHome() {
       const featured = posts.find(post => post.featured) || posts[0];
-      const categories = ["All", ...new Set(posts.map(post => post.category))];
+      const categories = deriveCategoryTree(posts);
       updateMeta(
         "JH.LOG — 2jeonghoon의 개발 기록",
         "게임 클라이언트, 서버 아키텍처, Linux I/O에 관한 2jeonghoon의 기록"
@@ -170,7 +223,7 @@
         </a>` : ""}
         <section class="writing" id="writing">
           <div class="section-head"><div><p class="section-kicker">01 / WRITING</p><h2>Latest notes</h2></div><span class="post-count">${String(posts.length).padStart(2, "0")} POSTS</span></div>
-          <div class="filters"><div class="filter-list" role="group" aria-label="글 카테고리">${categories.map((category, index) => `<button class="filter${index === 0 ? " active" : ""}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`).join("")}</div><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div>
+          <div class="filters"><div class="filter-list parent-filter-list" role="group" aria-label="글 대분류"><button class="filter active" data-category="">All</button>${categories.map(category => `<button class="filter" data-category="${escapeHtml(category.name)}">${escapeHtml(category.name)}</button>`).join("")}</div><div class="filter-list child-filter-list" role="group" aria-label="글 소분류"></div><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div>
           <div class="post-list" aria-live="polite"></div>
         </section>
         <section class="about" id="about"><div class="about-inner">
@@ -179,25 +232,13 @@
             <div class="about-table"><div class="about-row"><span>FOCUS</span><strong>Game systems & performance</strong></div><div class="about-row"><span>STACK</span><strong>C/C++ · C# · Python · Linux</strong></div><div class="about-row"><span>BASED IN</span><strong>Seoul, Republic of Korea</strong></div><div class="about-row"><span>CONTACT</span><strong><a href="mailto:lee.jonghoon26@gmail.com">lee.jonghoon26@gmail.com ↗</a></strong></div></div>
           </div></div></section>`;
 
-      let activeCategory = "All";
+      let activeCategory = "";
+      let activeSubcategory = "";
       let query = "";
       const list = app.querySelector(".post-list");
+      const childFilters = app.querySelector(".child-filter-list");
       function renderList() {
-        const normalized = query.trim().toLocaleLowerCase("ko");
-        const filtered = posts.filter(post => {
-          const haystack = [
-            post.title,
-            post.description,
-            post.category,
-            ...post.tags
-          ]
-            .join(" ")
-            .toLocaleLowerCase("ko");
-          return (
-            (activeCategory === "All" || post.category === activeCategory) &&
-            (!normalized || haystack.includes(normalized))
-          );
-        });
+        const filtered = filterPosts(posts, {category: activeCategory, subcategory: activeSubcategory, query});
         list.innerHTML = filtered.length
           ? filtered
               .map(
@@ -207,12 +248,27 @@
               .join("")
           : '<p class="empty">조건에 맞는 기록이 없습니다.</p>';
       }
-      app.querySelectorAll(".filter").forEach(button =>
+      function renderChildFilters() {
+        const parent = categories.find(category => category.name === activeCategory);
+        childFilters.innerHTML = parent && parent.children.length
+          ? `<button class="filter active" data-subcategory="">전체</button>${parent.children.map(child => `<button class="filter" data-subcategory="${escapeHtml(child.name)}">${escapeHtml(child.name)}</button>`).join("")}`
+          : "";
+        childFilters.querySelectorAll(".filter").forEach(button =>
+          button.addEventListener("click", () => {
+            activeSubcategory = button.dataset.subcategory;
+            childFilters.querySelectorAll(".filter").forEach(item => item.classList.toggle("active", item === button));
+            renderList();
+          })
+        );
+      }
+      app.querySelectorAll(".parent-filter-list .filter").forEach(button =>
         button.addEventListener("click", () => {
           activeCategory = button.dataset.category;
+          activeSubcategory = "";
           app
-            .querySelectorAll(".filter")
+            .querySelectorAll(".parent-filter-list .filter")
             .forEach(item => item.classList.toggle("active", item === button));
+          renderChildFilters();
           renderList();
         })
       );
@@ -220,6 +276,7 @@
         query = event.target.value;
         renderList();
       });
+      renderChildFilters();
       renderList();
     }
 
@@ -253,11 +310,15 @@
   return {
     bootstrap,
     createAdminUrl,
+    deriveCategoryTree,
     escapeHtml,
+    filterPosts,
+    formatCategoryPath,
     mountGiscus,
     mountAdSense,
     renderArticleAd,
     renderAiDisclosure,
-    renderCommentsShell
+    renderCommentsShell,
+    renderPostMeta
   };
 });
