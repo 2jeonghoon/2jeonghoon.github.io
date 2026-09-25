@@ -29,7 +29,9 @@ python3 -m http.server 4173 -d _site
 - `title`: 글 제목
 - `description`: 목록, 검색 결과, RSS에 표시할 요약
 - `date`: `YYYY-MM-DD` 형식의 게시일
-- `category`: 하나의 카테고리 이름
+- `category`: 필수 대분류 이름
+- `subcategory`: 선택 사항인 소분류 이름. 소분류를 사용하지 않으면 빈 문자열로
+  둡니다.
 - `tags`: 하나 이상의 태그 배열
 - `readingTime`: 선택 사항인 예상 읽기 시간. 생략하면 자동 계산됩니다.
 - `image`: 선택 사항인 대표 이미지 경로. `assets/...`처럼 저장소 루트 기준의
@@ -43,6 +45,23 @@ python3 -m http.server 4173 -d _site
 
 Markdown 안에서는 HTML이 실행되지 않습니다. 이미지는 먼저 `assets/`에 추가한 뒤
 `![설명](assets/파일명.png)` 형식으로 참조하세요.
+
+대분류에만 글을 넣으려면 다음처럼 작성합니다.
+
+```yaml
+category: "Development"
+subcategory: ""
+```
+
+등록된 소분류까지 지정하려면 다음처럼 작성합니다.
+
+```yaml
+category: "Development"
+subcategory: "Unity"
+```
+
+카테고리는 `대분류 → 소분류`의 두 단계까지만 지원합니다. 발행 글에는 대분류가
+필수이고 소분류는 선택 사항입니다.
 
 ### GitHub에서 게시하기
 
@@ -472,11 +491,15 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 ### 카테고리 관리
 
-관리자 화면 왼쪽의 `카테고리` 영역에서 이름을 입력하고 `추가`를 누릅니다.
-카테고리는 저장소 루트의 `categories.json`에 Git 커밋으로 저장되며, 글 작성과
-수정 화면에서는 등록된 카테고리를 드롭다운으로 선택합니다. 기존 Markdown 글에서
-이미 사용 중인 카테고리도 목록에 자동으로 유지됩니다. 현재 관리자 화면은 안전한
-추가만 지원하며 이름 변경과 삭제는 GitHub에서 `categories.json`을 직접 수정합니다.
+관리자 화면 왼쪽의 `카테고리` 영역에서 대분류를 추가하거나, 기존 대분류를 고른
+뒤 그 아래에 소분류를 추가합니다. 카테고리는 저장소 루트의 `categories.json`에
+Git 커밋으로 저장됩니다. 글 작성과 수정 화면에서는 대분류를 필수로 선택하고,
+선택한 대분류에 속한 소분류를 필요할 때만 추가로 선택합니다. 대분류만 선택한 글도
+발행할 수 있으며 카테고리는 두 단계까지만 지원합니다.
+
+기존 Markdown 글에서 이미 사용 중인 대분류와 소분류도 목록에 자동으로 유지됩니다.
+현재 관리자 화면은 안전한 추가만 지원하며 이름 변경과 삭제는 GitHub에서
+`categories.json`을 직접 수정합니다.
 
 ### Google AdSense 준비
 
