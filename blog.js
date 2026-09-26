@@ -227,7 +227,7 @@
           <div class="post-list" aria-live="polite"></div>
         </section>
         <section class="about" id="about"><div class="about-inner">
-          <div><p class="section-kicker">02 / ABOUT</p><h2>안녕하세요,<br />이정훈입니다.</h2></div>
+          <div><p class="section-kicker">02 / ABOUT</p><h2>안녕하세요</h2></div>
           <div class="about-copy"><p>Unity와 Unreal Engine으로 게임 플레이를 만들고, MMORPG 서버의 동시성 제어와 Linux <code>io_uring</code>의 I/O 성능을 연구합니다.</p>
             <div class="about-table"><div class="about-row"><span>FOCUS</span><strong>Game systems & performance</strong></div><div class="about-row"><span>STACK</span><strong>C/C++ · C# · Python · Linux</strong></div><div class="about-row"><span>BASED IN</span><strong>Seoul, Republic of Korea</strong></div><div class="about-row"><span>CONTACT</span><strong><a href="mailto:lee.jonghoon26@gmail.com">lee.jonghoon26@gmail.com ↗</a></strong></div></div>
           </div></div></section>`;
