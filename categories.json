@@ -2,7 +2,11 @@
   "categories": [
     {
       "name": "Study",
-      "children": []
+      "children": [
+        {
+          "name": "Game Server"
+        }
+      ]
     }
   ]
 }
