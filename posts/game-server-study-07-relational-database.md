@@ -94,6 +94,89 @@ CRUD는 `INSERT`, `SELECT`, `UPDATE`, `DELETE`로 표현되며 실제 서비스�
 
 게임 서버 DB 계정에는 필요한 테이블과 작업만 허용하고 관리 권한을 주지 않는다. 비밀번호와 연결 문자열은 비밀 저장소에서 주입하고 로그와 오류 응답에 노출하지 않는다. 전송 암호화, 저장 데이터 암호화, 백업 접근 제어를 적용하며 개인정보 보존·삭제 정책을 지킨다. 감사 로그에는 누가 언제 어떤 중요 변경을 했는지 남기되 민감한 원문 값은 최소화한다.
 
+## 코드와 그림으로 확인하기
+
+### 계정·캐릭터·아이템 관계
+
+```sql
+CREATE TABLE characters (
+    character_id BIGINT PRIMARY KEY,
+    account_id   BIGINT NOT NULL,
+    name         VARCHAR(32) NOT NULL UNIQUE,
+    gold         BIGINT NOT NULL CHECK (gold >= 0)
+);
+
+CREATE TABLE inventory_items (
+    item_instance_id BIGINT PRIMARY KEY,
+    character_id     BIGINT NOT NULL,
+    slot              INT NOT NULL,
+    item_type_id      INT NOT NULL,
+    quantity          INT NOT NULL CHECK (quantity > 0),
+    UNIQUE (character_id, slot),
+    FOREIGN KEY (character_id) REFERENCES characters(character_id)
+);
+```
+
+기본 키는 행을 식별하고 외래 키는 존재하지 않는 캐릭터의 아이템이 생기는 것을 막는다. 슬롯 유일 제약은 애플리케이션 버그가 같은 슬롯에 두 아이템을 저장하지 못하게 한다.
+
+### 재화 차감과 아이템 지급 트랜잭션
+
+```sql
+BEGIN;
+
+UPDATE characters
+SET gold = gold - :price
+WHERE character_id = :character_id
+  AND gold >= :price;
+
+-- UPDATE된 행이 정확히 1개인지 애플리케이션에서 확인한다.
+INSERT INTO inventory_items
+    (item_instance_id, character_id, slot, item_type_id, quantity)
+VALUES
+    (:instance_id, :character_id, :slot, :item_type_id, 1);
+
+COMMIT;
+```
+
+골드가 부족해 UPDATE된 행이 없다면 INSERT하지 않고 롤백한다. 실제 구현은 거래 ID의 유일 제약도 두어 응답 유실 뒤 같은 요청이 다시 와도 중복 지급되지 않게 한다.
+
+### 실행 계획으로 인덱스 확인
+
+```sql
+CREATE INDEX idx_inventory_character_type
+ON inventory_items (character_id, item_type_id);
+
+EXPLAIN
+SELECT item_instance_id, quantity
+FROM inventory_items
+WHERE character_id = :character_id
+  AND item_type_id = :item_type_id;
+```
+
+인덱스를 만들었다는 사실보다 실행 계획에서 조사 행 수가 실제로 줄었는지 확인하는 것이 중요하다. 대표 데이터량과 분포로 읽기 성능뿐 아니라 아이템 추가·변경의 쓰기 비용도 함께 측정한다.
+
+### 매개변수화된 질의
+
+```cpp
+auto statement = connection.Prepare(
+    "SELECT character_id, gold "
+    "FROM characters WHERE name = ?");
+statement.Bind(1, requestedName);
+auto rows = statement.ExecuteQuery();
+```
+
+`requestedName`을 SQL 문자열에 이어 붙이지 않는다. 값은 매개변수로 보내고, 정렬 열이나 테이블처럼 구조를 동적으로 선택해야 한다면 서버가 정의한 허용 목록을 사용한다.
+
+### 게임 스레드와 DB 작업 큐
+
+```text
+게임 스레드 ── SaveCommand(version=42) ──> DB 워커
+     ▲                                         │
+     └── SaveResult(version=42, success) <─────┘
+```
+
+완료 결과가 돌아왔을 때 현재 캐릭터 버전과 세션 세대를 확인한다. 오래된 저장 결과가 새로운 상태를 확정한 것처럼 처리되지 않게 해야 한다.
+
 ## 공부할 내용
 
 1. 계정-캐릭터-아이템 관계를 ER 다이어그램으로 그리고 키와 제약을 정의한다.

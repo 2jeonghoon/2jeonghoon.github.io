@@ -155,6 +155,110 @@ public class NativeBuffer : IDisposable
 
 상속이 필요 없는 타입은 `sealed`로 만들면 정리 패턴이 단순해진다. 비동기 해제가 필요하면 `IAsyncDisposable`과 `await using`을 별도 계약으로 제공한다.
 
+## 코드와 수명 흐름으로 확인하기
+
+### GC가 객체를 찾는 방식
+
+```text
+GC Root
+ ├─ 실행 중 스레드의 지역 변수 ──> Session ──> Player
+ ├─ static 필드 ─────────────────> Cache ──> Entry
+ └─ 네이티브 핸들 테이블 ─────────> ManagedObject
+
+어떤 Root에서도 도달할 수 없는 객체
+ └─ 다음 적절한 GC에서 회수 대상
+```
+
+변수가 블록을 벗어났다는 사실만으로 즉시 수집되는 것은 아니며, JIT가 마지막 사용 시점을 더 일찍 판단할 수도 있다. 반대로 이벤트나 정적 캐시에서 참조하면 의도보다 오래 살아남는다.
+
+### 필드와 생성자 실행 순서
+
+```csharp
+class Base
+{
+    private readonly Marker baseField = new("Base field");
+    protected Base() => Console.WriteLine("Base constructor");
+}
+
+class Derived : Base
+{
+    private readonly Marker derivedField = new("Derived field");
+    public Derived() => Console.WriteLine("Derived constructor");
+}
+```
+
+```text
+인스턴스 메모리 기본값 설정
+→ 파생 타입 필드 초기화
+→ 베이스 타입 필드 초기화
+→ 베이스 생성자 본문
+→ 파생 생성자 본문
+```
+
+정확한 순서를 암기하는 것보다 생성 도중 가상 호출이나 `this` 노출을 피하고, 각 생성자가 자신의 단계에서 완성되지 않은 파생 상태를 사용하지 않는 것이 중요하다.
+
+### 실패 가능한 정적 자원은 지연 초기화
+
+```csharp
+public static class Configuration
+{
+    private static readonly Lazy<AppSettings> settings =
+        new(Load, LazyThreadSafetyMode.ExecutionAndPublication);
+
+    public static AppSettings Current => settings.Value;
+
+    private static AppSettings Load() => AppSettings.ReadFromEnvironment();
+}
+```
+
+`Lazy<T>`는 첫 사용까지 생성을 늦추고 스레드 안전한 단일 초기화를 제공할 수 있다. 다만 기본 모드에서는 초기화 예외가 캐시될 수 있으므로 재시도가 필요한 외부 연결을 영구 정적 값으로 감추지 않는다.
+
+### 생성자에서 가상 메서드를 호출하면 생기는 문제
+
+```csharp
+abstract class BaseWidget
+{
+    protected BaseWidget() => PrintState();
+    protected abstract void PrintState();
+}
+
+sealed class PlayerWidget : BaseWidget
+{
+    private readonly string name;
+
+    public PlayerWidget(string name) => this.name = name;
+
+    protected override void PrintState() =>
+        Console.WriteLine(name.Length); // 아직 name이 대입되기 전 호출될 수 있음
+}
+```
+
+가상 디스패치는 파생 구현을 호출하지만 파생 생성자 본문은 아직 실행되지 않았다. 필요한 값을 베이스 생성자 인수로 전달하거나 생성 완료 후 별도 초기화 단계를 호출한다.
+
+### `SafeHandle`로 네이티브 핸들 감싸기
+
+```csharp
+sealed class FileHandle : SafeHandle
+{
+    private FileHandle() : base(IntPtr.Zero, ownsHandle: true) { }
+
+    public override bool IsInvalid => handle == IntPtr.Zero || handle == new IntPtr(-1);
+
+    protected override bool ReleaseHandle() => NativeMethods.CloseHandle(handle);
+}
+```
+
+네이티브 핸들을 직접 `IntPtr` 필드와 파이널라이저로 관리하기보다 `SafeHandle`을 사용하면 위험한 종료 경합과 파이널라이저 로직을 프레임워크에 맡길 수 있다. 이 핸들을 소유한 상위 객체는 `SafeHandle.Dispose()`를 호출한다.
+
+### 동기·비동기 정리 경계
+
+```csharp
+await using var connection = await OpenConnectionAsync(cancellationToken);
+await connection.SendAsync(message, cancellationToken);
+```
+
+`IAsyncDisposable`은 네트워크 종료나 버퍼 flush처럼 비동기 대기가 필요한 정리에 사용한다. 단순 메모리 필드를 비우기 위해 비동기 정리를 도입하지 않으며, 타입이 동기·비동기 정리를 모두 제공한다면 호출자가 어떤 계약을 선택해야 하는지 문서화한다.
+
 ## 복습할 내용
 
 - 관리 메모리 회수와 비관리 리소스 해제가 왜 다른 수명 모델을 갖는지 설명한다.

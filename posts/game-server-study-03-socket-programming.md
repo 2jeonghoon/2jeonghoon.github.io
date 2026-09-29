@@ -96,6 +96,94 @@ IOCP는 Windows에서 완료된 비동기 I/O 결과를 완료 포트 큐로 모
 
 완료 패킷에는 연결 문맥, 작업 종류, 전송 바이트 수를 연결할 정보가 필요하다. 0바이트 완료, 부분 송신, 연결 끊김, 실패 완료를 각각 처리하고 작업 구조체를 정확히 한 번 회수한다. 서버 종료 시 새 작업 제출을 막고 소켓을 취소·종료한 뒤 남은 완료를 모두 배출하는 순서를 갖춰야 메모리 누수와 사용 후 해제를 피할 수 있다.
 
+## 코드와 그림으로 확인하기
+
+### TCP 서버의 기본 호출 순서
+
+```text
+서버: socket → bind → listen → accept → recv/send → close
+클라이언트: socket → connect ────────────> send/recv → close
+```
+
+다음 코드는 POSIX 소켓의 흐름을 보여 주는 축약 예제다. 실제 서버에서는 모든 반환값, 인터럽트, 타임아웃과 종료 경로를 처리해야 한다.
+
+```cpp
+int listenSocket = socket(AF_INET, SOCK_STREAM, 0);
+bind(listenSocket, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+listen(listenSocket, SOMAXCONN);
+
+int clientSocket = accept(listenSocket, nullptr, nullptr);
+std::array<char, 4096> buffer{};
+const ssize_t received = recv(clientSocket, buffer.data(), buffer.size(), 0);
+
+if (received > 0) {
+    // received만큼 연결별 입력 버퍼에 추가한다.
+} else if (received == 0) {
+    // 상대가 정상적으로 송신 방향을 닫았다.
+}
+```
+
+### 부분 송신 처리
+
+`send`가 요청한 전체 길이를 처리한다고 가정하면 안 된다.
+
+```cpp
+bool SendAll(int socket, std::span<const std::byte> data) {
+    std::size_t offset = 0;
+    while (offset < data.size()) {
+        const auto sent = send(
+            socket,
+            data.data() + offset,
+            data.size() - offset,
+            0);
+        if (sent <= 0) return false;
+        offset += static_cast<std::size_t>(sent);
+    }
+    return true;
+}
+```
+
+블로킹 예제에서는 이해하기 쉽지만, 운영 서버에서는 느린 클라이언트 때문에 이 루프가 오래 멈출 수 있다. 논블로킹 방식은 남은 범위를 연결의 송신 큐에 저장하고 쓰기 가능 이벤트에서 이어서 보낸다.
+
+### 논블로킹 `epoll` 읽기
+
+```cpp
+for (;;) {
+    const auto received = recv(fd, buffer, sizeof(buffer), 0);
+    if (received > 0) {
+        AppendAndParse(fd, buffer, received);
+        continue;
+    }
+    if (received == 0) {
+        CloseConnection(fd);
+        break;
+    }
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        break; // 현재 읽을 데이터를 모두 소비했다.
+    }
+    CloseConnection(fd);
+    break;
+}
+```
+
+엣지 트리거에서는 `EAGAIN`이 나올 때까지 읽어야 다음 상태 변화 알림을 놓치지 않는다. 한 연결이 루프를 너무 오래 독점하지 않도록 바이트나 메시지 처리 예산도 둘 수 있다.
+
+### 완료 기반 I/O 객체 수명
+
+```text
+I/O 요청 제출
+   │
+   ├─ 연결 객체와 버퍼의 참조 유지
+   ▼
+IOCP 완료 큐 ──> 워커가 결과 처리 ──> 진행 중 작업 수 감소
+                                         │
+연결 종료 요청 ── 새 요청 차단 ─────────┘
+                                         ▼
+                              완료가 모두 회수된 뒤 파괴
+```
+
+종료 요청과 완료 통지는 경쟁할 수 있으므로, 소켓을 닫았다는 이유만으로 비동기 작업 구조체를 즉시 삭제해서는 안 된다.
+
 ## 공부할 내용
 
 1. 로컬 TCP 에코 서버를 블로킹 방식과 이벤트 방식으로 각각 구현한다.

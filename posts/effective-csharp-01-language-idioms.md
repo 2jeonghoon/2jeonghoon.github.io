@@ -142,6 +142,117 @@ value.Render(); // Derived의 new Render가 아니라 Base.Render 호출 가능
 
 `new` 한정자의 현실적인 용도는 외부 베이스 클래스가 업그레이드되면서 우연히 파생 클래스와 같은 이름의 멤버를 추가했을 때, 기존 의미를 유지하며 충돌 의도를 명시하는 호환 조치다. 가능하면 이름을 바꾸거나 구조를 정리하는 편이 장기적으로 낫다.
 
+## 코드로 차이를 확인하기
+
+### `var`는 컴파일 시점에 타입이 결정된다
+
+```csharp
+var count = 10;                    // 컴파일 시 int
+var names = new List<string>();    // 컴파일 시 List<string>
+
+// count = "ten";                 // 컴파일 오류
+Console.WriteLine(count.GetType()); // System.Int32
+```
+
+`var` 변수의 타입은 실행 중에 바뀌지 않는다. 우변이 `new CustomerRepository()`라면 변수도 구체 타입으로 추론되므로, 인터페이스 경계를 강조하려는 경우에는 `ICustomerRepository repository = ...`처럼 명시하는 편이 낫다.
+
+### 공개 `const`의 버전 문제
+
+```csharp
+// Library.dll 버전 1
+public static class Limits
+{
+    public const int MaxPlayers = 100;
+    public static readonly int DefaultPlayers = 100;
+}
+```
+
+```text
+App.dll 컴파일
+ ├─ Limits.MaxPlayers 값 100이 App.dll 코드에 삽입됨
+ └─ Limits.DefaultPlayers는 실행 시 Library.dll 필드를 읽음
+
+Library.dll만 새 버전으로 교체
+ ├─ const를 200으로 바꿔도 App.dll은 여전히 100을 사용할 수 있음
+ └─ readonly를 200으로 바꾸면 App.dll은 새 필드 값을 읽음
+```
+
+외부 어셈블리가 참조하는 공개 값이 바뀔 가능성이 있으면 `static readonly`가 버전 변경에 안전하다.
+
+### 패턴 검사와 사용자 정의 변환
+
+```csharp
+public sealed class UserId
+{
+    public string Value { get; }
+    public UserId(string value) => Value = value;
+
+    public static explicit operator UserId(string value) => new(value);
+}
+
+object value = "player-42";
+
+// value is UserId는 false다. 패턴 검사는 사용자 정의 변환을 실행하지 않는다.
+if (value is string text)
+{
+    UserId id = (UserId)text; // 의도적으로 정의한 명시적 변환
+}
+```
+
+`is`와 `as`는 런타임 타입 호환성을 검사하는 도구이며, 임의의 사용자 정의 변환을 모두 시도하는 문법이 아니다. 데이터 변환과 타입 검사를 같은 것으로 취급하지 않는다.
+
+### 멀티캐스트 델리게이트와 예외
+
+```csharp
+Action handlers = () => Console.WriteLine("first");
+handlers += () => throw new InvalidOperationException("second failed");
+handlers += () => Console.WriteLine("third");
+
+foreach (Action handler in handlers.GetInvocationList())
+{
+    try { handler(); }
+    catch (Exception ex) { Console.Error.WriteLine(ex.Message); }
+}
+```
+
+`handlers()`를 한 번 호출하면 두 번째 처리기의 예외 때문에 세 번째 처리기가 실행되지 않는다. 구독자별 실패를 격리해야 하는 시스템이라면 호출 목록을 순회하며 정책에 따라 오류를 기록하거나 모아야 한다.
+
+### 박싱 할당 관찰
+
+```csharp
+long before = GC.GetAllocatedBytesForCurrentThread();
+
+object boxed = 42;   // int 값을 담는 힙 객체 생성
+int number = (int)boxed;
+
+long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+Console.WriteLine($"Allocated: {allocated} bytes, value: {number}");
+```
+
+측정 자체도 할당에 영향을 줄 수 있으므로 실제 벤치마크에는 BenchmarkDotNet 같은 도구가 적합하다. 이 예제의 목적은 값 타입을 `object`로 변환하는 순간 별도 객체가 필요하다는 점을 확인하는 것이다.
+
+### `new`와 `override`의 호출 차이
+
+```csharp
+class Base
+{
+    public void Hidden() => Console.WriteLine("Base.Hidden");
+    public virtual void Polymorphic() => Console.WriteLine("Base.Polymorphic");
+}
+
+class Derived : Base
+{
+    public new void Hidden() => Console.WriteLine("Derived.Hidden");
+    public override void Polymorphic() => Console.WriteLine("Derived.Polymorphic");
+}
+
+Base value = new Derived();
+value.Hidden();       // Base.Hidden: 정적 타입으로 선택
+value.Polymorphic();  // Derived.Polymorphic: 실제 타입으로 디스패치
+```
+
+이름 숨김은 다형성이 아니다. 새 설계에서 파생 동작을 기대한다면 `virtual`과 `override`로 계약을 명시한다.
+
 ## 복습할 내용
 
 - `var`, `const`, `readonly`가 각각 컴파일 시점과 런타임에 어떤 정보를 고정하는지 설명한다.

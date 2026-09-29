@@ -92,6 +92,83 @@ MongoDB를 배웠다고 모든 데이터를 문서로 옮길 필요는 없다. �
 
 다음 단계로 복제 세트 장애 전환, 읽기·쓰기 우려 수준, 트랜잭션 범위, 백업과 시점 복구를 실습해야 한다. CAP를 단순 슬로건으로 외우기보다 실제 네트워크 분할에서 요청을 거부할지 오래된 값을 반환할지 기능별로 결정한다. 성능 시험은 현실적인 문서 크기와 인덱스, 동시성을 사용하고 장애 복구 시간까지 기록한다.
 
+## 코드와 그림으로 확인하기
+
+### 플레이어 문서 예시
+
+```json
+{
+  "_id": "player-42",
+  "profile": {
+    "name": "Knight",
+    "level": 18
+  },
+  "equipment": [
+    { "slot": "weapon", "itemType": 1201, "enhance": 3 },
+    { "slot": "armor", "itemType": 2304, "enhance": 1 }
+  ],
+  "version": 7
+}
+```
+
+프로필과 소수의 장비는 함께 읽는 경계라 한 문서에 둘 수 있다. 반대로 전투 로그나 우편처럼 계속 증가하는 배열은 문서가 끝없이 커지므로 별도 컬렉션에 두는 편이 낫다.
+
+### CRUD와 조건부 갱신
+
+```javascript
+db.players.find(
+  { "profile.level": { $gte: 10 } },
+  { "profile.name": 1, "profile.level": 1 }
+).limit(100)
+
+db.players.updateOne(
+  { _id: "player-42", version: 7 },
+  {
+    $inc: { "profile.level": 1, version: 1 },
+    $set: { lastLevelUpAt: new Date() }
+  }
+)
+```
+
+두 번째 갱신은 현재 버전이 7일 때만 적용된다. 매칭된 문서가 0개라면 다른 요청이 먼저 변경했을 수 있으므로 최신 상태를 읽고 충돌 정책을 적용한다.
+
+### 실행 계획과 인덱스
+
+```javascript
+db.players.createIndex({ "profile.level": 1, "profile.name": 1 })
+
+db.players.find({ "profile.level": { $gte: 10 } })
+          .sort({ "profile.name": 1 })
+          .explain("executionStats")
+```
+
+`totalDocsExamined`, `totalKeysExamined`, 반환 문서 수를 비교한다. 모든 질의에 인덱스를 추가하지 말고 빈도와 쓰기 비용, 메모리 사용을 함께 본다.
+
+### 샤딩 경로
+
+```text
+게임 서버 ── 질의 ──> 라우터(mongos) ── 샤드 키로 대상 선택
+                                      ├─> 샤드 A 복제 세트
+                                      ├─> 샤드 B 복제 세트
+                                      └─> 샤드 C 복제 세트
+```
+
+샤드 키가 없는 질의는 모든 샤드로 퍼질 수 있다. 계속 증가하는 값은 최신 쓰기를 한쪽에 몰 수 있고 해시 키는 범위 조회를 어렵게 하므로 실제 읽기·쓰기 패턴으로 선택한다.
+
+### 드라이버 수명
+
+```cpp
+MongoClient client{connectionString}; // 애플리케이션 수명 동안 재사용
+auto players = client.Database("game").Collection("players");
+
+Document player;
+player.Set("_id", playerId);
+player.Set("version", 1);
+co_await players.InsertOneAsync(player);
+```
+
+위 코드는 특정 드라이버 API를 복제한 것이 아니라 수명 구조를 나타내는 의사 코드다. 요청마다 클라이언트를 새로 만들지 말고 드라이버의 연결 풀을 재사용하며, 실제 API의 BSON 타입과 오류 모델을 따른다.
+
 ## 공부할 내용
 
 1. 같은 플레이어 데이터를 관계형 테이블과 MongoDB 문서로 각각 모델링한다.

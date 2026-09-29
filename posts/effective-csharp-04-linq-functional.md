@@ -130,6 +130,131 @@ public static Player? Best(
 
 필요한 값을 별도 지역 변수에 복사하고 이후 변경하지 않는 방식으로 의도를 고정한다. 가능하면 불변 입력을 매개변수로 전달하고 상태 변경이 필요한 경우에는 이를 소유하는 명시적 객체로 모델링한다. 캡처된 변수의 수정은 실행 시점과 상태 의존성을 숨기므로 동시성 코드에서는 특히 위험하다.
 
+## 코드로 실행 시점 확인하기
+
+### 이터레이터는 열거할 때 실행된다
+
+```csharp
+static IEnumerable<int> Trace(IEnumerable<int> source)
+{
+    Console.WriteLine("enumeration started");
+    foreach (int value in source)
+    {
+        Console.WriteLine($"yield {value}");
+        yield return value;
+    }
+}
+
+IEnumerable<int> query = Trace(new[] { 1, 2, 3 }).Take(2);
+Console.WriteLine("query created");
+foreach (int value in query) Console.WriteLine($"received {value}");
+```
+
+쿼리를 만드는 시점에는 `Trace` 본문이 실행되지 않는다. 열거가 시작된 뒤에도 `Take(2)`가 충분한 값을 받으면 세 번째 요소는 요구하지 않는다.
+
+### 반복 열거로 인한 중복 작업
+
+```csharp
+IEnumerable<Player> query = repository.StreamPlayers()
+    .Where(player => player.IsOnline);
+
+bool any = query.Any();       // 첫 번째 열거와 I/O
+int count = query.Count();    // 두 번째 전체 열거와 I/O
+
+List<Player> snapshot = query.ToList(); // 의도적인 한 번의 구체화
+bool cachedAny = snapshot.Count > 0;
+int cachedCount = snapshot.Count;
+```
+
+소스가 DB, 파일, 네트워크라면 반복 열거의 비용과 결과가 달라질 수 있다. 한 시점의 동일 결과를 여러 번 사용할 목적이라면 경계에서 구체화한다.
+
+### 쿼리 구문이 메서드로 변환되는 방식
+
+```csharp
+var querySyntax =
+    from player in players
+    where player.IsOnline
+    orderby player.Score descending, player.Name
+    select player.Name;
+
+var methodSyntax = players
+    .Where(player => player.IsOnline)
+    .OrderByDescending(player => player.Score)
+    .ThenBy(player => player.Name)
+    .Select(player => player.Name);
+```
+
+두 표현은 같은 연산 구조를 나타낸다. 두 번째 정렬에 `OrderBy`를 다시 쓰면 앞선 점수 정렬이 새 기본 정렬로 대체되므로 `ThenBy`를 사용한다.
+
+### 지연 이터레이터의 인수 검증
+
+```csharp
+static IEnumerable<T> TakeValid<T>(IEnumerable<T> source, int count)
+{
+    ArgumentNullException.ThrowIfNull(source);
+    if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
+    return Iterator();
+
+    IEnumerable<T> Iterator()
+    {
+        using IEnumerator<T> iterator = source.GetEnumerator();
+        for (int i = 0; i < count && iterator.MoveNext(); i++)
+            yield return iterator.Current;
+    }
+}
+```
+
+검증을 `yield return`이 있는 본문에 그대로 두면 메서드 호출이 아니라 첫 열거 시점에 예외가 발생한다. 바깥 메서드에서 즉시 검증하고 내부 이터레이터를 반환하면 API 오류 위치가 명확해진다.
+
+### 클로저가 변수와 자원을 붙잡는 방식
+
+```csharp
+var predicates = new List<Func<int, bool>>();
+for (int threshold = 0; threshold < 3; threshold++)
+{
+    int captured = threshold;
+    predicates.Add(value => value > captured);
+}
+
+static Func<Player, bool> ForMinimumLevel(int level) =>
+    player => player.Level >= level;
+```
+
+캡처된 것은 변수를 보관하는 클로저이며 델리게이트가 살아 있는 동안 함께 유지된다. 루프에서 의도한 현재 값을 별도 지역 변수로 고정하고, DB 컨텍스트나 스트림 같은 자원을 이벤트 람다에 캡처하지 않는다.
+
+캡처가 필요 없는 람다는 `static`으로 실수를 막을 수 있다.
+
+```csharp
+var normalized = names.Select(static name => name.Trim().ToUpperInvariant());
+```
+
+### `IQueryable<T>`에서 로컬 실행으로 넘어가는 경계
+
+```csharp
+IQueryable<PlayerRow> databaseQuery = db.Players
+    .Where(player => player.IsActive)
+    .OrderByDescending(player => player.Score)
+    .Select(player => new PlayerRow(player.Id, player.Name, player.Score));
+
+List<PlayerRow> rows = await databaseQuery.Take(100).ToListAsync();
+
+IEnumerable<PlayerView> local = rows.Select(row =>
+    new PlayerView(row.Id, FormatDisplayName(row.Name), row.Score));
+```
+
+DB가 처리할 수 있는 필터·정렬·투영과 개수 제한을 먼저 적용한 뒤 구체화한다. 임의의 .NET 메서드 `FormatDisplayName`은 메모리로 가져온 작은 결과에 적용해 번역 오류와 전체 테이블 로드를 피한다.
+
+### 결과 개수의 계약
+
+```csharp
+Player unique = players.Single(player => player.Email == email);
+Player? optional = players.SingleOrDefault(player => player.ExternalId == id);
+Player newest = players.OrderByDescending(player => player.CreatedAt).First();
+```
+
+이메일이 유일해야 한다면 `Single`과 DB 유일 제약으로 불변식을 드러낸다. 여러 기록 중 최신 하나를 고르는 목적에는 정렬과 `First`가 맞다. 빈 결과가 정상이라면 `OrDefault`를 사용하되 `null`의 의미를 호출자가 처리하게 한다.
+
 ## 복습할 내용
 
 - 각 LINQ 연산이 지연인지 즉시인지 분류하고 실제 열거 횟수를 측정한다.

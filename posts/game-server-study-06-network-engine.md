@@ -90,6 +90,72 @@ P2P는 클라이언트들이 서로 직접 데이터를 보내 서버 대역폭�
 
 안전한 기본 패턴은 네트워크 콜백에서 최소한의 검증과 복사만 한 뒤 게임 로직 소유 스레드의 큐로 전달하는 것이다. 반대 방향도 연결별 송신 큐로 직렬화한다. 종료 시 엔진 스레드가 여전히 콜백을 실행하는 동안 게임 객체를 파괴하지 않도록 새 작업 차단, 연결 종료, 워커 합류, 객체 파괴의 순서를 정한다.
 
+## 코드와 그림으로 확인하기
+
+### 엔진 콜백과 게임 스레드의 경계
+
+네트워크 엔진이 내부 워커에서 콜백을 실행한다면 게임 객체를 직접 수정하지 않고 명령을 소유 스레드로 전달한다.
+
+```cpp
+void NetworkListener::OnMessage(ConnectionId connection,
+                                std::span<const std::byte> bytes) {
+    auto command = DecodeAndValidate(connection, bytes);
+    if (!command) return;
+
+    gameCommandQueue.Push(std::move(*command));
+}
+
+void GameLoop::Tick() {
+    while (auto command = gameCommandQueue.TryPop()) {
+        ApplyCommand(*command); // 게임 상태는 이 스레드에서만 변경
+    }
+}
+```
+
+큐에 넣은 명령은 원본 네트워크 버퍼를 참조하지 않고 필요한 데이터를 소유해야 한다. 연결이 끊겼다가 다시 만들어졌을 때 이전 콜백을 구별하도록 세션 세대 번호도 포함한다.
+
+### 연결과 재접속 상태
+
+```text
+Disconnected ── Connect ──> Connecting
+      ▲                         │
+      │                         ├─ 성공 ──> Authenticating ──> Connected
+      │                         │                              │
+      └──── 취소/최종 실패 <────┴──── 오류/타임아웃 <─────────┘
+                                            │
+                                            └─ Backoff 뒤 재시도
+```
+
+재시도 간격은 계속 늘리되 작은 무작위 값을 섞어 많은 클라이언트가 동시에 서버를 두드리지 않게 한다. 사용자가 로그아웃했거나 앱을 닫았다면 예약된 재시도를 취소한다.
+
+### RPC가 로컬 호출과 다른 점
+
+```cpp
+struct PurchaseRequest {
+    TransactionId transactionId;
+    PlayerId playerId;
+    ItemId itemId;
+};
+
+// 타임아웃은 '실패'가 아니라 결과를 모른다는 뜻일 수 있다.
+auto result = co_await shopClient.Purchase(request, 2s);
+if (result.timedOut()) {
+    result = co_await shopClient.GetTransaction(request.transactionId);
+}
+```
+
+원격 서버가 구매를 처리한 뒤 응답만 유실될 수 있으므로 같은 구매를 새 거래로 재호출하지 않는다. 거래 ID로 기존 결과를 조회하거나 멱등하게 재전송한다.
+
+### P2P 직접 경로와 중계 경로
+
+```text
+직접 연결 성공:  클라이언트 A <────────────> 클라이언트 B
+
+직접 연결 실패:  클라이언트 A <──> 릴레이 서버 <──> 클라이언트 B
+```
+
+NAT 홀 펀칭에 성공하더라도 상대 주소 노출과 DDoS 위험을 검토한다. 게임 결과의 최종 권한은 별도 권위 서버에 남기고, P2P는 음성이나 지연에 민감한 보조 데이터에 제한할 수 있다.
+
 ## 공부할 내용
 
 1. 네트워크 엔진을 쓰지 않은 소켓 서버와 엔진 기반 서버의 책임 목록을 비교한다.

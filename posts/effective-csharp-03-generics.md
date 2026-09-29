@@ -180,6 +180,117 @@ public static IEnumerable<Employee> ActiveOnly(
 
 이 방식은 도메인 로직을 호출 위치마다 반복하는 일을 줄이고, 기존 타입과 함께 자연스럽게 발견된다. 그러나 범용 네임스페이스에 너무 많은 확장을 넣으면 자동 완성 목록과 이름 충돌이 커진다. 응집된 네임스페이스에 두고, 상태를 가져야 하거나 불변식을 강제해야 하는 기능은 전용 타입으로 모델링한다.
 
+## 코드로 제네릭 계약 확인하기
+
+### 열린 타입과 닫힌 타입
+
+```csharp
+Type open = typeof(Dictionary<,>);
+Type closed = typeof(Dictionary<string, int>);
+
+Console.WriteLine(open.ContainsGenericParameters);   // True
+Console.WriteLine(closed.ContainsGenericParameters); // False
+
+object instance = Activator.CreateInstance(closed)!;
+// Activator.CreateInstance(open); // 타입 인수가 없어 인스턴스화할 수 없음
+```
+
+열린 타입은 리플렉션으로 선언을 조사하거나 DI 등록 패턴을 표현할 때 사용할 수 있지만, 객체를 만들려면 모든 타입 인수가 정해진 닫힌 타입이어야 한다.
+
+### 비교 계약을 깨뜨리면 정렬도 깨진다
+
+```csharp
+public sealed record Player(string Name, int Score) : IComparable<Player>
+{
+    public int CompareTo(Player? other)
+    {
+        if (other is null) return 1;
+
+        int scoreOrder = other.Score.CompareTo(Score);
+        return scoreOrder != 0
+            ? scoreOrder
+            : StringComparer.Ordinal.Compare(Name, other.Name);
+    }
+}
+```
+
+점수가 같을 때 이름까지 비교하지 않으면 정렬 컨테이너가 서로 다른 두 플레이어를 동일한 키로 취급할 수 있다. 비교 기준과 동일성 기준이 어떤 관계를 가져야 하는지 자료구조별로 확인한다.
+
+### 공변성과 반공변성의 실제 대입
+
+```csharp
+IEnumerable<string> strings = new[] { "A", "B" };
+IEnumerable<object> objects = strings; // out T: 공변
+
+IComparer<object> objectComparer = Comparer<object>.Default;
+IComparer<string> stringComparer = objectComparer; // in T: 반공변
+
+// IList<object> list = new List<string>(); // 허용되지 않음
+```
+
+`IList<string>`을 `IList<object>`로 바꿀 수 있다면 그 목록에 `new object()`를 넣어 원래 문자열 목록을 깨뜨릴 수 있다. 입력과 출력 양쪽에 `T`를 사용하는 계약은 불변이어야 한다.
+
+### 정적 타입에 따라 달라지는 오버로드
+
+```csharp
+static void Process<T>(T value) => Console.WriteLine("generic");
+static void Process(Stream value) => Console.WriteLine("stream");
+
+MemoryStream concrete = new();
+Stream general = concrete;
+
+Process(concrete); // generic이 더 정확한 후보가 될 수 있음
+Process(general);  // stream
+```
+
+동일한 런타임 객체도 변수의 정적 타입에 따라 다른 오버로드가 선택될 수 있다. 성능 최적화를 오버로드 선택에 숨기기보다 제네릭 구현 내부에서 표준 인터페이스를 검사하면 의미를 일정하게 유지하기 쉽다.
+
+### 소유권이 있는 제네릭 컨테이너
+
+```csharp
+public sealed class OwnedItems<T> : IDisposable
+{
+    private readonly List<T> items = new();
+
+    public void Add(T item) => items.Add(item);
+
+    public void Dispose()
+    {
+        List<Exception>? errors = null;
+        foreach (T item in items)
+        {
+            try { (item as IDisposable)?.Dispose(); }
+            catch (Exception ex) { (errors ??= new()).Add(ex); }
+        }
+        items.Clear();
+
+        if (errors is not null) throw new AggregateException(errors);
+    }
+}
+```
+
+이 타입은 이름과 문서로 내부 항목의 소유권을 가져간다는 계약을 드러낸다. 단순히 호출자가 빌려준 객체를 보관하는 컨테이너라면 임의로 `Dispose`해서는 안 된다.
+
+### 필수 계약과 편의 기능 분리
+
+```csharp
+public interface IReadOnlyPlayerStore
+{
+    Player? Find(PlayerId id);
+}
+
+public static class PlayerStoreExtensions
+{
+    public static bool Exists(this IReadOnlyPlayerStore store, PlayerId id) =>
+        store.Find(id) is not null;
+
+    public static Player GetRequired(this IReadOnlyPlayerStore store, PlayerId id) =>
+        store.Find(id) ?? throw new KeyNotFoundException($"Player {id}");
+}
+```
+
+두 확장 메서드는 기존 `Find`만으로 구현할 수 있으므로 모든 저장소 구현체에 새 멤버를 강제할 필요가 없다. 반면 한 번의 원자적 DB 연산이 필요한 `TryUpdateVersion` 같은 기능은 편의 확장으로 흉내 내지 말고 인터페이스 계약에 포함한다.
+
 ## 복습할 내용
 
 - 열린 제네릭과 닫힌 제네릭, 참조 타입과 값 타입의 코드 생성 차이를 설명한다.
