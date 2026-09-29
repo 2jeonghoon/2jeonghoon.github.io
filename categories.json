@@ -7,6 +7,14 @@
           "name": "Game Server"
         }
       ]
+    },
+    {
+      "name": "C#",
+      "children": [
+        {
+          "name": "Effective C#"
+        }
+      ]
     }
   ]
 }
