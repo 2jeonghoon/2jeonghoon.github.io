@@ -1,15 +1,16 @@
 ---
 title: "게임 서버 공부 03: 소켓 프로그래밍과 비동기 I/O"
 description: "블로킹·논블로킹 소켓의 동작과 송수신 버퍼, epoll, IOCP를 비교하며 많은 연결을 처리하는 서버 I/O 구조를 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-09-29"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Socket", "epoll", "IOCP"]
+tags: ["Game Server","Socket","epoll","IOCP"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 소켓 API는 네트워크를 파일과 비슷한 읽기·쓰기 인터페이스로 다루게 해준다. 그러나 호출이 언제 기다리고, 운영체제 버퍼가 언제 가득 차며, 완료 통지가 어떤 스레드로 전달되는지를 이해하지 못하면 서버는 적은 연결에서도 쉽게 멈춘다.
 
 ## 블로킹 소켓의 동작
