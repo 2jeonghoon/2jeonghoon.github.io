@@ -1,7 +1,7 @@
 ---
 title: "게임 서버 공부 03: 소켓 프로그래밍과 비동기 I/O"
 description: "블로킹·논블로킹 소켓의 동작과 송수신 버퍼, epoll, IOCP를 비교하며 많은 연결을 처리하는 서버 I/O 구조를 정리한 학습 노트입니다."
-date: "2026-09-29"
+date: "2026-09-30"
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Socket","epoll","IOCP"]
