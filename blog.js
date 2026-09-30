@@ -214,8 +214,8 @@
       app.innerHTML = `
         <section class="hero">
           <div class="hero-topline"><span class="live-dot"></span>DEVELOPER NOTES FROM SEOUL</div>
-          <h1>게임을 만들고,<br />시스템을 <em>탐구합니다.</em></h1>
-          <div class="hero-bottom"><p class="hero-note">GAME CLIENT · SERVER · LINUX</p><p class="hero-intro">게임 경험을 만드는 과정에서 배운 것들을 기록합니다.</p></div>
+          <h1>안녕하세요.</h1>
+          <div class="hero-bottom"><p class="hero-note">GAME CLIENT · SERVER · LINUX</p><p class="hero-intro">게임을 만드는 과정에서 배운 것을 기록합니다.</p></div>
         </section>
         ${featured ? `<a class="featured" href="${postUrl(featured.slug)}" aria-label="대표 글 읽기: ${escapeHtml(featured.title)}">
           <div class="featured-visual"><img src="${escapeHtml(featured.image)}" alt="" /><span class="featured-label">FEATURED NOTE</span></div>
@@ -228,7 +228,7 @@
         </section>
         <section class="about" id="about"><div class="about-inner">
           <div><p class="section-kicker">02 / ABOUT</p><h2>안녕하세요</h2></div>
-          <div class="about-copy"><p>Unity와 Unreal Engine으로 게임 플레이를 만들고, MMORPG 서버의 동시성 제어와 Linux <code>io_uring</code>의 I/O 성능을 연구합니다.</p>
+          <div class="about-copy"><p>Unity와 Unreal Engine으로 게임 클라이언트를 만들고, 효율적인 게임 서버를 개발하며 배운 것을 기록합니다.</p>
             <div class="about-table"><div class="about-row"><span>FOCUS</span><strong>Game systems & performance</strong></div><div class="about-row"><span>STACK</span><strong>C/C++ · C# · Python · Linux</strong></div><div class="about-row"><span>BASED IN</span><strong>Seoul, Republic of Korea</strong></div><div class="about-row"><span>CONTACT</span><strong><a href="mailto:lee.jonghoon26@gmail.com">lee.jonghoon26@gmail.com ↗</a></strong></div></div>
           </div></div></section>`;
 
