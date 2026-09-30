@@ -4,12 +4,13 @@ description: "네트워크 장비와 주소 체계, 패킷과 스트림, TCP·UD
 date: "2026-09-28"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Networking", "TCP", "UDP"]
+tags: ["Game Server","Networking","TCP","UDP"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
+draft: false
 aiGenerated: true
 ---
-
 게임 서버의 메시지는 여러 네트워크 장비와 계층을 지나 클라이언트에 도달한다. 지연, 유실, 중복, 순서 변경은 예외적인 사건이 아니라 설계가 다뤄야 할 조건이다. 이번 단원에서는 전송 방식의 특성을 이해하고 메시지마다 적절한 선택을 내리는 기준을 정리한다.
 
 ## 네트워크를 구성하는 요소
