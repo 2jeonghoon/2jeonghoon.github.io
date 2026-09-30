@@ -1,7 +1,7 @@
 ---
 title: "게임 서버 공부 02: 컴퓨터 네트워크 기초"
 description: "네트워크 장비와 주소 체계, 패킷과 스트림, TCP·UDP의 차이, 메시지 직렬화와 NAT를 게임 서버 관점에서 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-09-29"
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Networking","TCP","UDP"]
