@@ -8,7 +8,7 @@ tags: ["Game Server","Multithreading","Concurrency","C++"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
+draft: true
 aiGenerated: false
 ---
 게임 서버는 여러 사용자의 요청을 동시에 처리한다. 하지만 스레드를 늘리는 것만으로 처리량이 자동으로 증가하지는 않는다. 공유 상태, lock contention, context switch, 순차(serial) 실행 구간이 함께 늘어날 수 있기 때문이다. 이번 단원의 목표는 **병렬화할 작업과 보호할 상태(state)를 구분하는 기준**을 세우는 것이다.
