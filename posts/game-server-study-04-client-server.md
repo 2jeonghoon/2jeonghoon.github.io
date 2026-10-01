@@ -1,15 +1,16 @@
 ---
-title: "게임 서버 공부 04: 클라이언트와 서버의 역할"
+title: "4: 클라이언트와 서버의 역할"
 description: "게임 서버의 역할과 클라이언트 상호작용, 상태 권한, 품질 목표, 데이터 저장 및 구동 환경을 하나의 설계 관점으로 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-10-01"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Client Server", "Architecture", "Cloud"]
+tags: ["Game Server","Client Server","Architecture","Cloud"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 멀티플레이 게임에서 서버의 핵심 역할은 여러 클라이언트가 공유하는 세계에 대해 신뢰할 수 있는 판정을 내리는 것이다. 모든 연산을 서버로 옮기면 안전하지만 지연과 비용이 커지고, 모든 연산을 클라이언트에 맡기면 조작과 불일치에 취약해진다. 현실적인 설계는 권한과 표현을 분리한다.
 
 ## 서버 권한과 클라이언트 표현
