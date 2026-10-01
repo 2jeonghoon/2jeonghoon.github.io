@@ -1,15 +1,16 @@
 ---
-title: "게임 서버 공부 05: 실시간 게임 네트워킹"
+title: "5: 실시간 게임 네트워킹"
 description: "지연을 숨기는 예측과 보정, 관심 영역, 락스텝, TCP·UDP 혼용, 로그인과 매치메이킹, 보안 위협을 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-10-01"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Realtime Networking", "Latency", "Security"]
+tags: ["Game Server","Realtime Networking","Latency","Security"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 실시간 게임 네트워킹은 모든 클라이언트에 완전히 같은 화면을 즉시 보여주는 일이 아니다. 물리적 지연이 존재하는 상황에서 플레이 감각을 유지하면서도 서버의 판정과 상태를 수렴시키는 일이다. 장르와 이벤트의 중요도에 따라 다른 동기화 전략을 선택해야 한다.
 
 ## 지연을 다루는 방법
