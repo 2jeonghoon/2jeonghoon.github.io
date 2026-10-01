@@ -1,15 +1,16 @@
 ---
-title: "게임 서버 공부 06: 네트워크 엔진과 통신 추상화"
+title: "6: 네트워크 엔진과 통신 추상화"
 description: "게임 네트워크 엔진이 제공하는 연결 관리, 메시지 전송, RMI, P2P, 핸드오버와 스레드 모델을 설계 관점에서 정리한 학습 노트입니다."
 date: "2026-09-28"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Network Engine", "RMI", "P2P"]
+tags: ["Game Server","Network Engine","RMI","P2P"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 소켓 API만으로도 게임 서버를 만들 수 있지만, 제품 수준의 통신에는 연결 상태 관리, 직렬화, 재접속, 암호화, 통계, P2P 연결 같은 반복 작업이 필요하다. 네트워크 엔진은 이 공통 문제를 추상화한다. 중요한 것은 특정 제품의 API를 외우는 것이 아니라 추상화가 감추는 상태와 실패를 이해하는 것이다.
 
 ## 엔진을 선택할 때 볼 것
