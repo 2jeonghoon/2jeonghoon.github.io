@@ -1,15 +1,16 @@
 ---
-title: "게임 서버 공부 09: 분산 서버 구조와 전략"
+title: "9: 분산 서버 구조와 전략"
 description: "수직·수평 확장, 데이터·기능 분산, 동기·비동기 처리, 응집도, 고가용성과 DB 분산을 하나의 판단 기준으로 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-10-05"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Distributed Systems", "Scalability", "High Availability"]
+tags: ["Game Server","Distributed Systems","Scalability","High Availability"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
+draft: false
 aiGenerated: true
 ---
-
 분산은 서버를 여러 대 두는 행위가 아니라 상태와 책임을 여러 실패 영역으로 나누는 설계다. 처리량과 가용성을 높일 수 있지만 네트워크 실패, 부분 성공, 데이터 불일치, 운영 복잡성을 새로 만든다. 따라서 단일 서버의 병목을 측정하고 최적화한 뒤 필요한 지점만 분산하는 것이 기본 원칙이다.
 
 ## 확장 방식
