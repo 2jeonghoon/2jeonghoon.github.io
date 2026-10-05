@@ -1,15 +1,16 @@
 ---
-title: "게임 서버 공부 08: NoSQL과 MongoDB"
+title: "8: NoSQL과 MongoDB"
 description: "관계형 DB와 NoSQL의 선택 기준, 문서 모델, MongoDB CRUD와 인덱스, 복제·샤딩 및 일관성의 절충을 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-10-03"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "NoSQL", "MongoDB", "Sharding"]
+tags: ["Game Server","NoSQL","MongoDB","Sharding"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
+draft: false
 aiGenerated: true
 ---
-
 NoSQL은 관계형 데이터베이스를 무조건 대체하는 기술이 아니다. 데이터 구조, 조회 패턴, 일관성 요구, 확장 방식에 따라 다른 선택지를 제공한다. 게임 서버에서는 계정과 결제처럼 강한 일관성이 필요한 데이터와 로그·세션처럼 대량 확장이 중요한 데이터를 구분하는 것이 출발점이다.
 
 ## 관계형 모델과 문서 모델
