@@ -1,15 +1,16 @@
 ---
-title: "게임 서버 공부 10: 분산 구조 적용 사례"
+title: "10: 분산 구조 적용 사례"
 description: "로그온, DB 샤딩, 로비·배틀 매치메이킹, NPC, 상호작용, 로그 분석과 장르별 서버 분산을 사례 중심으로 정리한 학습 노트입니다."
-date: "2026-09-28"
+date: "2026-10-05"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Game Server", "Distributed Systems", "Matchmaking", "Sharding"]
+tags: ["Game Server","Distributed Systems","Matchmaking","Sharding"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
+draft: false
 aiGenerated: true
 ---
-
 분산 시스템의 원칙은 실제 기능에 적용할 때 구체적인 선택이 된다. 어떤 상태를 공유하는지, 요청이 몰리는 지점이 어디인지, 실패 후 복구할 수 있는지를 기능별로 살펴봐야 한다. 이번 단원은 여러 사례를 통해 분산 경계를 판단하는 연습에 초점을 둔다.
 
 ## 로그온과 라우팅
