@@ -40,7 +40,8 @@ const {
   renderArticleAd,
   renderAiDisclosure,
   renderCommentsShell,
-  renderPostMeta
+  renderPostMeta,
+  sortPosts
 } = require("../blog.js");
 
 const categorizedPosts = [
@@ -48,6 +49,22 @@ const categorizedPosts = [
   {title: "Linux", description: "", content: "", category: "Systems", subcategory: "Linux", tags: []},
   {title: "Unity", description: "", content: "", category: "Games", subcategory: "Unity", tags: []}
 ];
+
+test("sorts browser posts newest first and same-date posts by title", () => {
+  assert.equal(typeof sortPosts, "function");
+  const posts = sortPosts([
+    {slug: "ten", title: "언리얼 공부 10", date: "2026-10-05"},
+    {slug: "six", title: "언리얼 공부 6", date: "2026-10-05"},
+    {slug: "newest", title: "새 글", date: "2026-10-06"},
+    {slug: "four", title: "언리얼 공부 4", date: "2026-10-05"},
+    {slug: "five", title: "언리얼 공부 5", date: "2026-10-05"}
+  ]);
+
+  assert.deepEqual(
+    posts.map(post => post.slug),
+    ["newest", "four", "five", "six", "ten"]
+  );
+});
 
 test("derives a two-level tree and formats category paths", () => {
   assert.equal(typeof deriveCategoryTree, "function");

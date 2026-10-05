@@ -117,6 +117,20 @@ test("uses slug as a deterministic tie-breaker", () => {
   );
 });
 
+test("sorts same-date posts by title with natural number ordering", () => {
+  const posts = compilePosts([
+    published("a-ten.md", "2026-01-01", {title: "언리얼 공부 10"}),
+    published("b-six.md", "2026-01-01", {title: "언리얼 공부 6"}),
+    published("c-four.md", "2026-01-01", {title: "언리얼 공부 4"}),
+    published("d-five.md", "2026-01-01", {title: "언리얼 공부 5"})
+  ]);
+
+  assert.deepEqual(
+    posts.map(post => post.title),
+    ["언리얼 공부 4", "언리얼 공부 5", "언리얼 공부 6", "언리얼 공부 10"]
+  );
+});
+
 test("selects the newest marked feature and falls back to newest", () => {
   const featuredFixtures = compilePosts([
     published("old-featured.md", "2024-01-01", {featured: true}),

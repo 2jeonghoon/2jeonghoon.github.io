@@ -15,6 +15,17 @@
           "name": "Effective C#"
         }
       ]
+    },
+    {
+      "name": "Unreal Engine",
+      "children": [
+        {
+          "name": "Unreal C++ Book"
+        },
+        {
+          "name": "UE Networking"
+        }
+      ]
     }
   ]
 }

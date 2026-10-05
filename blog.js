@@ -10,6 +10,19 @@
   const AI_DISCLOSURE =
     "이 글은 Agent가 제공된 정보를 기반으로 작성했습니다.";
 
+  const titleCollator = new Intl.Collator("ko", {
+    numeric: true,
+    sensitivity: "base"
+  });
+
+  function sortPosts(posts) {
+    return (posts || []).slice().sort((left, right) =>
+      right.date.localeCompare(left.date) ||
+      titleCollator.compare(left.title, right.title) ||
+      left.slug.localeCompare(right.slug)
+    );
+  }
+
   function createAdminUrl(base, slug = "") {
     if (typeof base !== "string" || !base) return "";
     if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return "";
@@ -184,9 +197,7 @@
   function bootstrap(browser, page) {
     const app = page.getElementById("app");
     if (!app) return;
-    const posts = (browser.BLOG_POSTS || [])
-      .slice()
-      .sort((a, b) => b.date.localeCompare(a.date));
+    const posts = sortPosts(browser.BLOG_POSTS);
     const postUrl = slug => `?post=${encodeURIComponent(slug)}`;
     const meta = renderPostMeta;
 
@@ -319,6 +330,7 @@
     renderArticleAd,
     renderAiDisclosure,
     renderCommentsShell,
-    renderPostMeta
+    renderPostMeta,
+    sortPosts
   };
 });
