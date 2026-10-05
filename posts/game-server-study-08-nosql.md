@@ -1,7 +1,7 @@
 ---
 title: "8: NoSQL과 MongoDB"
 description: "관계형 DB와 NoSQL의 선택 기준, 문서 모델, MongoDB CRUD와 인덱스, 복제·샤딩 및 일관성의 절충을 정리한 학습 노트입니다."
-date: "2026-10-03"
+date: "2026-10-04"
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","NoSQL","MongoDB","Sharding"]
