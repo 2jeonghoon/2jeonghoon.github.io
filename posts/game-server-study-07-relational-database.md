@@ -1,7 +1,7 @@
 ---
-title: "게임 서버 공부 07: 관계형 데이터베이스 기초"
+title: "7: 관계형 데이터베이스 기초"
 description: "플레이어 데이터 모델링, SQL CRUD, 키와 인덱스, 트랜잭션과 데드락, 안전한 질의 실행을 게임 서버 관점에서 정리한 학습 노트입니다."
-date: "2026-10-05"
+date: "2026-10-02"
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Database","SQL","Transaction"]
