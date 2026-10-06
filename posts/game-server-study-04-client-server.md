@@ -2,6 +2,7 @@
 title: "4: 클라이언트와 서버의 역할"
 description: "게임 서버의 역할과 클라이언트 상호작용, 상태 권한, 품질 목표, 데이터 저장 및 구동 환경을 하나의 설계 관점으로 정리한 학습 노트입니다."
 date: "2026-10-01"
+order: 4
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Client Server","Architecture","Cloud"]
