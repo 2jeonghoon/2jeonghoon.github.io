@@ -2,6 +2,7 @@
 title: "5: 실시간 게임 네트워킹"
 description: "지연을 숨기는 예측과 보정, 관심 영역, 락스텝, TCP·UDP 혼용, 로그인과 매치메이킹, 보안 위협을 정리한 학습 노트입니다."
 date: "2026-10-01"
+order: 5
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Realtime Networking","Latency","Security"]
