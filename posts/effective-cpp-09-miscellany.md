@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 9
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "Compiler Warnings", "Standard Library", "Boost"]
+tags: ["C++","Effective C++","Compiler Warnings","Standard Library","Boost"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
+draft: true
 aiGenerated: true
 ---
-
 마지막 장은 특정 문법보다 학습과 검증의 습관을 다룬다. 컴파일러 경고를 무시하지 않고, 표준 라이브러리의 어휘를 익히며, 검증된 외부 라이브러리를 선별하는 습관은 책의 다른 52개 항목을 실제 프로젝트에서 유지하게 해 준다.
 
 ## 아이템 53: 컴파일러 경고에 주의를 기울이자
