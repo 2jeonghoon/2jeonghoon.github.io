@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 5
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "Exception Safety", "PImpl"]
+tags: ["C++","Effective C++","Exception Safety","PImpl"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
+draft: true
 aiGenerated: true
 ---
-
 인터페이스가 사용법을 결정한다면 구현은 실패했을 때의 상태와 변경 비용을 결정한다. 이 장은 객체 수명을 짧게 유지하고, 타입 시스템을 우회하지 않으며, 예외가 발생해도 불변식을 보존하고, 헤더 의존성을 통제하는 방법을 다룬다.
 
 ## 아이템 26: 변수 정의는 가능한 한 늦추자
