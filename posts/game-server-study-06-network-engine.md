@@ -2,6 +2,7 @@
 title: "6: 네트워크 엔진과 통신 추상화"
 description: "게임 네트워크 엔진이 제공하는 연결 관리, 메시지 전송, RMI, P2P, 핸드오버와 스레드 모델을 설계 관점에서 정리한 학습 노트입니다."
 date: "2026-10-01"
+order: 6
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Network Engine","RMI","P2P"]
