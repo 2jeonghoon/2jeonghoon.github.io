@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 8
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "Memory Allocation", "operator new"]
+tags: ["C++","Effective C++","Memory Allocation","operator new"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
+draft: true
 aiGenerated: true
 ---
-
 메모리 할당 함수를 바꾸는 일은 일반적인 최적화가 아니라 저수준 시스템 경계를 설계하는 작업이다. 표준 컨테이너, allocator, `std::pmr`로 해결할 수 있는지 먼저 확인하고, 전역 `new`와 `delete` 교체는 측정 가능한 필요가 있을 때만 선택한다.
 
 ## 아이템 49: `new-handler`의 동작을 이해하자
