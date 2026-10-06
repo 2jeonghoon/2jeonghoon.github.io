@@ -1,7 +1,7 @@
 window.BLOG_CONFIG = {
   adminUrl: "https://jh-log-admin.2jeonghoon.workers.dev",
   adsense: {
-    client: "",
+    client: "ca-pub-2600992687898567",
     articleTopSlot: ""
   },
   giscus: {

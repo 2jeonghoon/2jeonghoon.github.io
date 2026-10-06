@@ -25,6 +25,7 @@ const STATIC_FILES = [
   "styles.css",
   "blog.js",
   "blog.config.js",
+  "ads.txt",
   "robots.txt"
 ];
 const STATIC_DIRECTORIES = ["admin", "assets", "public"];

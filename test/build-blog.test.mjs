@@ -61,6 +61,7 @@ beforeEach(async () => {
     put("styles.css", "body {}"),
     put("blog.js", "window.app = true;"),
     put("blog.config.js", "window.BLOG_CONFIG = {};"),
+    put("ads.txt", "google.com, pub-2600992687898567, DIRECT, f08c47fec0942fa0\n"),
     put("admin/index.html", '<script src="../blog.config.js"></script><script src="./admin.js"></script>'),
     put("admin/admin.js", "window.admin = true;"),
     put("robots.txt", "User-agent: *"),
@@ -96,6 +97,11 @@ test("builds only published posts into every artifact", async () => {
 test("copies only declared static inputs including nested assets", async () => {
   const {files} = await buildSite({projectRoot: fixtureRoot, outDir});
   assert(files.includes("index.html"));
+  assert(files.includes("ads.txt"));
+  assert.equal(
+    await read("_site/ads.txt"),
+    "google.com, pub-2600992687898567, DIRECT, f08c47fec0942fa0\n"
+  );
   assert(files.includes("assets/cover.png"));
   assert(files.includes("assets/nested/diagram.png"));
   assert(files.includes("public/favicon.ico"));
@@ -108,6 +114,7 @@ test("produces the exact deployable artifact and resolves local references", asy
   assert.deepEqual(files, [
     "admin/admin.js",
     "admin/index.html",
+    "ads.txt",
     "assets/cover.png",
     "assets/nested/diagram.png",
     "blog.config.js",
