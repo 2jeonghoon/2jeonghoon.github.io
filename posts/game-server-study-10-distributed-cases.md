@@ -2,6 +2,7 @@
 title: "10: 분산 구조 적용 사례"
 description: "로그온, DB 샤딩, 로비·배틀 매치메이킹, NPC, 상호작용, 로그 분석과 장르별 서버 분산을 사례 중심으로 정리한 학습 노트입니다."
 date: "2026-10-05"
+order: 10
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Distributed Systems","Matchmaking","Sharding"]
