@@ -2,6 +2,7 @@
 title: "9: 분산 서버 구조와 전략"
 description: "수직·수평 확장, 데이터·기능 분산, 동기·비동기 처리, 응집도, 고가용성과 DB 분산을 하나의 판단 기준으로 정리한 학습 노트입니다."
 date: "2026-10-05"
+order: 9
 category: "Study"
 subcategory: "Game Server"
 tags: ["Game Server","Distributed Systems","Scalability","High Availability"]
