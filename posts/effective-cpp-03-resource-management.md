@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 3
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "RAII", "Smart Pointer"]
+tags: ["C++","Effective C++","RAII","Smart Pointer"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
+draft: true
 aiGenerated: true
 ---
-
 자원은 메모리만 뜻하지 않는다. 파일, 소켓, 잠금, GPU 핸들, 데이터베이스 트랜잭션처럼 반드시 해제해야 하는 모든 것이 자원이다. C++의 핵심 해법은 획득과 해제를 객체 수명에 묶는 RAII다.
 
 ## 아이템 13: 자원 관리에는 객체를 사용하자
