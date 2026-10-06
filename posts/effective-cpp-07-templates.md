@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 7
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "Templates", "Generic Programming"]
+tags: ["C++","Effective C++","Templates","Generic Programming"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
+draft: true
 aiGenerated: true
 ---
-
 템플릿은 타입을 지운 런타임 다형성과 달리, 타입의 구체적인 연산을 컴파일 시간에 조합한다. 강력한 만큼 이름 탐색, 코드 생성, 오류 메시지와 빌드 비용을 이해해야 한다. 현대 C++의 concepts는 이 장의 암시적 계약을 명시적으로 표현하는 도구가 된다.
 
 ## 아이템 41: 암시적 인터페이스와 컴파일 시간 다형성을 이해하자
