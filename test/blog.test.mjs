@@ -3,8 +3,8 @@ import {createRequire} from "node:module";
 import {after, test} from "node:test";
 
 const require = createRequire(import.meta.url);
+const renderedHtml = [];
 const genericNode = {
-  innerHTML: "",
   textContent: "",
   addEventListener() {},
   querySelector() {
@@ -12,6 +12,13 @@ const genericNode = {
   },
   querySelectorAll() {
     return [];
+  },
+  set innerHTML(value) {
+    this._innerHTML = value;
+    renderedHtml.push(value);
+  },
+  get innerHTML() {
+    return this._innerHTML ?? "";
   }
 };
 
@@ -43,6 +50,13 @@ const {
   renderPostMeta,
   sortPosts
 } = require("../blog.js");
+
+test("renders the homepage as an always-open learning notebook", () => {
+  const homepage = renderedHtml.find(html => html.includes('class="hero"'));
+
+  assert.match(homepage, /<h1>언제나 펼쳐볼 수 있는 노트 같은 공간<\/h1>/);
+  assert.match(homepage, /<p class="hero-intro">배우고 공부한 것들을 기록합니다\.<\/p>/);
+});
 
 const categorizedPosts = [
   {title: "Parent", description: "", content: "", category: "Systems", subcategory: "", tags: []},
