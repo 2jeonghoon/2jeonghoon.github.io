@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 2
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "Constructor", "Rule of Zero"]
+tags: ["C++","Effective C++","Constructor","Rule of Zero"]
 image: ""
 readingTime: ""
 featured: false
-draft: false
-aiGenerated: true
+draft: true
+aiGenerated: false
 ---
-
 클래스가 자원을 직접 관리하기 시작하면 생성, 복사, 이동, 대입, 소멸이 하나의 수명 계약으로 묶인다. 이 장의 핵심은 컴파일러가 만들어 주는 동작을 막연히 믿지 말고, 타입이 어떤 복사와 삭제를 허용하는지 명시하는 것이다.
 
 ## 아이템 5: 컴파일러가 만드는 함수를 이해하자
