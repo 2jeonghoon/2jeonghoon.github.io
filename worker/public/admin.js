@@ -15,7 +15,32 @@
     return {url, init};
   }
   function createEditorModel(input) {
-    return Object.assign({slug:"",title:"",description:"",date:"",category:"",subcategory:"",tags:[],image:"",featured:false,draft:true,aiGenerated:false,body:"",sha:"",error:null}, input || {});
+    return Object.assign({slug:"",title:"",description:"",date:"",order:null,category:"",subcategory:"",tags:[],image:"",featured:false,draft:true,aiGenerated:false,body:"",sha:"",error:null}, input || {});
+  }
+  function parseOptionalOrder(value) { return value === "" ? null : Number(value); }
+  const postTitleCollator = new Intl.Collator("ko", {numeric:true,sensitivity:"base"});
+  function sortAdminPosts(posts) {
+    return (posts||[]).slice().sort((left,right)=>
+      String(right.date||"").localeCompare(String(left.date||"")) ||
+      (Number.isInteger(left.order)?left.order:Number.MAX_SAFE_INTEGER) - (Number.isInteger(right.order)?right.order:Number.MAX_SAFE_INTEGER) ||
+      postTitleCollator.compare(left.title||left.slug,right.title||right.slug) ||
+      String(left.slug||"").localeCompare(String(right.slug||""))
+    );
+  }
+  function groupAdminPosts(posts, filter="all") {
+    const visible=(posts||[]).filter(post=>filter==="all"||(filter==="draft")===Boolean(post.draft));
+    const published=visible.filter(post=>!post.draft);const drafts=visible.filter(post=>post.draft);
+    const groups=[];const byCategory=new Map();const uncategorized=[];
+    sortAdminPosts(published).forEach(post=>{
+      const label=String(post.category||"").trim();
+      if(!label){uncategorized.push(post);return;}
+      const key=categoryKey(label);let group=byCategory.get(key);
+      if(!group){group={label,posts:[]};byCategory.set(key,group);groups.push(group);}
+      group.posts.push(post);
+    });
+    if(uncategorized.length)groups.push({label:"미분류",posts:uncategorized});
+    if(drafts.length)groups.push({label:"초안",posts:sortAdminPosts(drafts)});
+    return groups;
   }
   function withRequestError(model, error) { return Object.assign({}, model, {error}); }
   function canEditSlug(model) { return !model.sha; }
@@ -72,7 +97,7 @@
     function readForm(draft) {
       return createEditorModel({
         slug:get("post-slug").value.trim(),title:get("post-title").value.trim(),description:get("post-description").value.trim(),
-        date:get("post-date").value,category:get("post-category").value.trim(),subcategory:get("post-subcategory").value.trim(),tags:get("post-tags").value.split(",").map(v=>v.trim()).filter(Boolean),
+        date:get("post-date").value,order:parseOptionalOrder(get("post-order").value),category:get("post-category").value.trim(),subcategory:get("post-subcategory").value.trim(),tags:get("post-tags").value.split(",").map(v=>v.trim()).filter(Boolean),
         image:get("post-image").value.trim(),featured:get("post-featured").checked,draft,aiGenerated:get("post-ai").checked,
         body:get("post-body").value,sha:model.sha
       });
@@ -95,14 +120,15 @@
     }
     function writeForm(next) {
       model=createEditorModel(next); get("post-slug").value=model.slug; get("post-slug").disabled=!canEditSlug(model);
-      get("post-title").value=model.title;get("post-description").value=model.description;get("post-date").value=model.date;
+      get("post-title").value=model.title;get("post-description").value=model.description;get("post-date").value=model.date;get("post-order").value=model.order??"";
       writeCategoryOptions(model.category,model.subcategory);get("post-tags").value=model.tags.join(", ");get("post-image").value=model.image;
       get("post-featured").checked=model.featured;get("post-ai").checked=model.aiGenerated;get("post-body").value=model.body;
       get("delete-post").hidden=!model.sha;get("editor-title").textContent=model.sha?"글 수정":"새 글";get("validation").textContent="";
     }
     async function loadList() {
       const data=await api("/api/posts"); const filter=get("post-filter").value; const list=get("post-list"); list.textContent="";
-      data.posts.filter(p=>filter==="all"||(filter==="draft")===p.draft).forEach(p=>{const li=document.createElement("li");const b=document.createElement("button");const badge=document.createElement("span");b.type="button";badge.className="badge";badge.textContent=p.draft?"초안":"발행";b.append(document.createTextNode(`${p.title||p.slug} `),badge);b.addEventListener("click",()=>loadPost(p.slug));li.append(b);list.append(li);});
+      groupAdminPosts(data.posts,filter).forEach(group=>{const section=document.createElement("li");const heading=document.createElement("h3");const items=document.createElement("ul");section.className="post-group";heading.textContent=group.label;items.className="post-group-items";section.append(heading,items);
+        group.posts.forEach(p=>{const li=document.createElement("li");const b=document.createElement("button");const meta=document.createElement("span");b.type="button";meta.className="post-list-meta";meta.textContent=[p.subcategory,p.date,Number.isInteger(p.order)?`순서 ${p.order}`:""].filter(Boolean).join(" · ");b.append(document.createTextNode(p.title||p.slug),meta);b.addEventListener("click",()=>loadPost(p.slug));li.append(b);items.append(li);});list.append(section);});
     }
     async function loadCategories(selection) {
       const current=selection||{category:model.category,subcategory:model.subcategory};const data=await api("/api/categories");categorySha=data.sha||"";
@@ -146,5 +172,5 @@
     get("confirm-delete").addEventListener("click",async event=>{event.preventDefault();const confirmation=get("delete-confirmation").value;if(!canDelete(model.slug,confirmation))return;try{await api(`/api/posts/${encodeURIComponent(model.slug)}`,{method:"DELETE",body:{sha:model.sha,confirmation}});get("delete-dialog").close();writeForm(createEditorModel());await loadList();}catch(error){showError(error);}});
     form.addEventListener("submit",event=>event.preventDefault()); start();
   }
-  return {createApiRequest,createEditorModel,withRequestError,canEditSlug,canDelete,mergeCategoryTrees,childNamesFor,nextCategorySelection,bootstrap};
+  return {createApiRequest,createEditorModel,parseOptionalOrder,groupAdminPosts,withRequestError,canEditSlug,canDelete,mergeCategoryTrees,childNamesFor,nextCategorySelection,bootstrap};
 });

@@ -232,6 +232,47 @@ test("creates, updates, and deletes only validated posts with SHA concurrency", 
   assert.equal((await request("/api/posts/%252e%252e", {authenticated: true}, bindings)).status, 422);
 });
 
+test("round-trips post order through create, get, list, and update", async () => {
+  const client = fakeClient();
+  let storedSource = serializePostSource(post());
+  client.getPost = async () => ({sha: "old", source: storedSource});
+  client.createPost = async (slug, source) => {
+    storedSource = source;
+    client.calls.push(["create", slug, source]);
+    return {commit: {sha: "create-commit"}};
+  };
+  client.updatePost = async (slug, source, sha) => {
+    storedSource = source;
+    client.calls.push(["update", slug, source, sha]);
+    return {commit: {sha: "update-commit"}};
+  };
+  const bindings = env({GITHUB_CLIENT: client});
+
+  const created = await request("/api/posts", {
+    method: "POST", body: post({order: 3})
+  }, bindings);
+  assert.equal(created.status, 201);
+  assert.match(storedSource, /^order: 3$/m);
+
+  const fetched = await request("/api/posts/safe-post", {}, bindings);
+  assert.equal(fetched.status, 200);
+  assert.equal((await fetched.json()).order, 3);
+
+  const listed = await request("/api/posts", {}, bindings);
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json()).posts[0].order, 3);
+
+  const updated = await request("/api/posts/safe-post", {
+    method: "PUT", body: {...post({order: 4}), sha: "old"}
+  }, bindings);
+  assert.equal(updated.status, 200);
+  assert.match(storedSource, /^order: 4$/m);
+
+  const refetched = await request("/api/posts/safe-post", {}, bindings);
+  assert.equal(refetched.status, 200);
+  assert.equal((await refetched.json()).order, 4);
+});
+
 test("accepts parent-only, matching-child, and uncategorized draft post mutations", async () => {
   const client = fakeClient();
   client.getCategoryConfig = async () => ({

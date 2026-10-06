@@ -35,6 +35,7 @@
           <label for="post-description">설명</label><textarea id="post-description" name="description" maxlength="600"></textarea>
           <div class="fields">
             <div><label for="post-date">날짜</label><input id="post-date" name="date" type="date"></div>
+            <div><label for="post-order">순서 (선택)</label><input id="post-order" name="order" type="number" min="1" max="9999" step="1"></div>
             <div><label for="post-category">대분류</label><select id="post-category" name="category" required><option value="">대분류 선택</option></select></div>
             <div><label for="post-subcategory">소분류 (선택)</label><select id="post-subcategory" name="subcategory" disabled><option value="">소분류 없음</option></select></div>
           </div>

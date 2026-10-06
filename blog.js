@@ -15,9 +15,18 @@
     sensitivity: "base"
   });
 
+  function comparePostOrder(left, right) {
+    const leftOrder = Number.isInteger(left.order) ? left.order : null;
+    const rightOrder = Number.isInteger(right.order) ? right.order : null;
+    if (leftOrder === null) return rightOrder === null ? 0 : 1;
+    if (rightOrder === null) return -1;
+    return leftOrder - rightOrder;
+  }
+
   function sortPosts(posts) {
     return (posts || []).slice().sort((left, right) =>
       right.date.localeCompare(left.date) ||
+      comparePostOrder(left, right) ||
       titleCollator.compare(left.title, right.title) ||
       left.slug.localeCompare(right.slug)
     );
@@ -77,6 +86,76 @@
       }
     });
     return categories;
+  }
+
+  function deriveCategoryNavigation(posts) {
+    const categories = [];
+    const parents = new Map();
+    (posts || []).forEach(post => {
+      const name = String(post.category || "").trim();
+      if (!name) return;
+      const parentKey = categoryKey(name);
+      let parent = parents.get(parentKey);
+      if (!parent) {
+        parent = {name, count: 0, children: []};
+        parents.set(parentKey, parent);
+        categories.push(parent);
+      }
+      parent.count += 1;
+      const childName = String(post.subcategory || "").trim();
+      if (!childName) return;
+      const childKey = categoryKey(childName);
+      let child = parent.children.find(item => categoryKey(item.name) === childKey);
+      if (!child) {
+        child = {name: childName, count: 0};
+        parent.children.push(child);
+      }
+      child.count += 1;
+    });
+    return categories;
+  }
+
+  function categorySelectionFromSearch(search, categories) {
+    const params = new URLSearchParams(search || "");
+    const categoryName = params.get("category") || "";
+    const subcategoryName = params.get("subcategory") || "";
+    const category = (categories || []).find(item => categoryKey(item.name) === categoryKey(categoryName));
+    if (!category) return {category: "", subcategory: ""};
+    const subcategory = category.children.find(item => categoryKey(item.name) === categoryKey(subcategoryName));
+    return {category: category.name, subcategory: subcategory?.name || ""};
+  }
+
+  function categoryHref(category = "", subcategory = "") {
+    if (!category) return "./#writing";
+    const child = subcategory ? `&subcategory=${encodeURIComponent(subcategory)}` : "";
+    return `?category=${encodeURIComponent(category)}${child}#writing`;
+  }
+
+  function renderCategorySidebar(categories, active = {}, total = 0) {
+    const activeCategory = active.category || "";
+    const activeSubcategory = active.subcategory || "";
+    const current = (category, subcategory = "") =>
+      categoryKey(activeCategory) === categoryKey(category) &&
+      categoryKey(activeSubcategory) === categoryKey(subcategory)
+        ? ' aria-current="page"'
+        : "";
+    const groups = (categories || []).map(category => `
+      <div class="category-group">
+        <a class="category-link category-parent" href="${escapeHtml(categoryHref(category.name))}" data-category="${escapeHtml(category.name)}" data-subcategory=""${current(category.name)}>${escapeHtml(category.name)}<span>${category.count}</span></a>
+        ${category.children.length ? `<div class="category-children">${category.children.map(child => `<a class="category-link" href="${escapeHtml(categoryHref(category.name, child.name))}" data-category="${escapeHtml(category.name)}" data-subcategory="${escapeHtml(child.name)}"${current(category.name, child.name)}>${escapeHtml(child.name)}<span>${child.count}</span></a>`).join("")}</div>` : ""}
+      </div>`).join("");
+    return `<aside class="category-sidebar" aria-label="카테고리"><details open><summary>Categories</summary><nav class="category-nav"><a class="category-link category-all" href="${categoryHref()}" data-category="" data-subcategory=""${current("")}>전체<span>${total}</span></a>${groups}</nav></details></aside>`;
+  }
+
+  function updateCategorySidebarState(root, active = {}) {
+    if (!root) return;
+    root.querySelectorAll(".category-link").forEach(link => {
+      const current =
+        categoryKey(link.dataset.category) === categoryKey(active.category) &&
+        categoryKey(link.dataset.subcategory) === categoryKey(active.subcategory);
+      if (current) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
   }
 
   function filterPosts(posts, {category = "", subcategory = "", query = ""} = {}) {
@@ -217,7 +296,7 @@
 
     function renderHome() {
       const featured = posts.find(post => post.featured) || posts[0];
-      const categories = deriveCategoryTree(posts);
+      const categories = deriveCategoryNavigation(posts);
       updateMeta(
         "JH.LOG — 2jeonghoon의 개발 기록",
         "게임 클라이언트, 서버 아키텍처, Linux I/O에 관한 2jeonghoon의 기록"
@@ -234,8 +313,7 @@
         </a>` : ""}
         <section class="writing" id="writing">
           <div class="section-head"><div><p class="section-kicker">01 / WRITING</p><h2>Latest notes</h2></div><span class="post-count">${String(posts.length).padStart(2, "0")} POSTS</span></div>
-          <div class="filters"><div class="filter-list parent-filter-list" role="group" aria-label="글 대분류"><button class="filter active" data-category="">All</button>${categories.map(category => `<button class="filter" data-category="${escapeHtml(category.name)}">${escapeHtml(category.name)}</button>`).join("")}</div><div class="filter-list child-filter-list" role="group" aria-label="글 소분류"></div><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div>
-          <div class="post-list" aria-live="polite"></div>
+          <div class="writing-layout"><div class="writing-main"><div class="filters"><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div><div class="post-list" aria-live="polite"></div></div><div class="category-sidebar-shell"></div></div>
         </section>
         <section class="about" id="about"><div class="about-inner">
           <div><p class="section-kicker">02 / ABOUT</p><h2>안녕하세요</h2></div>
@@ -243,11 +321,10 @@
             <div class="about-table"><div class="about-row"><span>FOCUS</span><strong>Game systems & performance</strong></div><div class="about-row"><span>STACK</span><strong>C/C++ · C# · Python · Linux</strong></div><div class="about-row"><span>BASED IN</span><strong>Seoul, Republic of Korea</strong></div><div class="about-row"><span>CONTACT</span><strong><a href="mailto:lee.jonghoon26@gmail.com">lee.jonghoon26@gmail.com ↗</a></strong></div></div>
           </div></div></section>`;
 
-      let activeCategory = "";
-      let activeSubcategory = "";
+      let {category: activeCategory, subcategory: activeSubcategory} = categorySelectionFromSearch(browser.location.search, categories);
       let query = "";
       const list = app.querySelector(".post-list");
-      const childFilters = app.querySelector(".child-filter-list");
+      const sidebarShell = app.querySelector(".category-sidebar-shell");
       function renderList() {
         const filtered = filterPosts(posts, {category: activeCategory, subcategory: activeSubcategory, query});
         list.innerHTML = filtered.length
@@ -259,35 +336,41 @@
               .join("")
           : '<p class="empty">조건에 맞는 기록이 없습니다.</p>';
       }
-      function renderChildFilters() {
-        const parent = categories.find(category => category.name === activeCategory);
-        childFilters.innerHTML = parent && parent.children.length
-          ? `<button class="filter active" data-subcategory="">전체</button>${parent.children.map(child => `<button class="filter" data-subcategory="${escapeHtml(child.name)}">${escapeHtml(child.name)}</button>`).join("")}`
-          : "";
-        childFilters.querySelectorAll(".filter").forEach(button =>
-          button.addEventListener("click", () => {
-            activeSubcategory = button.dataset.subcategory;
-            childFilters.querySelectorAll(".filter").forEach(item => item.classList.toggle("active", item === button));
+      function renderSidebar() {
+        sidebarShell.innerHTML = renderCategorySidebar(categories, {
+          category: activeCategory,
+          subcategory: activeSubcategory
+        }, posts.length);
+        sidebarShell.querySelectorAll(".category-link").forEach(link =>
+          link.addEventListener("click", event => {
+            event.preventDefault();
+            activeCategory = link.dataset.category || "";
+            activeSubcategory = link.dataset.subcategory || "";
+            if (browser.history?.pushState) {
+              browser.history.pushState(null, "", categoryHref(activeCategory, activeSubcategory));
+            }
             renderList();
+            updateCategorySidebarState(sidebarShell, {
+              category: activeCategory,
+              subcategory: activeSubcategory
+            });
           })
         );
       }
-      app.querySelectorAll(".parent-filter-list .filter").forEach(button =>
-        button.addEventListener("click", () => {
-          activeCategory = button.dataset.category;
-          activeSubcategory = "";
-          app
-            .querySelectorAll(".parent-filter-list .filter")
-            .forEach(item => item.classList.toggle("active", item === button));
-          renderChildFilters();
-          renderList();
-        })
-      );
       app.querySelector(".search").addEventListener("input", event => {
         query = event.target.value;
         renderList();
       });
-      renderChildFilters();
+      if (typeof browser.addEventListener === "function") {
+        browser.addEventListener("popstate", () => {
+          const selection = categorySelectionFromSearch(browser.location.search, categories);
+          activeCategory = selection.category;
+          activeSubcategory = selection.subcategory;
+          renderList();
+          updateCategorySidebarState(sidebarShell, selection);
+        });
+      }
+      renderSidebar();
       renderList();
     }
 
@@ -320,7 +403,10 @@
 
   return {
     bootstrap,
+    categoryHref,
+    categorySelectionFromSearch,
     createAdminUrl,
+    deriveCategoryNavigation,
     deriveCategoryTree,
     escapeHtml,
     filterPosts,
@@ -329,8 +415,10 @@
     mountAdSense,
     renderArticleAd,
     renderAiDisclosure,
+    renderCategorySidebar,
     renderCommentsShell,
     renderPostMeta,
-    sortPosts
+    sortPosts,
+    updateCategorySidebarState
   };
 });

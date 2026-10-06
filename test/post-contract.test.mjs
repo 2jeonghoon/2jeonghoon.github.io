@@ -20,6 +20,7 @@ function valid(overrides = {}) {
     tags: ["Security", "GitHub"],
     image: "assets/blog/cover.png",
     readingTime: "4 min read",
+    order: null,
     featured: false,
     draft: false,
     aiGenerated: true,
@@ -49,6 +50,14 @@ test("normalizes valid post input without changing booleans", () => {
   assert.equal(post.featured, true);
   assert.equal(post.aiGenerated, true);
   assert.deepEqual(post.tags, ["Security", "GitHub"]);
+});
+
+test("accepts an optional positive integer order and rejects invalid values", () => {
+  assert.equal(validatePostInput(valid()).order, null);
+  assert.equal(validatePostInput(valid({order: 7})).order, 7);
+  for (const order of [0, -1, 1.5, "2", 10000]) {
+    assert.throws(() => validatePostInput(valid({order})), /order.*integer.*1.*9999/i);
+  }
 });
 
 test("published posts require complete metadata and real booleans", () => {
@@ -94,12 +103,12 @@ test("rejects unsafe image paths and accepts a safe relative asset", () => {
 });
 
 test("serializes and parses a deterministic Markdown source round trip", () => {
-  const source = serializePostSource(valid());
+  const source = serializePostSource(valid({order: 7}));
   assert.equal(source.endsWith("\n"), true);
-  assert.equal(source, serializePostSource(valid()));
+  assert.equal(source, serializePostSource(valid({order: 7})));
 
   const parsed = parsePostSource({filePath: "safe-post.md", source});
-  assert.deepEqual(parsed, valid());
+  assert.deepEqual(parsed, valid({order: 7}));
 });
 
 test("derives and validates the slug from a plain Markdown filename", () => {

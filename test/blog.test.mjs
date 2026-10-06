@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {createRequire} from "node:module";
+import {readFile} from "node:fs/promises";
 import {after, test} from "node:test";
 
 const require = createRequire(import.meta.url);
@@ -38,7 +39,10 @@ global.document = {
 
 const {
   createAdminUrl,
+  categoryHref,
+  categorySelectionFromSearch,
   deriveCategoryTree,
+  deriveCategoryNavigation,
   escapeHtml,
   filterPosts,
   formatCategoryPath,
@@ -47,8 +51,10 @@ const {
   renderArticleAd,
   renderAiDisclosure,
   renderCommentsShell,
+  renderCategorySidebar,
   renderPostMeta,
-  sortPosts
+  sortPosts,
+  updateCategorySidebarState
 } = require("../blog.js");
 
 test("renders the homepage as an always-open learning notebook", () => {
@@ -80,6 +86,21 @@ test("sorts browser posts newest first and same-date posts by title", () => {
   );
 });
 
+test("sorts browser posts by same-date order before title fallbacks", () => {
+  const posts = sortPosts([
+    {slug: "unordered-z", title: "Zeta", date: "2026-10-05"},
+    {slug: "second", title: "Alpha", date: "2026-10-05", order: 2},
+    {slug: "first", title: "Zulu", date: "2026-10-05", order: 1},
+    {slug: "unordered-a", title: "Alpha", date: "2026-10-05"},
+    {slug: "newer", title: "Newest", date: "2026-10-06", order: 99}
+  ]);
+
+  assert.deepEqual(
+    posts.map(post => post.slug),
+    ["newer", "first", "second", "unordered-a", "unordered-z"]
+  );
+});
+
 test("derives a two-level tree and formats category paths", () => {
   assert.equal(typeof deriveCategoryTree, "function");
   assert.equal(typeof formatCategoryPath, "function");
@@ -89,6 +110,73 @@ test("derives a two-level tree and formats category paths", () => {
   ]);
   assert.equal(formatCategoryPath(categorizedPosts[0]), "Systems");
   assert.equal(formatCategoryPath(categorizedPosts[1]), "Systems / Linux");
+});
+
+test("derives two-level category navigation with post counts", () => {
+  assert.equal(typeof deriveCategoryNavigation, "function");
+  assert.deepEqual(deriveCategoryNavigation(categorizedPosts), [
+    {name: "Systems", count: 2, children: [{name: "Linux", count: 1}]},
+    {name: "Games", count: 1, children: [{name: "Unity", count: 1}]}
+  ]);
+});
+
+test("reads only valid category selections from a shareable URL", () => {
+  assert.equal(typeof categorySelectionFromSearch, "function");
+  const categories = deriveCategoryNavigation(categorizedPosts);
+  assert.deepEqual(
+    categorySelectionFromSearch("?category=Systems&subcategory=Linux", categories),
+    {category: "Systems", subcategory: "Linux"}
+  );
+  assert.deepEqual(
+    categorySelectionFromSearch("?category=Systems&subcategory=Unity", categories),
+    {category: "Systems", subcategory: ""}
+  );
+  assert.deepEqual(
+    categorySelectionFromSearch("?category=Unknown&subcategory=Linux", categories),
+    {category: "", subcategory: ""}
+  );
+});
+
+test("renders escaped category links with counts and active state", () => {
+  assert.equal(typeof categoryHref, "function");
+  assert.equal(
+    categoryHref("C++", "Effective C++"),
+    "?category=C%2B%2B&subcategory=Effective%20C%2B%2B#writing"
+  );
+  const output = renderCategorySidebar([
+    {name: "C++", count: 3, children: [{name: "Effective <C++>", count: 2}]}
+  ], {category: "C++", subcategory: "Effective <C++>"}, 3);
+  assert.match(output, /class="category-sidebar"/);
+  assert.match(output, /C\+\+<span>3<\/span>/);
+  assert.match(output, /Effective &lt;C\+\+&gt;<span>2<\/span>/);
+  assert.match(output, /aria-current="page"/);
+  assert.doesNotMatch(output, /Effective <C\+\+>/);
+});
+
+test("updates the active category on existing links without replacing them", () => {
+  assert.equal(typeof updateCategorySidebarState, "function");
+  const link = (category, subcategory, current = false) => ({
+    dataset: {category, subcategory},
+    current,
+    setAttribute(name, value) { if (name === "aria-current") this.current = value; },
+    removeAttribute(name) { if (name === "aria-current") this.current = false; }
+  });
+  const links = [link("", "", "page"), link("Study", ""), link("Study", "Game Server")];
+  const selectedLink = links[2];
+  const root = {querySelectorAll: () => links};
+
+  updateCategorySidebarState(root, {category: "Study", subcategory: "Game Server"});
+
+  assert.equal(links[0].current, false);
+  assert.equal(links[1].current, false);
+  assert.equal(links[2].current, "page");
+  assert.strictEqual(links[2], selectedLink);
+});
+
+test("moves category navigation above posts before tablet cards become too narrow", async () => {
+  const css = await readFile(new URL("../styles.css", import.meta.url), "utf8");
+  assert.match(css, /@media \(max-width: 980px\)[\s\S]*?\.writing-layout \{ grid-template-columns: 1fr;/);
+  assert.match(css, /@media \(max-width: 980px\)[\s\S]*?\.category-sidebar-shell \{ grid-row: 1;/);
 });
 
 test("parent filters include direct and descendant posts while child filters are exact", () => {

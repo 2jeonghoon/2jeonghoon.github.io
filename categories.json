@@ -17,6 +17,14 @@
       ]
     },
     {
+      "name": "C++",
+      "children": [
+        {
+          "name": "Effective C++"
+        }
+      ]
+    },
+    {
       "name": "Unreal Engine",
       "children": [
         {

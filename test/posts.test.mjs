@@ -45,6 +45,7 @@ function source(overrides = {}, body = "## Heading\n\nBody") {
     `draft: ${String(data.draft)}`,
     `aiGenerated: ${String(data.aiGenerated)}`
   ];
+  if (data.order !== undefined) lines.push(`order: ${data.order}`);
   if (data.readingTime) lines.push(`readingTime: ${data.readingTime}`);
   return `${lines.join("\n")}\n---\n${body}\n`;
 }
@@ -128,6 +129,21 @@ test("sorts same-date posts by title with natural number ordering", () => {
   assert.deepEqual(
     posts.map(post => post.title),
     ["언리얼 공부 4", "언리얼 공부 5", "언리얼 공부 6", "언리얼 공부 10"]
+  );
+});
+
+test("sorts same-date posts by explicit order before title fallbacks", () => {
+  const posts = compilePosts([
+    published("unordered-z.md", "2026-01-01", {title: "Zeta"}),
+    published("second.md", "2026-01-01", {title: "Alpha", order: 2}),
+    published("first.md", "2026-01-01", {title: "Zulu", order: 1}),
+    published("unordered-a.md", "2026-01-01", {title: "Alpha"}),
+    published("newer.md", "2026-01-02", {title: "Newest", order: 99})
+  ]);
+
+  assert.deepEqual(
+    posts.map(post => post.slug),
+    ["newer", "first", "second", "unordered-a", "unordered-z"]
   );
 });
 

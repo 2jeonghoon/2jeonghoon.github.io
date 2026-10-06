@@ -27,6 +27,36 @@ test("keeps editor data after every recoverable server error", () => {
   }
 });
 
+test("parses an optional post order from the editor", () => {
+  assert.equal(ui.parseOptionalOrder(""), null);
+  assert.equal(ui.parseOptionalOrder("7"), 7);
+});
+
+test("groups published posts by category and keeps drafts separate", () => {
+  assert.equal(typeof ui.groupAdminPosts, "function");
+  const groups = ui.groupAdminPosts([
+    {slug: "draft", title: "Draft", date: "", order: null, category: "", subcategory: "", draft: true},
+    {slug: "unordered", title: "Unordered", date: "2026-10-06", order: null, category: "Systems", subcategory: "Linux", draft: false},
+    {slug: "second", title: "Second", date: "2026-10-06", order: 2, category: "Systems", subcategory: "Linux", draft: false},
+    {slug: "first", title: "First", date: "2026-10-06", order: 1, category: "Systems", subcategory: "", draft: false},
+    {slug: "uncategorized", title: "No category", date: "2026-10-05", order: null, category: "", subcategory: "", draft: false}
+  ], "all");
+
+  assert.deepEqual(groups.map(group => ({label: group.label, slugs: group.posts.map(post => post.slug)})), [
+    {label: "Systems", slugs: ["first", "second", "unordered"]},
+    {label: "미분류", slugs: ["uncategorized"]},
+    {label: "초안", slugs: ["draft"]}
+  ]);
+  assert.deepEqual(
+    ui.groupAdminPosts(groups.flatMap(group => group.posts), "published").map(group => group.label),
+    ["Systems", "미분류"]
+  );
+  assert.deepEqual(
+    ui.groupAdminPosts(groups.flatMap(group => group.posts), "draft").map(group => group.label),
+    ["초안"]
+  );
+});
+
 test("locks an existing slug and requires exact delete confirmation", () => {
   assert.equal(ui.canEditSlug({sha: "old"}), false);
   assert.equal(ui.canEditSlug({sha: ""}), true);
@@ -68,6 +98,8 @@ test("ships accessible external-script UI and responsive editor styles", async (
   const headers = await readFile(new URL("../worker/public/_headers", import.meta.url), "utf8");
   assert.match(html, /<main[^>]*id="app"/);
   assert.match(html, /<label[^>]*for="post-title"/);
+  assert.match(html, /<label[^>]*for="post-order"/);
+  assert.match(html, /<input[^>]*id="post-order"[^>]*type="number"[^>]*min="1"[^>]*max="9999"/);
   assert.match(html, /<select[^>]*id="post-category"[^>]*required/);
   assert.match(html, /<select[^>]*id="post-subcategory"/);
   assert.match(html, /<input[^>]*id="new-parent-name"/);

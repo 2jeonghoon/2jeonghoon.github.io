@@ -23,6 +23,7 @@ export function createPostService(client) {
           slug,
           title: post.title,
           date: post.date,
+          order: post.order,
           category: post.category,
           subcategory: post.subcategory,
           draft: post.draft,
