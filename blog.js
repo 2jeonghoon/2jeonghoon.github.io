@@ -32,6 +32,21 @@
     );
   }
 
+  function renderArticleNavigation(posts, post) {
+    const currentIndex = posts.indexOf(post);
+    if (currentIndex === -1) return "";
+    const next = posts[currentIndex - 1];
+    const prev = posts[currentIndex + 1];
+    if (!next && !prev) return "";
+    const nextLink = next
+      ? `<a class="article-nav article-nav-next" href="?post=${encodeURIComponent(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>`
+      : "";
+    const prevLink = prev
+      ? `<a class="article-nav article-nav-prev" href="?post=${encodeURIComponent(prev.slug)}"><p>← PREV NOTE</p><strong>${escapeHtml(prev.title)}</strong></a>`
+      : "";
+    return `<nav class="article-navigation" aria-label="글 탐색">${nextLink}${prevLink}</nav>`;
+  }
+
   function createAdminUrl(base, slug = "") {
     if (typeof base !== "string" || !base) return "";
     if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return "";
@@ -384,11 +399,10 @@
           '<section class="article not-found"><a class="back-link" href="./">← ALL NOTES</a><h1>404</h1><p>요청한 기록을 찾을 수 없습니다.</p></section>';
         return;
       }
-      const next = posts[(posts.indexOf(post) + 1) % posts.length];
       const manageUrl = createAdminUrl(browser.BLOG_CONFIG && browser.BLOG_CONFIG.adminUrl, post.slug);
       updateMeta(`${post.title} — JH.LOG`, post.description);
       const adsense = browser.BLOG_CONFIG && browser.BLOG_CONFIG.adsense;
-      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a>${manageUrl ? `<a class="manage-link" href="${escapeHtml(manageUrl)}" rel="nofollow">Manage post ↗</a>` : ""}<header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderArticleAd(adsense)}${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${posts.length > 1 ? `<a class="article-nav" href="${postUrl(next.slug)}"><p>NEXT NOTE →</p><strong>${escapeHtml(next.title)}</strong></a>` : ""}${renderCommentsShell()}</article>`;
+      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a>${manageUrl ? `<a class="manage-link" href="${escapeHtml(manageUrl)}" rel="nofollow">Manage post ↗</a>` : ""}<header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderArticleAd(adsense)}${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${renderArticleNavigation(posts, post)}${renderCommentsShell()}</article>`;
       mountAdSense(browser, page, adsense);
       mountGiscus(
         app.querySelector("[data-comments]"),
@@ -414,6 +428,7 @@
     mountGiscus,
     mountAdSense,
     renderArticleAd,
+    renderArticleNavigation,
     renderAiDisclosure,
     renderCategorySidebar,
     renderCommentsShell,

@@ -49,6 +49,7 @@ const {
   mountGiscus,
   mountAdSense,
   renderArticleAd,
+  renderArticleNavigation,
   renderAiDisclosure,
   renderCommentsShell,
   renderCategorySidebar,
@@ -99,6 +100,44 @@ test("sorts browser posts by descending same-date order before title fallbacks",
     posts.map(post => post.slug),
     ["newer", "second", "first", "unordered-a", "unordered-z"]
   );
+});
+
+test("renders Next from the row above and Prev from the row below", () => {
+  const posts = [
+    {slug: "top", title: "Top note"},
+    {slug: "middle", title: "Middle note"},
+    {slug: "bottom", title: "Bottom note"}
+  ];
+
+  const output = renderArticleNavigation(posts, posts[1]);
+
+  assert.match(output, /href="\?post=top"[\s\S]*?NEXT NOTE →[\s\S]*?Top note/);
+  assert.match(output, /href="\?post=bottom"[\s\S]*?← PREV NOTE[\s\S]*?Bottom note/);
+});
+
+test("hides article navigation links at the list boundaries", () => {
+  const posts = [
+    {slug: "top", title: "Top note"},
+    {slug: "bottom", title: "Bottom note"}
+  ];
+
+  const topOutput = renderArticleNavigation(posts, posts[0]);
+  assert.doesNotMatch(topOutput, /NEXT NOTE/);
+  assert.match(topOutput, /PREV NOTE/);
+
+  const bottomOutput = renderArticleNavigation(posts, posts[1]);
+  assert.match(bottomOutput, /NEXT NOTE/);
+  assert.doesNotMatch(bottomOutput, /PREV NOTE/);
+
+  assert.equal(renderArticleNavigation([posts[0]], posts[0]), "");
+});
+
+test("lays out article navigation side by side and stacks it on mobile", async () => {
+  const css = await readFile(new URL("../styles.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.article-navigation \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /\.article-nav:only-child \{[^}]*grid-column: 1 \/ -1/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.article-navigation \{ grid-template-columns: 1fr;/);
 });
 
 test("derives a two-level tree and formats category paths", () => {
