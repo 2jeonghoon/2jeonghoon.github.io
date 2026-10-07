@@ -9,7 +9,7 @@ image: ""
 readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
 게임 서버의 메모리 상태는 빠르지만 프로세스가 종료되면 사라진다. 계정, 캐릭터, 재화, 아이템처럼 다음 접속에도 남아야 하는 데이터는 영속 저장소가 필요하다. 관계형 데이터베이스는 스키마, 제약 조건, 트랜잭션을 통해 데이터의 의미와 일관성을 표현한다.
 
