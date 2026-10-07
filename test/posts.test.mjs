@@ -132,7 +132,7 @@ test("sorts same-date posts by title with natural number ordering", () => {
   );
 });
 
-test("sorts same-date posts by explicit order before title fallbacks", () => {
+test("sorts same-date posts by descending explicit order before title fallbacks", () => {
   const posts = compilePosts([
     published("unordered-z.md", "2026-01-01", {title: "Zeta"}),
     published("second.md", "2026-01-01", {title: "Alpha", order: 2}),
@@ -143,7 +143,7 @@ test("sorts same-date posts by explicit order before title fallbacks", () => {
 
   assert.deepEqual(
     posts.map(post => post.slug),
-    ["newer", "first", "second", "unordered-a", "unordered-z"]
+    ["newer", "second", "first", "unordered-a", "unordered-z"]
   );
 });
 

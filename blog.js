@@ -20,7 +20,7 @@
     const rightOrder = Number.isInteger(right.order) ? right.order : null;
     if (leftOrder === null) return rightOrder === null ? 0 : 1;
     if (rightOrder === null) return -1;
-    return leftOrder - rightOrder;
+    return rightOrder - leftOrder;
   }
 
   function sortPosts(posts) {

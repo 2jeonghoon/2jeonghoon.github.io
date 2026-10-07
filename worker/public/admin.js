@@ -19,10 +19,14 @@
   }
   function parseOptionalOrder(value) { return value === "" ? null : Number(value); }
   const postTitleCollator = new Intl.Collator("ko", {numeric:true,sensitivity:"base"});
+  function compareAdminPostOrder(left,right) {
+    const leftOrder=Number.isInteger(left.order)?left.order:null;const rightOrder=Number.isInteger(right.order)?right.order:null;
+    if(leftOrder===null)return rightOrder===null?0:1;if(rightOrder===null)return -1;return rightOrder-leftOrder;
+  }
   function sortAdminPosts(posts) {
     return (posts||[]).slice().sort((left,right)=>
       String(right.date||"").localeCompare(String(left.date||"")) ||
-      (Number.isInteger(left.order)?left.order:Number.MAX_SAFE_INTEGER) - (Number.isInteger(right.order)?right.order:Number.MAX_SAFE_INTEGER) ||
+      compareAdminPostOrder(left,right) ||
       postTitleCollator.compare(left.title||left.slug,right.title||right.slug) ||
       String(left.slug||"").localeCompare(String(right.slug||""))
     );

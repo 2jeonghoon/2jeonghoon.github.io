@@ -43,7 +43,7 @@ test("groups published posts by category and keeps drafts separate", () => {
   ], "all");
 
   assert.deepEqual(groups.map(group => ({label: group.label, slugs: group.posts.map(post => post.slug)})), [
-    {label: "Systems", slugs: ["first", "second", "unordered"]},
+    {label: "Systems", slugs: ["second", "first", "unordered"]},
     {label: "미분류", slugs: ["uncategorized"]},
     {label: "초안", slugs: ["draft"]}
   ]);

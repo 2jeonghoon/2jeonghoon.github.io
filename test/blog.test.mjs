@@ -86,7 +86,7 @@ test("sorts browser posts newest first and same-date posts by title", () => {
   );
 });
 
-test("sorts browser posts by same-date order before title fallbacks", () => {
+test("sorts browser posts by descending same-date order before title fallbacks", () => {
   const posts = sortPosts([
     {slug: "unordered-z", title: "Zeta", date: "2026-10-05"},
     {slug: "second", title: "Alpha", date: "2026-10-05", order: 2},
@@ -97,7 +97,7 @@ test("sorts browser posts by same-date order before title fallbacks", () => {
 
   assert.deepEqual(
     posts.map(post => post.slug),
-    ["newer", "first", "second", "unordered-a", "unordered-z"]
+    ["newer", "second", "first", "unordered-a", "unordered-z"]
   );
 });
 
