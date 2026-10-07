@@ -9,7 +9,7 @@ image: ""
 readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
 NoSQL은 관계형 데이터베이스를 무조건 대체하는 기술이 아니다. 데이터 구조, 조회 패턴, 일관성 요구, 확장 방식에 따라 다른 선택지를 제공한다. 게임 서버에서는 계정과 결제처럼 강한 일관성이 필요한 데이터와 로그·세션처럼 대량 확장이 중요한 데이터를 구분하는 것이 출발점이다.
 
