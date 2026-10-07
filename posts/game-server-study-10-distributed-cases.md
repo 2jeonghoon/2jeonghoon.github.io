@@ -10,7 +10,7 @@ image: ""
 readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
 분산 시스템의 원칙은 실제 기능에 적용할 때 구체적인 선택이 된다. 어떤 상태를 공유하는지, 요청이 몰리는 지점이 어디인지, 실패 후 복구할 수 있는지를 기능별로 살펴봐야 한다. 이번 단원은 여러 사례를 통해 분산 경계를 판단하는 연습에 초점을 둔다.
 
