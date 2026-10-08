@@ -1,7 +1,7 @@
 ---
 title: "Effective C++ 공부 05: 구현을 단단하게 만들기"
 description: "변수 정의 시점, 캐스팅 최소화, 내부 핸들 노출 방지, 예외 안전성, 인라인과 컴파일 의존성을 통해 구현의 안정성과 빌드 비용을 관리합니다."
-date: "2026-10-06"
+date: "2026-10-07"
 order: 5
 category: "C++"
 subcategory: "Effective C++"
@@ -9,8 +9,8 @@ tags: ["C++","Effective C++","Exception Safety","PImpl"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
 인터페이스가 사용법을 결정한다면 구현은 실패했을 때의 상태와 변경 비용을 결정한다. 이 장은 객체 수명을 짧게 유지하고, 타입 시스템을 우회하지 않으며, 예외가 발생해도 불변식을 보존하고, 헤더 의존성을 통제하는 방법을 다룬다.
 
