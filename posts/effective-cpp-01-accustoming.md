@@ -5,14 +5,13 @@ date: "2026-10-06"
 order: 1
 category: "C++"
 subcategory: "Effective C++"
-tags: ["C++", "Effective C++", "const", "Initialization"]
+tags: ["C++","Effective C++","const","Initialization"]
 image: ""
 readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
-
 『Effective C++ 3판』의 첫 장은 개별 문법보다 C++를 바라보는 기준을 세운다. C++는 C의 절차적 기능, 객체지향, 템플릿, STL이 한 언어 안에 공존한다. 어느 영역을 사용하느냐에 따라 좋은 설계와 비용 모델이 달라진다는 점을 먼저 받아들여야 한다.
 
 ## 아이템 1: C++를 언어들의 연합체로 바라보자
