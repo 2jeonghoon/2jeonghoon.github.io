@@ -1,7 +1,7 @@
 ---
-title: "Effective C++ 공부 04: 설계와 선언"
+title: "04: 설계와 선언"
 description: "올바르게 사용하기 쉬운 인터페이스, 타입 설계, const 참조 전달, 캡슐화, 비멤버 함수, 암시적 변환과 예외 없는 swap을 정리합니다."
-date: "2026-10-06"
+date: "2026-10-07"
 order: 4
 category: "C++"
 subcategory: "Effective C++"
@@ -9,7 +9,7 @@ tags: ["C++","Effective C++","API Design","Interface"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
+draft: false
 aiGenerated: true
 ---
 좋은 인터페이스는 사용자가 구현을 몰라도 올바른 코드를 작성하게 돕는다. 타입 시스템으로 단위와 소유권을 표현하고, 잘못된 상태를 만들기 어렵게 하며, 구현 세부가 외부 계약으로 새지 않게 하는 것이 이 장의 중심이다.
