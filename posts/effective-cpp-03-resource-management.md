@@ -1,5 +1,5 @@
 ---
-title: "Effective C++ 공부 03: 자원 관리와 RAII"
+title: "03: 자원 관리와 RAII"
 description: "RAII 객체와 스마트 포인터로 자원 수명을 표현하고, 복사 정책과 원시 자원 접근, new/delete 짝, 독립 문장의 예외 안전성을 현대 C++ 코드로 정리합니다."
 date: "2026-10-06"
 order: 3
@@ -9,8 +9,8 @@ tags: ["C++","Effective C++","RAII","Smart Pointer"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
 자원은 메모리만 뜻하지 않는다. 파일, 소켓, 잠금, GPU 핸들, 데이터베이스 트랜잭션처럼 반드시 해제해야 하는 모든 것이 자원이다. C++의 핵심 해법은 획득과 해제를 객체 수명에 묶는 RAII다.
 
