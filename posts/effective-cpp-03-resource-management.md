@@ -1,7 +1,7 @@
 ---
 title: "03: 자원 관리와 RAII"
 description: "RAII 객체와 스마트 포인터로 자원 수명을 표현하고, 복사 정책과 원시 자원 접근, new/delete 짝, 독립 문장의 예외 안전성을 현대 C++ 코드로 정리합니다."
-date: "2026-10-06"
+date: "2026-10-07"
 order: 3
 category: "C++"
 subcategory: "Effective C++"
