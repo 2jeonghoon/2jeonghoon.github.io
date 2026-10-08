@@ -1,7 +1,7 @@
 ---
 title: "05: 구현을 단단하게 만들기"
 description: "변수 정의 시점, 캐스팅 최소화, 내부 핸들 노출 방지, 예외 안전성, 인라인과 컴파일 의존성을 통해 구현의 안정성과 빌드 비용을 관리합니다."
-date: "2026-10-07"
+date: "2026-10-08"
 order: 5
 category: "C++"
 subcategory: "Effective C++"
