@@ -10,7 +10,7 @@ image: ""
 readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
 좋은 인터페이스는 사용자가 구현을 몰라도 올바른 코드를 작성하게 돕는다. 타입 시스템으로 단위와 소유권을 표현하고, 잘못된 상태를 만들기 어렵게 하며, 구현 세부가 외부 계약으로 새지 않게 하는 것이 이 장의 중심이다.
 
