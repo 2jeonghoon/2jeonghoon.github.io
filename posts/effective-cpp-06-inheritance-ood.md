@@ -1,7 +1,7 @@
 ---
-title: "Effective C++ 공부 06: 상속과 객체지향 설계"
+title: "06: 상속과 객체지향 설계"
 description: "public·private 상속의 의미, 이름 숨김, 인터페이스와 구현 상속, 가상 함수 대안, 합성, 다중 상속을 설계 관점에서 정리합니다."
-date: "2026-10-06"
+date: "2026-10-08"
 order: 6
 category: "C++"
 subcategory: "Effective C++"
@@ -9,8 +9,8 @@ tags: ["C++","Effective C++","Inheritance","Object-Oriented Design"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
 상속은 코드를 재사용하는 문법이기 전에 타입 사이의 관계를 선언하는 도구다. public 상속은 대체 가능성을 약속하고, 합성과 private 상속은 구현 관계를 표현한다. 관계의 의미를 먼저 정하지 않으면 작은 재사용을 위해 강한 결합을 만들게 된다.
 
