@@ -1,15 +1,17 @@
 ---
-title: "언리얼 C++ 공부 03: 애니메이션과 콤보 공격"
+title: "03: 애니메이션과 콤보 공격"
 description: "AnimInstance와 상태 머신, Montage·Section·Notify를 연결해 이동과 콤보 공격을 구성하고 게임 로직과 표현을 분리하는 방법을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-12"
+order: 3
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "Animation", "AnimMontage", "Combat"]
+tags: ["Unreal Engine","C++","Animation","AnimMontage","Combat"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 애니메이션은 단순히 영상을 재생하는 기능이 아니다. 캐릭터의 이동 상태를 시각적으로 표현하고, 공격 판정이 발생할 시점과 다음 입력을 받을 구간을 게임 로직에 알려 주는 시스템이다. 언리얼에서는 C++ `UAnimInstance`, 애니메이션 블루프린트, 상태 머신, Montage와 Notify가 이 책임을 나눠 가진다.
 
 ## AnimInstance와 AnimGraph
