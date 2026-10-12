@@ -1,7 +1,7 @@
 ---
-title: "Effective C++ 공부 09: 경고, 표준 라이브러리와 Boost"
+title: "09: 경고, 표준 라이브러리와 Boost"
 description: "컴파일러 경고를 품질 도구로 사용하고, 과거 TR1 조언을 현대 표준 라이브러리로 업데이트하며, Boost를 도입할 때의 기준까지 시리즈를 마무리합니다."
-date: "2026-10-06"
+date: "2026-10-12"
 order: 9
 category: "C++"
 subcategory: "Effective C++"
@@ -9,7 +9,7 @@ tags: ["C++","Effective C++","Compiler Warnings","Standard Library","Boost"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
+draft: false
 aiGenerated: true
 ---
 마지막 장은 특정 문법보다 학습과 검증의 습관을 다룬다. 컴파일러 경고를 무시하지 않고, 표준 라이브러리의 어휘를 익히며, 검증된 외부 라이브러리를 선별하는 습관은 책의 다른 52개 항목을 실제 프로젝트에서 유지하게 해 준다.
