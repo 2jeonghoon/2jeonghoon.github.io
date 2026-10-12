@@ -1,7 +1,7 @@
 ---
 title: "08: new와 delete 커스터마이징"
 description: "new-handler, 전역·클래스별 할당 함수 교체, operator new/delete 작성 규칙과 placement new 실패 경로를 메모리 추적과 게임 엔진 사례에 연결합니다."
-date: "2026-10-06"
+date: "2026-10-12"
 order: 8
 category: "C++"
 subcategory: "Effective C++"
