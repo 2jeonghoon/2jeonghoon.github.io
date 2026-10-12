@@ -1,5 +1,5 @@
 ---
-title: "Effective C++ 공부 08: new와 delete 커스터마이징"
+title: "08: new와 delete 커스터마이징"
 description: "new-handler, 전역·클래스별 할당 함수 교체, operator new/delete 작성 규칙과 placement new 실패 경로를 메모리 추적과 게임 엔진 사례에 연결합니다."
 date: "2026-10-06"
 order: 8
@@ -9,8 +9,8 @@ tags: ["C++","Effective C++","Memory Allocation","operator new"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
 메모리 할당 함수를 바꾸는 일은 일반적인 최적화가 아니라 저수준 시스템 경계를 설계하는 작업이다. 표준 컨테이너, allocator, `std::pmr`로 해결할 수 있는지 먼저 확인하고, 전역 `new`와 `delete` 교체는 측정 가능한 필요가 있을 때만 선택한다.
 
