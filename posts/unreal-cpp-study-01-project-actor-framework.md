@@ -1,15 +1,17 @@
 ---
-title: "언리얼 C++ 공부 01: 프로젝트, 액터와 게임플레이 프레임워크"
+title: "01: 프로젝트, 액터와 게임플레이 프레임워크"
 description: "언리얼 C++ 프로젝트의 폴더와 모듈 구조, 액터 생명주기, 컴포넌트 구성, GameMode 중심의 게임플레이 프레임워크를 정리합니다."
-date: "2026-10-05"
+date: "2026-10-12"
+order: 1
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "Actor", "Gameplay Framework"]
+tags: ["Unreal Engine","C++","Actor","Gameplay Framework"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 『이득우의 언리얼 C++ 게임 개발의 정석』은 작은 액터를 만든 뒤 폰, 캐릭터, 애니메이션, 전투와 AI를 차례로 결합해 하나의 게임을 완성하는 방식으로 언리얼의 구조를 설명한다. 첫 단계에서 중요한 것은 에디터 조작을 외우는 일이 아니라 **에디터에서 만든 콘텐츠와 C++ 모듈이 어떤 경계로 연결되는지** 이해하는 것이다.
 
 책은 Unreal Engine 4.19를 기준으로 작성되었고 참고한 실습 기록은 4.27을 사용한다. 이 글은 그 학습 순서를 따르되 UE5에서도 유지되는 개념을 중심으로 정리한다. 메뉴 위치, 기본 템플릿, 입력 시스템과 일부 API는 버전에 따라 다를 수 있다.
