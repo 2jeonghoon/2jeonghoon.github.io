@@ -4,12 +4,13 @@ description: "PostgreSQL만 Docker 컨테이너로 실행하는 개발 구성을
 date: "2026-10-08"
 category: "Study"
 subcategory: "Game Server"
-tags: ["Docker", "Docker Compose", "PostgreSQL", "C++", "Backend"]
+tags: ["Docker","Docker Compose","PostgreSQL","C++","Backend"]
+image: ""
+readingTime: ""
 featured: false
-draft: false
-aiGenerated: true
+draft: true
+aiGenerated: false
 ---
-
 Docker를 도입했다고 해서 모든 프로그램을 컨테이너에 넣어야 하는 것은 아니다. 개발 환경에서는 데이터베이스처럼 설치와 초기화가 번거로운 의존성만 Docker로 실행하고, 애플리케이션은 익숙한 IDE와 디버거에서 직접 실행할 수 있다.
 
 이 글에서 살펴볼 구성도 그렇다. PostgreSQL은 Docker Compose가 관리하는 컨테이너에서 실행하고, C++ 계정 서버는 Windows에서 직접 빌드하고 실행한다. 이 구성을 따라가면서 Docker의 이미지와 컨테이너, Compose, 포트 매핑과 named volume의 의미를 살펴보고 서버 코드가 데이터베이스와 어떻게 연결되는지 정리한다.
