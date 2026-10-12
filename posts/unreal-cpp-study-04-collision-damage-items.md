@@ -1,15 +1,17 @@
 ---
-title: "언리얼 C++ 공부 04: 충돌, 대미지와 아이템"
+title: "04: 충돌, 대미지와 아이템"
 description: "Collision Channel과 Response, Trace 기반 공격 판정, 대미지 전달, 소켓과 아이템 액터를 이용한 장비 구조를 정리합니다."
-date: "2026-10-05"
+date: "2026-10-12"
+order: 4
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "Collision", "Damage", "Items"]
+tags: ["Unreal Engine","C++","Collision","Damage","Items"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 전투에서 보이는 검과 실제 판정은 같은 것이 아니다. 언리얼은 충돌 형태, 객체 유형, 서로 만났을 때의 반응을 분리해 설정한다. 공격 판정을 안정적으로 만들려면 “무엇과 부딪혔는가”보다 **어떤 채널로 어떤 질문을 했고 상대가 어떻게 응답했는가**를 이해해야 한다.
 
 ## Collision의 세 요소
