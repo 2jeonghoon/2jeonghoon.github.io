@@ -1,7 +1,7 @@
 ---
 title: "Effective C++ 공부 07: 템플릿과 일반화 프로그래밍"
 description: "암시적 인터페이스, 의존 이름과 typename, 템플릿 기반 클래스, 코드 팽창, 멤버 함수 템플릿, traits와 템플릿 메타프로그래밍을 현대 C++로 연결합니다."
-date: "2026-10-06"
+date: "2026-10-12"
 order: 7
 category: "C++"
 subcategory: "Effective C++"
@@ -9,8 +9,8 @@ tags: ["C++","Effective C++","Templates","Generic Programming"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
 템플릿은 타입을 지운 런타임 다형성과 달리, 타입의 구체적인 연산을 컴파일 시간에 조합한다. 강력한 만큼 이름 탐색, 코드 생성, 오류 메시지와 빌드 비용을 이해해야 한다. 현대 C++의 concepts는 이 장의 암시적 계약을 명시적으로 표현하는 도구가 된다.
 
