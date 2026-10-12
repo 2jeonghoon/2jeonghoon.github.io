@@ -1,15 +1,16 @@
 ---
-title: "언리얼 C++ 공부 02: 폰, 캐릭터와 입력"
+title: "02: 폰, 캐릭터와 입력"
 description: "Pawn과 Character, Controller의 관계를 이해하고 컴포넌트 조립, 이동과 회전, 카메라, UE5 Enhanced Input의 흐름을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-12"
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "Pawn", "Character", "Enhanced Input"]
+tags: ["Unreal Engine","C++","Pawn","Character","Enhanced Input"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 월드에 존재하는 액터가 모두 플레이어에게 조종되는 것은 아니다. 언리얼은 **보이는 몸체와 판단 주체를 분리**하기 위해 Pawn과 Controller를 사용한다. 같은 캐릭터라도 플레이어 컨트롤러가 빙의하면 사용자 입력으로 움직이고, AI 컨트롤러가 빙의하면 행동 트리의 판단으로 움직일 수 있다.
 
 ## Pawn과 Controller
