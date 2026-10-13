@@ -1,15 +1,16 @@
 ---
 title: "Ollama와 OpenCode로 로컬 코딩 에이전트를 사용해 본 후기"
 description: "Codex와 Claude Code의 사용량 한도에 도달했을 때 로컬 LLM을 대안으로 쓸 수 있을까? Radeon 9070 XT에서 Ollama와 OpenCode를 MapleStory Worlds 개발에 사용한 과정과 결과를 정리했습니다."
-date: "2026-10-12"
+date: "2026-10-13"
+order: 4
 category: "Development"
-subcategory: ""
-tags: ["Ollama", "OpenCode", "Local LLM", "Qwen", "MapleStory Worlds"]
+subcategory: "AI"
+tags: ["Ollama","OpenCode","Local LLM","Qwen","MapleStory Worlds"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
 Codex와 Claude Code를 쓰다 사용량 한도에 도달하면, 다시 사용할 수 있을 때까지 기다려야 한다. 그 시간에 로컬 LLM으로 간단한 코딩 작업을 처리할 수 없을까? 이 호기심에서 시작해 Ollama로 모델을 실행하고, OpenCode에 연결해 코딩 에이전트처럼 사용해 봤다.
 
@@ -17,13 +18,13 @@ Codex와 Claude Code를 쓰다 사용량 한도에 도달하면, 다시 사용�
 
 ## Ollama에서 시작하다
 
-먼저 [Ollama](https://ollama.com/download)를 설치했다. 처음에는 Ollama MCP도 설치해 사용해 봤다. 로컬에서 모델을 돌려 보는 단계는 흥미로웠지만, 내가 원하던 것은 대화만 하는 환경이 아니었다. Codex나 Claude Code처럼 프로젝트의 파일을 읽고, 수정하고, 필요한 명령을 실행하는 흐름을 원했다.
+먼저 [Ollama](https://ollama.com/download)를 설치했다. LLM 뿐만아니라 MCP도 연결해 사용하고 싶었기에 오픈소스로 공개되어 있는 [Ollmcp](https://github.com/jonigl/mcp-client-for-ollama)도 설치해 사용해 봤다. 로컬에서 모델을 돌려 보는 단계는 흥미로웠지만, 내가 원하던 것은 대화만 하는 환경이 아니었다. Codex나 Claude Code처럼 프로젝트의 파일을 읽고, 수정하고, 필요한 명령을 실행하는 흐름을 원했다.
 
 그런 형태의 코딩 에이전트 환경을 찾다가 [OpenCode](https://opencode.ai/)를 알게 되어 Ollama와 함께 써보기로 했다. Ollama는 로컬 모델을 실행하고, OpenCode는 그 모델을 이용해 코딩 작업의 흐름을 맡는 구성이었다. 당시 사용한 GPU는 Radeon 9070 XT였다.
 
 ## Gemma 4에서 Qwen 3.6으로
 
-처음 Ollama에서 사용한 모델은 Gemma 4였다. 하지만 내 환경에서 OpenCode와 연결해 작업을 시도했을 때 정상적으로 진행되지 않았다. 정확히 어떤 설정이나 동작이 원인이었는지는 확인하지 못했다. 따라서 Gemma 4와 OpenCode가 일반적으로 호환되지 않는다고 결론 내릴 수는 없다.
+처음 Ollama에서 사용한 모델은 Gemma 4였다. 하지만 내 환경에서 OpenCode와 연결해 작업을 시도했을 때 정상적으로 진행되지 않았다. 정확히 어떤 설정이나 동작이 원인이었는지는 확인하지 못했다. 추측컨데 Gemma 4 모델이 지원하는 api와 Opencode가 서로 호환이 안되는 것 같다고 생각했다.
 
 이후 모델을 Qwen 3.6 27B(`qwen3.6:27b`)로 바꿨고, 같은 목적의 작업 흐름은 정상적으로 진행됐다. 적어도 내 환경에서는 OpenCode가 모델을 호출하고 코딩 작업을 이어가는 데 성공했다. 모델을 바꾼 뒤 동작했다는 사실과, 앞선 실패의 원인을 밝혔다는 것은 별개의 이야기다.
 
@@ -48,7 +49,7 @@ Codex와 Claude Code를 쓰다 사용량 한도에 도달하면, 다시 사용�
 
 이미 내려받은 모델의 정확한 이름과 태그는 `ollama list`의 `NAME` 열에서 확인할 수 있다. 이 글에서 사용한 `qwen3.6:27b`의 태그는 `27b`다.
 
-내 실제 시도에서는 [MapleStory Worlds MCP](https://maplestoryworlds-creators.nexon.com/ko/docs?postId=1368)를 활용해 개발 중이던 게임 작업을 OpenCode에 맡겼다. 따라서 단순 채팅만 시험한 것이 아니라, 게임 개발 도구와 연결된 에이전트 흐름을 사용했다. 앞서 탐색에 사용한 Ollama MCP와 MapleStory Worlds MCP는 서로 다른 연결이다.
+내 실제 시도에서는 [MapleStory Worlds MCP](https://maplestoryworlds-creators.nexon.com/ko/docs?postId=1368)를 활용해 개발 중이던 게임 작업을 OpenCode에 맡겼다. 따라서 단순 채팅만 시험한 것이 아니라, 게임 개발 도구와 연결된 에이전트 흐름을 사용했다.
 
 Ollama의 `launch` 명령을 사용하지 않는 경우에는 [OpenCode의 Ollama 제공자 설정 문서](https://opencode.ai/docs/providers/)를 참고해 로컬 Ollama 주소(`http://localhost:11434/v1`)와 설치한 모델 ID를 설정할 수 있다. 이 연결에 앞서 사용했던 Ollama MCP가 필수인 것은 아니다.
 
