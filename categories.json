@@ -34,6 +34,14 @@
           "name": "UE Networking"
         }
       ]
+    },
+    {
+      "name": "Development",
+      "children": [
+        {
+          "name": "AI"
+        }
+      ]
     }
   ]
 }
