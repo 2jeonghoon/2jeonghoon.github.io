@@ -2,7 +2,7 @@
 title: "03: 애니메이션과 콤보 공격"
 description: "AnimInstance와 상태 머신, Montage·Section·Notify를 연결해 이동과 콤보 공격을 구성하고 게임 로직과 표현을 분리하는 방법을 정리합니다."
 date: "2026-10-12"
-order: 3
+order: 5
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
 tags: ["Unreal Engine","C++","Animation","AnimMontage","Combat"]
