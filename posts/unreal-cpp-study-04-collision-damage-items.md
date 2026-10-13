@@ -2,7 +2,7 @@
 title: "04: 충돌, 대미지와 아이템"
 description: "Collision Channel과 Response, Trace 기반 공격 판정, 대미지 전달, 소켓과 아이템 액터를 이용한 장비 구조를 정리합니다."
 date: "2026-10-12"
-order: 4
+order: 7
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
 tags: ["Unreal Engine","C++","Collision","Damage","Items"]
