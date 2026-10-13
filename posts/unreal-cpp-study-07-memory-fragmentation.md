@@ -1,7 +1,7 @@
 ---
 title: "07: 메모리 관리와 단편화 대응"
 description: "언리얼에서 메모리 단편화를 누수·에셋 상주·GC 문제와 구분하고 Memory Insights, LLM, 컨테이너 용량 관리와 객체 풀링으로 진단·대응하는 방법을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-13"
 order: 3
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
