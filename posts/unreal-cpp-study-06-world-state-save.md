@@ -2,6 +2,7 @@
 title: "06: 월드, 상태 관리와 저장"
 description: "모듈과 폴더 구조, 반복되는 맵 구성, 캐릭터 상태 머신, GameMode·PlayerState·SaveGame을 연결해 게임 루프를 완성하는 방법을 정리합니다."
 date: "2026-10-05"
+order: 2
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
 tags: ["Unreal Engine","C++","Level","State Machine","SaveGame"]
