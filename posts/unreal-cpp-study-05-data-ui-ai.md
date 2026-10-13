@@ -1,15 +1,16 @@
 ---
-title: "언리얼 C++ 공부 05: 데이터, UI와 AI"
+title: "05: 데이터, UI와 AI"
 description: "GameInstance와 DataTable, UMG 위젯, AIController·Blackboard·Behavior Tree를 연결해 데이터 중심 게임플레이를 구성하는 방법을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-13"
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "DataTable", "UMG", "Behavior Tree"]
+tags: ["Unreal Engine","C++","DataTable","UMG","Behavior Tree"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 캐릭터 수치가 코드 곳곳에 상수로 박혀 있으면 밸런스를 바꿀 때마다 다시 컴파일해야 한다. 화면 위젯이 캐릭터 내부 구현을 직접 알고, AI가 플레이어 클래스를 강하게 참조하면 기능 하나를 고칠 때 여러 시스템이 함께 흔들린다. 이 단계의 핵심은 데이터, 표현, 판단의 책임을 분리하는 것이다.
 
 ## DataTable로 정적 데이터 관리하기
