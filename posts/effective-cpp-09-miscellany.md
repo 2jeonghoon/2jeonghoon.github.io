@@ -2,7 +2,7 @@
 title: "09: 경고, 표준 라이브러리와 Boost"
 description: "컴파일러 경고를 품질 도구로 사용하고, 과거 TR1 조언을 현대 표준 라이브러리로 업데이트하며, Boost를 도입할 때의 기준까지 시리즈를 마무리합니다."
 date: "2026-10-12"
-order: 9
+order: 3
 category: "C++"
 subcategory: "Effective C++"
 tags: ["C++","Effective C++","Compiler Warnings","Standard Library","Boost"]
