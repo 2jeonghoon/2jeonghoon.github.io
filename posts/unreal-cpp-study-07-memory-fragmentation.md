@@ -1,15 +1,17 @@
 ---
-title: "언리얼 C++ 공부 07: 메모리 관리와 단편화 대응"
+title: "07: 메모리 관리와 단편화 대응"
 description: "언리얼에서 메모리 단편화를 누수·에셋 상주·GC 문제와 구분하고 Memory Insights, LLM, 컨테이너 용량 관리와 객체 풀링으로 진단·대응하는 방법을 정리합니다."
 date: "2026-10-05"
+order: 3
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "Memory", "Fragmentation", "Unreal Insights", "LLM"]
+tags: ["Unreal Engine","C++","Memory","Fragmentation","Unreal Insights","LLM"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 게임을 오래 실행했을 때 프로세스 메모리가 증가하거나 큰 할당이 실패한다고 해서 모두 메모리 누수는 아니다. 살아 있는 객체가 계속 늘어나는 누수, 필요 없는 에셋이 참조 때문에 남는 문제, 컨테이너의 여유 용량, allocator가 보관한 캐시, 주소 공간과 실제 물리 메모리, CPU 메모리와 GPU 메모리를 구분해야 한다. **단편화라고 단정하기 전에 어떤 메모리가 누구에게 소유되어 있는지 측정하는 것**이 먼저다.
 
 ## 외부 단편화와 내부 단편화
