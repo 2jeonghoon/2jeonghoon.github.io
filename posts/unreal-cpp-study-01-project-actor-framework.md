@@ -2,7 +2,7 @@
 title: "01: 프로젝트, 액터와 게임플레이 프레임워크"
 description: "언리얼 C++ 프로젝트의 폴더와 모듈 구조, 액터 생명주기, 컴포넌트 구성, GameMode 중심의 게임플레이 프레임워크를 정리합니다."
 date: "2026-10-12"
-order: 4
+order: 3
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
 tags: ["Unreal Engine","C++","Actor","Gameplay Framework"]
