@@ -2,7 +2,7 @@
 title: "07: 템플릿과 일반화 프로그래밍"
 description: "암시적 인터페이스, 의존 이름과 typename, 템플릿 기반 클래스, 코드 팽창, 멤버 함수 템플릿, traits와 템플릿 메타프로그래밍을 현대 C++로 연결합니다."
 date: "2026-10-12"
-order: 7
+order: 1
 category: "C++"
 subcategory: "Effective C++"
 tags: ["C++","Effective C++","Templates","Generic Programming"]
