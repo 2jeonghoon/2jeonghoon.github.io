@@ -1,15 +1,16 @@
 ---
-title: "언리얼 C++ 공부 06: 월드, 상태 관리와 저장"
+title: "06: 월드, 상태 관리와 저장"
 description: "모듈과 폴더 구조, 반복되는 맵 구성, 캐릭터 상태 머신, GameMode·PlayerState·SaveGame을 연결해 게임 루프를 완성하는 방법을 정리합니다."
 date: "2026-10-05"
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
-tags: ["Unreal Engine", "C++", "Level", "State Machine", "SaveGame"]
+tags: ["Unreal Engine","C++","Level","State Machine","SaveGame"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 개별 기능이 동작한다고 게임이 완성되는 것은 아니다. 캐릭터 생성, 플레이, 사망, 다음 구역 이동, 점수 저장이 하나의 상태 흐름으로 연결되어야 한다. 책의 후반부는 무한히 이어지는 타일형 맵과 캐릭터 상태, 플레이어 데이터 저장을 결합해 작은 게임 루프를 완성한다.
 
 ## 프로젝트 구조 정리
