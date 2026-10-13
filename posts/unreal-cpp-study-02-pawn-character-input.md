@@ -2,7 +2,7 @@
 title: "02: 폰, 캐릭터와 입력"
 description: "Pawn과 Character, Controller의 관계를 이해하고 컴포넌트 조립, 이동과 회전, 카메라, UE5 Enhanced Input의 흐름을 정리합니다."
 date: "2026-10-12"
-order: 5
+order: 4
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
 tags: ["Unreal Engine","C++","Pawn","Character","Enhanced Input"]
