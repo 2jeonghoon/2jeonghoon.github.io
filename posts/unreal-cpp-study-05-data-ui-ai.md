@@ -2,6 +2,7 @@
 title: "05: 데이터, UI와 AI"
 description: "GameInstance와 DataTable, UMG 위젯, AIController·Blackboard·Behavior Tree를 연결해 데이터 중심 게임플레이를 구성하는 방법을 정리합니다."
 date: "2026-10-13"
+order: 1
 category: "Unreal Engine"
 subcategory: "Unreal C++ Book"
 tags: ["Unreal Engine","C++","DataTable","UMG","Behavior Tree"]
