@@ -136,7 +136,58 @@ Release
 
 UObject는 참조 그래프를 기반으로 GC가 관리한다. `UPROPERTY`/`TObjectPtr`, 컨테이너 참조, Root 등록과 델리게이트 때문에 예상보다 오래 살아 있을 수 있다. 반대로 GC가 알아야 하는 참조를 원시 포인터에만 보관하면 객체가 수집된 뒤 잘못된 포인터를 사용할 수 있다.
 
+### Mark and Sweep의 동작
+
+언리얼의 UObject GC는 **Mark and Sweep** 방식으로 동작한다. 참조 횟수만 세는 방식이 아니라 Root Set에서 출발해 도달 가능한 객체 그래프를 찾기 때문에, 서로를 참조하지만 Root Set과 연결이 끊긴 UObject 순환 구조도 수집할 수 있다.
+
+```text
+Root Set
+   │
+   ├─ 강한 참조 ─▶ UObject A ─▶ UObject B
+   │
+   └─ 강한 참조 ─▶ UObject C
+
+Mark  : Root Set에서 강한 참조를 따라 A, B, C를 살아 있는 객체로 표시한다.
+Sweep : 표시되지 않은 UObject D, E를 도달 불가능한 객체로 보고 정리한다.
+```
+
+Mark 단계의 출발점에는 Root Set과 엔진이 직접 유지하는 객체가 포함된다. GC는 여기서 `UPROPERTY`로 노출된 `TObjectPtr`, 리플렉션 시스템이 추적하는 컨테이너, `FGCObject::AddReferencedObjects`로 보고된 참조 등을 따라간다. Root에서 이어지는 강한 참조가 하나라도 남아 있으면 그 아래 객체 그래프도 살아남는다. 따라서 “누수처럼 보이는 UObject”를 조사할 때는 객체 자체보다 **어떤 Root 경로가 객체를 계속 도달 가능하게 만드는지** 찾아야 한다.
+
+Sweep 단계에서는 Mark되지 않은 객체를 정리 대상으로 확정하고 파괴 준비와 메모리 해제를 진행한다. 이 작업은 C++ 지역 변수의 스코프 종료와 동시에 일어나는 것이 아니며, GC가 실행되는 시점까지 지연된다. `BeginDestroy`는 리소스 해제를 시작하는 훅이지 메모리가 그 자리에서 즉시 반환됐다는 뜻은 아니다.
+
+Mark and Sweep은 UObject의 생존 여부를 판단하지만 일반 heap을 재배치해 빈 공간을 한 덩어리로 합치는 **compacting GC는 아니다**. UObject가 회수돼도 allocator가 페이지를 재사용하려고 보유하거나 흩어진 빈 블록이 남을 수 있다. 따라서 GC 이후 UObject 수는 줄었는데 RSS가 유지되는 현상만으로 누수나 단편화를 단정할 수 없다.
+
+### 참조 방식이 객체 수명을 결정한다
+
+| 참조 방식 | GC에서의 의미 | 대표 용도 |
+| --- | --- | --- |
+| `UPROPERTY()`로 선언한 `TObjectPtr<T>` | 강한 참조로 추적되어 대상을 살려 둠 | UObject가 소유하는 지속 참조 |
+| `TWeakObjectPtr<T>` | 대상을 살려 두지 않으며 수집 후 유효하지 않게 됨 | 비소유 캐시, 선택적 참조 |
+| `TSoftObjectPtr<T>` | 로드된 객체를 살려 두지 않고 에셋 경로를 유지 | 필요할 때 불러오는 에셋 참조 |
+| `TStrongObjectPtr<T>` | 스코프에 존재하는 동안 대상을 강제로 살려 둠 | `UPROPERTY`를 쓸 수 없는 비-UObject 소유자 |
+| 리플렉션에 노출되지 않은 raw `UObject*` | GC가 참조로 인식하거나 자동으로 무효화하지 않음 | 수명이 보장된 짧은 구간의 비소유 접근 |
+
+```cpp
+UPROPERTY()
+TObjectPtr<UMyObject> OwnedObject; // Mark 단계에서 따라가는 강한 참조
+
+TWeakObjectPtr<UMyObject> CachedObject; // 객체의 생존을 연장하지 않음
+
+if (UMyObject* Object = CachedObject.Get())
+{
+    Object->Use();
+}
+```
+
+`TSharedPtr`와 `TWeakPtr`는 일반 C++ 객체를 위한 별도 소유권 시스템이며 UObject의 GC 참조를 대신하지 않는다. UObject가 아닌 클래스가 UObject를 강하게 보유해야 한다면 `TStrongObjectPtr` 또는 상황에 맞는 `FGCObject` 구현을 검토한다. 불필요한 강한 참조, 해제하지 않은 Root 등록, 장수명 델리게이트 캡처는 객체 그래프 전체의 회수를 막을 수 있다.
+
 `Destroy()`를 호출한 Actor는 즉시 메모리에서 사라지는 것이 아니라 파괴 대상으로 표시되고 이후 GC에서 정리된다. GC를 자주 강제하면 메모리가 빨리 줄어 보일 수 있지만 긴 정지 시간을 만들 수 있다. 공식 가이드가 설명하듯 대규모 할당 직전 OOM이나 paging hitch가 재현되는 제한된 구간처럼 측정된 이유가 있을 때만 수동 GC를 검토한다.
+
+### Cluster와 GC 히치
+
+GC Cluster는 함께 살아 있고 함께 사라지는 UObject 묶음을 하나의 단위처럼 취급해 Mark 단계의 참조 탐색 비용을 줄인다. 반면 큰 Cluster의 일부가 Root에서 도달 가능하면 묶음 전체가 살아남을 수 있고, 해제 시 많은 객체를 한꺼번에 정리해 히치가 커질 수 있다. Cluster 설정은 객체 수와 수명 패턴을 Unreal Insights에서 측정한 뒤 조정한다.
+
+일반적인 Reachability Analysis는 많은 UObject를 검사하는 동안 한 프레임의 작업량을 크게 늘릴 수 있다. 최신 UE5에는 Mark 작업을 여러 프레임으로 나누는 Incremental Reachability Analysis도 있지만 실험적 기능과 제약이 있으므로 엔진 버전의 공식 문서를 확인해야 한다. 이 기능은 GC 도중 새로 기록되는 참조를 추적하는 write barrier에 `TObjectPtr`를 사용하므로, 활성화 전 프로젝트의 GC-visible 참조를 `TObjectPtr` 기반으로 정리하고 대상 플랫폼에서 검증한다.
 
 GC 설정을 바꾸기 전에 다음을 확인한다.
 
@@ -175,6 +226,8 @@ GPU 메모리 부족과 CPU heap 단편화는 같은 문제가 아니다. 렌더
 
 ## 복습 질문
 
+- Mark and Sweep에서 Root Set과 강한 참조는 UObject의 생존 여부를 어떻게 결정하는가?
+- UObject GC가 실행돼도 heap 단편화와 프로세스 RSS가 즉시 해소되지 않을 수 있는 이유는 무엇인가?
 - 메모리 누수와 외부 단편화는 Memory Insights에서 어떻게 다르게 보일 수 있는가?
 - `Reset`, `Empty`, `Shrink`, `Reserve`를 각각 언제 사용해야 하는가?
 - 모든 객체를 풀링하면 오히려 메모리 사용량이 늘 수 있는 이유는 무엇인가?
@@ -186,6 +239,9 @@ GPU 메모리 부족과 CPU heap 단편화는 같은 문제가 아니다. 렌더
 - [Epic Games: Memory Insights](https://dev.epicgames.com/documentation/en-us/unreal-engine/memory-insights-in-unreal-engine)
 - [Epic Games: Low-Level Memory Tracker](https://dev.epicgames.com/documentation/unreal-engine/using-the-low-level-memory-tracker-in-unreal-engine)
 - [Epic Games: Common Memory and CPU Performance Considerations](https://dev.epicgames.com/documentation/en-us/unreal-engine/common-memory-and-cpu-performance-considerations-in-unreal-engine)
+- [Epic Games: Unreal Object Handling](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-object-handling-in-unreal-engine)
+- [Epic Games: Object Pointers](https://dev.epicgames.com/documentation/en-us/unreal-engine/object-pointers-in-unreal-engine)
+- [Epic Games: Incremental Garbage Collection](https://dev.epicgames.com/documentation/en-us/unreal-engine/incremental-garbage-collection-in-unreal-engine)
 - [Epic Games API: FMallocBinned2](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Core/FMallocBinned2)
 - [Epic Games API: TArray::Reserve](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Core/TArray/Reserve)
 - [Epic Games API: TPagedArray](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Core/TPagedArray)

@@ -30,6 +30,84 @@ aiGenerated: false
 
 `Binaries`, `Intermediate`, 일부 `Saved` 내용은 다시 생성할 수 있지만 `Content`, `Config`, `Source`, `.uproject`는 프로젝트의 원본이다. 문제가 생겼다고 모든 디렉터리를 무작정 지우기보다 어떤 단계의 산출물인지 구분해야 한다.
 
+## 언리얼 빌드 시스템의 전체 흐름
+
+언리얼은 Visual Studio의 `.sln`이나 Xcode 프로젝트를 빌드 규칙의 원본으로 사용하지 않는다. **Unreal Build Tool(UBT)** 이 `.uproject`, `Target.cs`, 각 모듈의 `Build.cs`를 읽고 현재 플랫폼과 구성에 맞는 컴파일 환경을 만든다. IDE 프로젝트 파일은 이 정보를 바탕으로 생성되는 편집용 산출물이므로 소스 파일을 추가하거나 모듈 구성이 바뀌었을 때 다시 생성할 수 있다.
+
+```text
+.uproject
+    │
+    ├─ <Project>.Target.cs / <Project>Editor.Target.cs
+    │       └─ 무엇을 어떤 형태로 빌드할지 선택
+    │
+    └─ Source/<Module>/<Module>.Build.cs
+            └─ 모듈 의존성과 컴파일 환경 정의
+                    │
+                    ▼
+          Unreal Build Tool (UBT)
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+ Unreal Header Tool     C++ 컴파일러·링커
+ 리플렉션 코드 생성      오브젝트·바이너리 생성
+```
+
+일반적인 빌드는 다음 순서로 이해할 수 있다.
+
+1. UBT가 빌드할 Target, 플랫폼과 Configuration을 결정한다.
+2. Target에 포함된 모듈과 각 `Build.cs`의 의존성을 계산한다.
+3. 리플렉션 매크로가 있는 헤더가 변경됐다면 UHT를 실행해 generated code를 만든다.
+4. 플랫폼의 C++ 컴파일러와 링커를 호출해 실행 파일이나 모듈 바이너리를 만든다.
+
+따라서 IDE에서 Build를 눌러도 실제 빌드 그래프를 결정하는 주체는 UBT다. `.sln`에 파일이 보인다는 사실만으로 모듈 의존성이 연결된 것은 아니며, 반대로 생성된 IDE 파일을 지워도 원본 규칙이 남아 있으면 다시 만들 수 있다.
+
+## Target.cs는 빌드 결과물을 선택한다
+
+`Target.cs`는 프로젝트 전체에서 **어떤 종류의 프로그램을 만들 것인지** 정의한다. UBT는 C#으로 작성된 `TargetRules` 클래스를 읽어 Target 종류와 포함할 모듈을 결정한다.
+
+```csharp
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class ArenaGameTarget : TargetRules
+{
+    public ArenaGameTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Game;
+        ExtraModuleNames.Add("ArenaGame");
+    }
+}
+
+public class ArenaGameEditorTarget : TargetRules
+{
+    public ArenaGameEditorTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Editor;
+        ExtraModuleNames.Add("ArenaGame");
+    }
+}
+```
+
+Target과 Configuration은 서로 다른 축이다. `Editor`는 무엇을 만들지, `Development`는 어느 정도의 최적화와 디버깅 기능을 사용할지 나타낸다. 그래서 `Development Editor`, `DebugGame Editor`, `Development Game`처럼 조합한다.
+
+| Target | 결과와 용도 |
+| --- | --- |
+| `Game` | Cook된 콘텐츠를 사용하는 독립 실행 게임 |
+| `Editor` | 프로젝트 모듈을 포함한 언리얼 에디터 |
+| `Client` | 네트워크 게임에서 서버 코드를 제외한 클라이언트 |
+| `Server` | 렌더링 등 클라이언트 코드를 제외한 전용 서버 |
+| `Program` | 엔진 위에서 동작하는 독립 유틸리티 |
+
+| Configuration | 특징 |
+| --- | --- |
+| `Debug` | 엔진과 게임 코드를 디버깅 중심으로 빌드하며 가장 느림 |
+| `DebugGame` | 엔진은 최적화된 상태로 두고 게임 코드 디버깅에 집중 |
+| `Development` | 대부분의 최적화를 사용하며 일반 개발과 에디터 작업의 기본값 |
+| `Test` | Shipping에 가까운 최적화를 사용하면서 일부 통계·프로파일링 기능 유지 |
+| `Shipping` | 배포 성능에 맞춰 최적화하고 불필요한 콘솔 명령과 개발 기능 제거 |
+
+구성 이름만 보고 디버그 심볼의 존재 여부를 단정해서는 안 된다. 심볼 생성과 패키지 포함 여부는 빌드 방식과 Packaging 설정의 영향을 받으므로 배포 파이프라인에서 별도로 확인한다.
+
 ## 모듈과 빌드 규칙
 
 언리얼 C++ 코드는 일반 실행 파일 하나로만 구성되지 않는다. 프로젝트 이름의 게임 모듈이 엔진 모듈을 의존하고, Unreal Build Tool이 `<ModuleName>.Build.cs`의 규칙을 읽어 include 경로와 링크 대상을 정한다.
@@ -52,6 +130,41 @@ public class ArenaGame : ModuleRules
 외부에 공개할 선언은 `Public`, 구현 세부는 `Private`에 배치하는 방식이 일반적이다. 작은 게임에서는 한 디렉터리로도 동작하지만 모듈이 커질수록 공개 API와 내부 구현의 경계를 정리하는 편이 빌드 의존성을 이해하기 쉽다.
 
 헤더에 `UCLASS`, `USTRUCT`, `UENUM`, `UPROPERTY`, `UFUNCTION` 같은 리플렉션 매크로가 있으면 Unreal Header Tool이 엔진용 메타데이터와 연결 코드를 생성한다. 그래서 언리얼 클래스 파일을 단순히 파일 탐색기에서 복사하거나 이름만 바꾸면 생성 코드와 클래스 정보가 어긋날 수 있다.
+
+`Target.cs`와 `Build.cs`의 책임을 섞지 않는 것이 중요하다.
+
+```text
+Target.cs  → 최종 프로그램의 종류와 포함할 모듈 결정
+Build.cs   → 한 모듈이 공개·비공개로 의존하는 모듈과 라이브러리 결정
+```
+
+예를 들어 전용 서버 실행 파일을 추가하는 일은 `Server.Target.cs`의 책임이고, 게임 모듈에서 `AIModule`을 사용하도록 연결하는 일은 게임 모듈의 `Build.cs` 책임이다. Public 헤더가 다른 모듈의 타입을 노출하면 `PublicDependencyModuleNames`, 구현 파일에서만 사용하면 `PrivateDependencyModuleNames`를 우선 검토한다. 불필요한 Public 의존성은 다른 모듈의 재컴파일 범위를 키울 수 있다.
+
+## 빌드 오류는 발생 단계를 구분한다
+
+같은 “빌드 실패”라도 원인에 따라 확인할 파일이 다르다.
+
+| 실패 단계 | 자주 보이는 원인 | 먼저 확인할 곳 |
+| --- | --- | --- |
+| UBT 규칙 평가 | 잘못된 Target/Module 이름, `Build.cs` 문법, 누락된 모듈 | 오류에 표시된 `.Target.cs`, `.Build.cs` |
+| UHT 코드 생성 | 잘못된 리플렉션 매크로, 지원하지 않는 `UPROPERTY` 타입, `generated.h` 위치 | 오류가 가리키는 헤더와 첫 UHT 메시지 |
+| C++ 컴파일 | 선언 오류, include 누락, API 매크로 문제 | 첫 compiler error와 translation unit |
+| 링크 | 모듈 의존성 누락, 구현 없는 함수, 라이브러리 설정 오류 | unresolved external symbol과 소유 모듈 |
+
+마지막에 출력된 연쇄 오류보다 **처음 발생한 UBT·UHT·compiler 오류**를 먼저 읽는다. 리플렉션 선언이나 모듈 구조를 바꾼 뒤 Live Coding 결과가 이상하다면 에디터를 종료하고 전체 빌드로 재현해 generated code와 로드된 바이너리 상태를 분리한다.
+
+## Build와 Cook, Package는 다르다
+
+Build는 C++ 소스를 플랫폼 바이너리로 컴파일하고 링크하는 과정이다. Cook은 에디터용 원본 에셋을 목표 플랫폼이 읽을 수 있는 형식으로 변환하고, Stage는 배포할 파일을 임시 디렉터리에 모으며, Package는 바이너리와 Cook된 콘텐츠, 설정과 필요한 런타임 파일을 배포 가능한 구조로 만든다.
+
+```text
+Build   → 코드 바이너리 생성
+Cook    → 콘텐츠를 대상 플랫폼 형식으로 변환
+Stage   → 배포할 파일을 임시 디렉터리에 모음
+Package → 실행 가능한 배포 결과물 생성
+```
+
+따라서 `Development Game` 빌드로 실행 파일을 만들었더라도 필요한 Cooked Content가 없으면 독립 실행에 실패할 수 있다. 반대로 블루프린트 전용 변경처럼 C++ 컴파일이 필요 없는 작업도 패키징 과정에서는 Cook과 Stage가 필요하다.
 
 ## 액터는 월드에 존재하는 단위다
 
@@ -131,6 +244,9 @@ AAdventureGameMode::AAdventureGameMode()
 
 ## 복습 질문
 
+- `Target.cs`와 `Build.cs`는 각각 빌드의 어떤 결정을 담당하는가?
+- `Development Editor`에서 두 단어는 각각 무엇을 의미하는가?
+- C++ 빌드가 성공했는데 독립 실행 파일이 콘텐츠를 찾지 못한다면 어떤 단계를 확인해야 하는가?
 - 생성자와 `BeginPlay`에 넣어야 할 로직은 어떻게 구분하는가?
 - `GameMode`와 `GameState`에 같은 경기 데이터를 중복 저장하면 어떤 문제가 생기는가?
 - C++ 기반 클래스와 블루프린트 자식 클래스 사이에 어떤 설정을 공개할 것인가?
@@ -139,5 +255,11 @@ AAdventureGameMode::AAdventureGameMode()
 ## 참고 자료
 
 - 이득우, 『이득우의 언리얼 C++ 게임 개발의 정석』
+- [딩굴딩굴고양이: 언리얼 빌드 시스템 + Target.cs](https://kyoun.tistory.com/121)
 - [코딩 부부: 이득우 언리얼 C++ 정리](https://wecandev.tistory.com/category/%F0%9F%93%95%20Book/%EC%9D%B4%EB%93%9D%EC%9A%B0%20%EC%96%B8%EB%A6%AC%EC%96%BC%20C%2B%2B)
+- [Epic Games: Unreal Build Tool](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-build-tool-in-unreal-engine)
+- [Epic Games: UBT Target Reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-build-tool-target-reference)
+- [Epic Games: Build Configurations Reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/build-configurations-reference-for-unreal-engine)
+- [Epic Games: Unreal Header Tool](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-header-tool-for-unreal-engine)
+- [Epic Games: Packaging Your Project](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-your-project)
 - [Unreal Engine Actor Lifecycle](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-actor-lifecycle)
