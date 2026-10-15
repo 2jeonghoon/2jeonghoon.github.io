@@ -1,15 +1,17 @@
 ---
-title: "언리얼 네트워크 공부 01: 클라이언트·서버 프레임워크와 로그인"
+title: "01: 클라이언트·서버 프레임워크와 로그인"
 description: "언리얼 멀티플레이의 서버 권한 모델, NetMode, Listen/Dedicated Server, GameMode 중심의 접속과 로그인 흐름을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-15"
+order: 1
 category: "Unreal Engine"
 subcategory: "UE Networking"
-tags: ["Unreal Engine", "Networking", "Client Server", "GameMode", "Login"]
+tags: ["Unreal Engine","Networking","Client Server","GameMode","Login"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 싱글 플레이에서는 하나의 프로세스가 월드의 유일한 상태를 가진다. 멀티플레이에서는 서버와 각 클라이언트가 같은 종류의 액터를 서로 다른 인스턴스로 보유한다. 화면에 같은 캐릭터가 보여도 메모리 주소와 역할은 다르며, 네트워크를 통해 필요한 상태만 전달된다.
 
 언리얼 네트워크 학습의 출발점은 “이 코드는 몇 번 실행되는가?”보다 **어느 머신의 어떤 인스턴스에서 실행되고 그 결과를 누가 신뢰하는가?**를 묻는 것이다.
