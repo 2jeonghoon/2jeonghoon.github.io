@@ -1,15 +1,17 @@
 ---
 title: "언리얼 네트워크 공부 02: Connection, Ownership와 Actor Role"
 description: "NetConnection이 플레이어와 액터 소유권에 연결되는 과정, Authority·AutonomousProxy·SimulatedProxy의 의미와 RPC 실행 조건을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-15"
+order: 2
 category: "Unreal Engine"
 subcategory: "UE Networking"
-tags: ["Unreal Engine", "Networking", "Ownership", "Actor Role", "Connection"]
+tags: ["Unreal Engine","Networking","Ownership","Actor Role","Connection"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 언리얼에서 “이 액터는 내 것”이라는 말은 게임 디자인상의 소유와 네트워크 소유가 같다는 뜻이 아니다. 네트워크 Ownership은 액터에서 Owner 체인을 따라가 특정 PlayerController의 연결에 도달할 수 있는지로 결정되며, RPC 라우팅과 조건부 복제, Relevancy에 영향을 준다.
 
 ## Connection의 중심은 PlayerController다
