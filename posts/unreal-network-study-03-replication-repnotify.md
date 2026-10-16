@@ -1,15 +1,17 @@
 ---
-title: "언리얼 네트워크 공부 03: Actor·Property Replication과 RepNotify"
+title: "03: Actor·Property Replication과 RepNotify"
 description: "서버 상태를 클라이언트에 복제하는 기본 원리, DOREPLIFETIME과 RepNotify, 컴포넌트·서브오브젝트 복제와 초기 상태 설계를 정리합니다."
-date: "2026-10-05"
+date: "2026-10-16"
+order: 1
 category: "Unreal Engine"
 subcategory: "UE Networking"
-tags: ["Unreal Engine", "Networking", "Replication", "RepNotify", "Actor"]
+tags: ["Unreal Engine","Networking","Replication","RepNotify","Actor"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 Replication은 서버의 메모리를 그대로 복사하는 기능이 아니다. 서버가 각 연결에 대해 관련 있는 Actor를 선택하고, 복제 대상으로 등록된 상태의 변경분을 직렬화해 클라이언트의 대응 Actor에 적용하는 시스템이다. Actor가 복제된다고 모든 변수와 컴포넌트가 자동으로 전달되지는 않는다.
 
 ## Actor 복제 활성화
