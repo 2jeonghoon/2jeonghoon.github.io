@@ -2,14 +2,16 @@
 title: "크래프톤은 AI 역량을 어떻게 평가할까? — Cofa Probe 영상 정리"
 description: "크래프톤의 AI 역량 평가 방식이 궁금해서 찾아본 Cofa Probe 영상. AI Native의 의미부터 질문 방식, 평가 세 축과 직무의 변화까지 나중에 다시 읽기 위해 정리한 기록입니다."
 date: "2026-10-15"
+order: 3
 category: "Study"
-subcategory: ""
-tags: ["AI", "AI Native", "Cofa Probe", "크래프톤", "영상 정리"]
+subcategory: "AI"
+tags: ["AI","AI Native","Cofa Probe","크래프톤","영상 정리"]
+image: ""
+readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
-
 최근 기업의 채용 과정에서 AI 활용 역량을 평가한다는 이야기를 자주 접한다. 그럴 때마다 구체적으로 무엇을 평가하는지 궁금했다. 프롬프트를 잘 작성하는 능력일까, AI로 좋은 결과물을 만드는 능력일까? 결과물이 비슷하다면 지원자 사이의 차이는 어떻게 알아볼 수 있을까?
 
 그러던 중 크래프톤의 구한모·조정석 님이 출연한 Cofa Probe 소개 영상을 보게 됐다. 크래프톤에서는 실제로 어떤 환경에서 AI 역량을 평가하고, 지원자의 어떤 행동을 중요하게 보는지 알고 싶어서 시청했다.
@@ -19,8 +21,6 @@ aiGenerated: true
 한 번 보고 지나가기에는 아쉬워서 영상의 흐름에 따라 내용을 정리해 둔다. 나중에 AI를 활용하는 방식이나 필요한 역량을 다시 고민하게 될 때 펼쳐볼 수 있는 기록으로 남기려 한다.
 
 > 원본: 빌더 조쉬 Builder Josh, HOW I AI 팟캐스트 — [크래프톤 AI 역량 평가에서 개발 경험 없는 매장 직원 출신이 상위권에 오른 이유 (크래프톤 구한모·조정석님)](https://www.youtube.com/watch?v=CLpN3zl8noQ)
->
-> 아래는 영상의 자동 자막과 설명란을 대조해 내용을 재구성한 정리다. 출연자의 설명을 요약한 부분과 개인적인 생각을 함께 담았으며, 발언을 그대로 옮긴 직접 인용은 사용하지 않았다. 평가 성능과 참가자 사례는 영상에서 소개된 내용이다.
 
 ## 1. AI Literacy vs AI Native
 
