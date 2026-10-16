@@ -2,6 +2,8 @@ import {ContractError, validateSlug} from "../../lib/post-contract.mjs";
 import {GitHubError, createGitHubContentsClient, createInstallationToken, exchangeOAuthCode, fetchOAuthUser} from "./github.mjs";
 import {createPostService} from "./post-service.mjs";
 import {createCategoryService} from "./category-service.mjs";
+import {recordView, readAnalytics} from "./analytics.mjs";
+import analyticsPages from "./analytics-pages.json" with {type: "json"};
 import {
   SecurityError, assertMutationRequest, createOAuthState, expireSessionCookie,
   issueSession, jsonResponse, securityHeaders, serializeSessionCookie, verifySession
@@ -9,6 +11,8 @@ import {
 
 const BODY_LIMIT = 256 * 1024;
 const OAUTH_COOKIE = "__Host-jh_oauth";
+const PUBLIC_PAGES = new Set(["/", ...analyticsPages]);
+const VIEW_PATH = "/api/analytics/view";
 
 function now(env) { return env.NOW ? env.NOW() : Date.now(); }
 function requestId() { return createOAuthState().slice(0, 22); }
@@ -162,6 +166,10 @@ async function handleApi(request, env, url) {
     `${current.ownerId}:${current.sessionId}`
   );
   if (mutation) assertMutationRequest(request, current, env.ADMIN_ORIGIN);
+  if (url.pathname === "/api/analytics") {
+    if (request.method !== "GET") throw new SecurityError("method not allowed", 405);
+    return jsonResponse(await readAnalytics(env.ANALYTICS_DB, now(env)));
+  }
   const client = await githubClient(env);
   const service = createPostService(client);
   const categories = createCategoryService(client, service);
@@ -199,11 +207,79 @@ async function handleApi(request, env, url) {
   throw new SecurityError("not found", 404);
 }
 
+function collectionCors(response, request, env) {
+  const copy = new Response(response.body, response);
+  copy.headers.set("Cache-Control", "no-store");
+  copy.headers.set("Vary", "Origin");
+  if (env.PUBLIC_BLOG_ORIGIN && request.headers.get("origin") === env.PUBLIC_BLOG_ORIGIN) {
+    copy.headers.set("Access-Control-Allow-Origin", env.PUBLIC_BLOG_ORIGIN);
+    copy.headers.set("Access-Control-Allow-Methods", "POST");
+    copy.headers.set("Access-Control-Allow-Headers", "Content-Type");
+  }
+  return copy;
+}
+
+async function collectView(request, env) {
+  if (!env.PUBLIC_BLOG_ORIGIN || request.headers.get("origin") !== env.PUBLIC_BLOG_ORIGIN) throw new SecurityError("request forbidden");
+  if (request.method === "OPTIONS") {
+    if (request.headers.get("access-control-request-method") !== "POST") throw new SecurityError("method not allowed", 405);
+    const headers = (request.headers.get("access-control-request-headers") || "").toLowerCase().split(",").map(value => value.trim()).filter(Boolean);
+    if (headers.some(value => value !== "content-type")) throw new SecurityError("request forbidden");
+    return new Response(null, {status: 204});
+  }
+  if (request.method !== "POST") throw new SecurityError("method not allowed", 405);
+  if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get("content-type") || "")) throw new SecurityError("JSON content type required", 415);
+  if (!env.VIEW_RATE_LIMITER) throw new SecurityError("collection unavailable", 503);
+  await rateLimit(env.VIEW_RATE_LIMITER, await hashedRateLimitKey(request.headers.get("cf-connecting-ip") || "unknown"));
+  if (Number(request.headers.get("content-length") || 0) > 1024) throw new SecurityError("request body too large", 413);
+  const reader = request.body?.getReader();
+  const chunks = [];
+  let length = 0;
+  if (reader) {
+    try {
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        length += value.byteLength;
+        if (length > 1024) { await reader.cancel(); throw new SecurityError("request body too large", 413); }
+        chunks.push(value);
+      }
+    } finally { reader.releaseLock(); }
+  }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  let input;
+  try { input = JSON.parse(new TextDecoder().decode(bytes)); } catch { throw new SecurityError("invalid JSON", 400); }
+  if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).length !== 1 || typeof input.page !== "string" || !PUBLIC_PAGES.has(input.page)) throw new SecurityError("invalid page", 400);
+  await recordView(env.ANALYTICS_DB, input.page, now(env));
+  return new Response(null, {status: 204});
+}
+
+async function serveWorkspace(request, env, url) {
+  if (!["GET", "HEAD"].includes(request.method)) throw new SecurityError("method not allowed", 405);
+  let current = null;
+  try { current = await session(request, env, false); }
+  catch (error) { if (error.status !== 401) throw error; }
+  const assetUrl = new URL(current ? "/" : "/login", url);
+  const asset = await env.ASSETS.fetch(new Request(assetUrl, {method: "GET"}));
+  const response = new Response(request.method === "HEAD" ? null : asset.body, asset);
+  response.headers.set("Cache-Control", "no-store");
+  response.headers.set("X-Robots-Tag", "noindex");
+  return response;
+}
+
 async function fetchHandler(request, env) {
   const id = requestId();
   const url = new URL(request.url);
   try {
+    if (url.pathname === VIEW_PATH) return withRequestId(collectionCors(await collectView(request, env), request, env), id);
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      requireConfig(env);
+      return withRequestId(await serveWorkspace(request, env, url), id);
+    }
     if (!url.pathname.startsWith("/api/") && !url.pathname.startsWith("/auth/")) {
+      if (!["/admin.js", "/admin.css", "/login", "/login.html"].includes(url.pathname)) throw new SecurityError("not found", 404);
       return withRequestId(await env.ASSETS.fetch(request), id);
     }
     requireConfig(env);
@@ -216,8 +292,9 @@ async function fetchHandler(request, env) {
   } catch (error) {
     const status = error instanceof ContractError ? 422 : error.status || 500;
     const body = {error: {code: error.code || (status === 422 ? "validation" : "request_failed"), message: status >= 500 ? "Request failed" : error.message}, requestId: id};
-    await auditRequest(env, request, url, id, status);
-    return withRequestId(jsonResponse(body, {status, headers: error.responseHeaders}), id);
+    if (url.pathname !== VIEW_PATH) await auditRequest(env, request, url, id, status);
+    const response = jsonResponse(body, {status, headers: error.responseHeaders});
+    return withRequestId(url.pathname === VIEW_PATH ? collectionCors(response, request, env) : response, id);
   }
 }
 

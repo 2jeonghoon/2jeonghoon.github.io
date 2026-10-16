@@ -72,7 +72,7 @@ async function request(path, {method = "GET", body, authenticated = true, header
 
 test("serves assets without secrets but protects API configuration", async () => {
   const bindings = env({SESSION_SIGNING_KEY: undefined});
-  const asset = await request("/", {authenticated: false}, bindings);
+  const asset = await request("/admin.css", {authenticated: false}, bindings);
   assert.equal(asset.status, 200);
   assert.match(asset.headers.get("content-security-policy"), /script-src 'self'/);
   assert.equal(asset.headers.get("x-content-type-options"), "nosniff");
