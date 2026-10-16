@@ -39,6 +39,8 @@ name = "VIEW_RATE_LIMITER"
 namespace_id = "1004"
 simple = { limit = 30, period = 60 }
 
-# Add [[d1_databases]] with binding = "ANALYTICS_DB", the real database_id,
-# database_name = "jh-log-analytics", migrations_dir = "migrations".
-# See README for creation and migration commands. No fake ID is deployed.
+[[d1_databases]]
+binding = "ANALYTICS_DB"
+database_name = "jh-log-analytics"
+database_id = "d52ce794-5142-4784-a94d-4fab6277539e"
+migrations_dir = "migrations"
