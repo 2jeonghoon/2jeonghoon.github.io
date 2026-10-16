@@ -70,6 +70,34 @@
       .replaceAll("'", "&#39;");
   }
 
+  const pendingViews = new WeakMap();
+  async function trackView(browser, page) {
+    try {
+      const base = createAdminUrl(browser.BLOG_CONFIG && browser.BLOG_CONFIG.adminUrl);
+      if (!base || typeof browser.fetch !== "function") return;
+      const storage = browser.sessionStorage;
+      const key = `jh-log:view:${page}`;
+      const now = browser.Date ? browser.Date.now() : Date.now();
+      const stored = storage.getItem(key);
+      const previous = Number(stored);
+      if (stored !== null && Number.isFinite(previous) && now >= previous && now - previous < 30 * 60 * 1000) return;
+      let pending = pendingViews.get(browser);
+      if (!pending) { pending = new Set(); pendingViews.set(browser, pending); }
+      if (pending.has(page)) return;
+      pending.add(page);
+      try {
+        const response = await browser.fetch(new URL("/api/analytics/view", base).href, {
+          method: "POST", credentials: "omit", keepalive: true,
+          headers: {"Content-Type": "application/json"}, body: JSON.stringify({page}),
+          ...(typeof browser.AbortSignal?.timeout === "function" ? {signal: browser.AbortSignal.timeout(5000)} : {})
+        });
+        if (response.ok) storage.setItem(key, String(now));
+      } finally { pending.delete(page); }
+    } catch {
+      // Analytics and browser storage must never interrupt reading.
+    }
+  }
+
   function categoryKey(value) {
     return String(value || "").trim().toLocaleLowerCase("ko");
   }
@@ -399,10 +427,9 @@
           '<section class="article not-found"><a class="back-link" href="./">← ALL NOTES</a><h1>404</h1><p>요청한 기록을 찾을 수 없습니다.</p></section>';
         return;
       }
-      const manageUrl = createAdminUrl(browser.BLOG_CONFIG && browser.BLOG_CONFIG.adminUrl, post.slug);
       updateMeta(`${post.title} — JH.LOG`, post.description);
       const adsense = browser.BLOG_CONFIG && browser.BLOG_CONFIG.adsense;
-      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a>${manageUrl ? `<a class="manage-link" href="${escapeHtml(manageUrl)}" rel="nofollow">Manage post ↗</a>` : ""}<header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderArticleAd(adsense)}${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${renderArticleNavigation(posts, post)}${renderCommentsShell()}</article>`;
+      app.innerHTML = `<article class="article"><a class="back-link" href="./#writing">← ALL NOTES</a><header class="article-header">${meta(post)}<h1>${escapeHtml(post.title)}</h1><p class="lead">${escapeHtml(post.description)}</p></header>${renderArticleAd(adsense)}${renderAiDisclosure(post)}${post.image ? `<img class="article-cover" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" />` : ""}<div class="article-body">${post.content}</div><div class="article-tags">${post.tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>${renderArticleNavigation(posts, post)}${renderCommentsShell()}</article>`;
       mountAdSense(browser, page, adsense);
       mountGiscus(
         app.querySelector("[data-comments]"),
@@ -413,6 +440,7 @@
 
     const slug = new URLSearchParams(browser.location.search).get("post");
     slug ? renderArticle(posts.find(post => post.slug === slug)) : renderHome();
+    if (!slug || posts.some(post => post.slug === slug)) void trackView(browser, slug || "/");
   }
 
   return {
@@ -434,6 +462,7 @@
     renderCommentsShell,
     renderPostMeta,
     sortPosts,
+    trackView,
     updateCategorySidebarState
   };
 });

@@ -141,10 +141,12 @@ test("produces the exact deployable artifact and resolves local references", asy
 });
 
 test("rejects symlinks in static inputs", async () => {
-  await symlink(path.join(fixtureRoot, "assets/cover.png"), path.join(fixtureRoot, "assets/linked.png"));
+  // Windows junctions exercise the same symlink rejection without requiring
+  // the elevated privilege needed to create a file symlink.
+  await symlink(path.join(fixtureRoot, "public"), path.join(fixtureRoot, "assets/linked"), process.platform === "win32" ? "junction" : "dir");
   await assert.rejects(
     buildSite({projectRoot: fixtureRoot, outDir}),
-    /symbolic link.*assets\/linked\.png/i
+    /symbolic link.*assets\/linked/i
   );
 });
 
