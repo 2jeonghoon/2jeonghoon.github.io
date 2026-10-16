@@ -5,6 +5,9 @@
       "children": [
         {
           "name": "Game Server"
+        },
+        {
+          "name": "AI"
         }
       ]
     },
