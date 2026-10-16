@@ -1,15 +1,17 @@
 ---
-title: "언리얼 네트워크 공부 04: Relevancy, 빈도, 우선순위와 Dormancy"
+title: "04: Relevancy, 빈도, 우선순위와 Dormancy"
 description: "연결별 Actor Relevancy, NetUpdateFrequency, Priority, Dormancy와 저수준 복제 흐름을 이해하고 Networking Insights로 대역폭을 측정하는 방법을 정리합니다."
-date: "2026-10-05"
+date: "2026-10-16"
+order: 2
 category: "Unreal Engine"
 subcategory: "UE Networking"
-tags: ["Unreal Engine", "Networking", "Relevancy", "Dormancy", "Network Insights"]
+tags: ["Unreal Engine","Networking","Relevancy","Dormancy","Network Insights"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 복제를 켜는 것만으로 네트워크 설계가 끝나지 않는다. 서버에 Actor가 수천 개 있고 클라이언트가 수십 명이라면 모든 Actor를 매 프레임 모든 연결에 보낼 수 없다. 언리얼은 먼저 복제 후보를 고르고, 연결마다 관련성을 판단한 뒤, 제한된 대역폭에서 우선순위를 계산해 실제 전송 대상을 정한다.
 
 ## 저수준 흐름을 큰 단계로 보기
