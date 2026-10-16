@@ -77,6 +77,28 @@
     return {category:parent?.name||normalizedCategory,subcategory:child?.name||""};
   }
 
+  function renderAnalytics(document, data) {
+    const count = value => Number(value).toLocaleString("ko-KR");
+    document.getElementById("analytics-total").textContent = count(data.total);
+    document.getElementById("analytics-today").textContent = count(data.today);
+    function rows(id, values, label) {
+      const body = document.getElementById(id);
+      body.textContent = "";
+      values.forEach(value => {
+        const row = document.createElement("tr");
+        const name = document.createElement("th");
+        name.scope = "row";
+        name.textContent = label(value);
+        const views = document.createElement("td");
+        views.textContent = count(value.views);
+        row.append(name, views);
+        body.appendChild(row);
+      });
+    }
+    rows("analytics-days", data.days, row => row.day);
+    rows("analytics-pages", data.pages, row => row.page === "/" ? "홈" : row.page);
+  }
+
   function bootstrap(document) {
     if (!document) return;
     let csrfToken = "";
@@ -97,6 +119,22 @@
         throw error;
       }
       return payload;
+    }
+    async function loadAnalytics() {
+      const button = get("refresh-analytics");
+      button.disabled = true;
+      get("analytics-status").textContent = "통계를 불러오는 중…";
+      try {
+        const data = await api("/api/analytics");
+        renderAnalytics(document, data);
+        get("analytics-status").textContent = "통계가 갱신되었습니다.";
+      } catch {
+        get("analytics-total").textContent = "—";
+        get("analytics-today").textContent = "—";
+        get("analytics-days").textContent = "";
+        get("analytics-pages").textContent = "";
+        get("analytics-status").textContent = "통계를 불러오지 못했습니다. 잠시 후 새로고침해 주세요. 글쓰기는 계속 이용할 수 있습니다.";
+      } finally { button.disabled = false; }
     }
     function readForm(draft) {
       return createEditorModel({
@@ -164,17 +202,18 @@
         catch(error){if(error.name!=="AbortError")showError(error);}},300);
     }
     async function start() {
-      try {const session=await api("/api/session");if(!session.authenticated){get("signed-out").hidden=false;return;}csrfToken=session.csrfToken;get("workspace").hidden=false;get("logout").hidden=false;writeForm(model);await loadCategories();await loadList();
+      try {const session=await api("/api/session");if(!session.authenticated){get("signed-out").hidden=false;return;}csrfToken=session.csrfToken;get("workspace").hidden=false;get("logout").hidden=false;writeForm(model);void loadAnalytics();await loadCategories();await loadList();
         const edit=new URL(location.href).searchParams.get("edit");if(edit)await loadPost(edit);}catch(error){get("signed-out").hidden=false;showError(error);}
     }
     get("new-post").addEventListener("click",()=>writeForm(createEditorModel()));get("post-filter").addEventListener("change",loadList);
+    get("refresh-analytics").addEventListener("click",loadAnalytics);
     get("post-category").addEventListener("change",()=>{const selection=nextCategorySelection(categoryTree,get("post-category").value,get("post-subcategory").value);writeChildOptions(selection.category,selection.subcategory);});
     get("add-parent-category").addEventListener("click",addParentCategory);get("add-child-category").addEventListener("click",addChildCategory);
     get("save-draft").addEventListener("click",()=>save(true));get("publish").addEventListener("click",()=>save(false));get("post-body").addEventListener("input",schedulePreview);
     get("logout").addEventListener("click",async()=>{await api("/auth/logout",{method:"POST",body:{}});location.reload();});
     get("delete-post").addEventListener("click",()=>{get("delete-slug").textContent=model.slug;get("delete-confirmation").value="";get("delete-dialog").showModal();});
     get("confirm-delete").addEventListener("click",async event=>{event.preventDefault();const confirmation=get("delete-confirmation").value;if(!canDelete(model.slug,confirmation))return;try{await api(`/api/posts/${encodeURIComponent(model.slug)}`,{method:"DELETE",body:{sha:model.sha,confirmation}});get("delete-dialog").close();writeForm(createEditorModel());await loadList();}catch(error){showError(error);}});
-    form.addEventListener("submit",event=>event.preventDefault()); start();
+    form.addEventListener("submit",event=>event.preventDefault()); return start();
   }
-  return {createApiRequest,createEditorModel,parseOptionalOrder,groupAdminPosts,withRequestError,canEditSlug,canDelete,mergeCategoryTrees,childNamesFor,nextCategorySelection,bootstrap};
+  return {createApiRequest,createEditorModel,parseOptionalOrder,groupAdminPosts,withRequestError,canEditSlug,canDelete,mergeCategoryTrees,childNamesFor,nextCategorySelection,renderAnalytics,bootstrap};
 });

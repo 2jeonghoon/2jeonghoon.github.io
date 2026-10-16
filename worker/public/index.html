@@ -11,6 +11,17 @@
   <main id="app">
     <section id="signed-out" class="panel" hidden><p>GitHub 소유자 계정으로 로그인해 글을 관리합니다.</p><a class="button" href="/auth/login">GitHub로 로그인</a></section>
     <section id="workspace" hidden>
+      <section class="panel analytics" aria-labelledby="analytics-title">
+        <div class="row"><h1 id="analytics-title">조회 통계</h1><button id="refresh-analytics" type="button">새로고침</button></div>
+        <p class="analytics-note">본인만 볼 수 있는 조회 통계 · 한국 시간 기준 · 같은 탭에서 30분 이내 새로고침은 중복 집계를 줄입니다.</p>
+        <dl class="analytics-summary"><div><dt>전체 조회</dt><dd id="analytics-total">—</dd></div><div><dt>오늘 조회</dt><dd id="analytics-today">—</dd></div></dl>
+        <p id="analytics-status" role="status" aria-live="polite"></p>
+        <div class="analytics-tables">
+          <div class="analytics-table"><table><caption>최근 30일 조회 수</caption><thead><tr><th scope="col">날짜</th><th scope="col">조회 수</th></tr></thead><tbody id="analytics-days"></tbody></table></div>
+          <div class="analytics-table"><table><caption>페이지별 누적 조회 수</caption><thead><tr><th scope="col">페이지</th><th scope="col">조회 수</th></tr></thead><tbody id="analytics-pages"></tbody></table></div>
+        </div>
+        <p class="analytics-note">기능 배포 이후부터 집계합니다. 차단 도구나 네트워크 상태에 따라 실제 열람 수와 차이가 있을 수 있습니다.</p>
+      </section>
       <aside class="panel sidebar">
         <div class="row"><h1>글 관리</h1><button id="new-post" type="button">새 글</button></div>
         <label for="post-filter">글 상태</label>
