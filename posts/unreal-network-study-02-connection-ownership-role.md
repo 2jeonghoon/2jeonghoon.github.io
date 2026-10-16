@@ -1,5 +1,5 @@
 ---
-title: "언리얼 네트워크 공부 02: Connection, Ownership와 Actor Role"
+title: "02: Connection, Ownership와 Actor Role"
 description: "NetConnection이 플레이어와 액터 소유권에 연결되는 과정, Authority·AutonomousProxy·SimulatedProxy의 의미와 RPC 실행 조건을 정리합니다."
 date: "2026-10-15"
 order: 2
