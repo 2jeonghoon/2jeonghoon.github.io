@@ -1,5 +1,5 @@
 ---
-title: "언리얼 네트워크 공부 05: RPC, 전투 동기화와 지연 대응"
+title: "05: RPC, 전투 동기화와 지연 대응"
 description: "Server·Client·NetMulticast RPC의 실행 조건, Reliable 선택, 공격과 체력 동기화, 로컬 예측·패킷 지연 테스트·대역폭 최적화를 정리합니다."
 date: "2026-10-16"
 order: 3
