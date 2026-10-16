@@ -479,7 +479,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 ### 일상적인 글 관리
 
-1. 공개 블로그의 `Write` 또는 관리자 주소를 열고 GitHub 소유자 계정으로
+1. 북마크한 관리자 주소를 열고 GitHub 소유자 계정으로
    로그인합니다.
 2. 새 글은 먼저 `초안 저장`으로 보관합니다. 초안은 공개 글 목록, RSS,
    사이트맵에 포함되지 않습니다.
@@ -566,7 +566,80 @@ Cloudflare에는 `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`,
 - 긴급 차단: GitHub App 설치를 제거하면 저장소 접근이 즉시 중단됩니다. 필요하면
   App의 모든 키와 client secret도 폐기합니다.
 
-### 남용 방지와 사용량 모니터링
+### 비공개 조회 통계
+
+공개 블로그에는 `Write`와 `Manage post` 링크가 표시되지 않습니다.
+`https://jh-log-admin.2jeonghoon.workers.dev/`를 북마크해 사용하세요.
+로그인 전에는 로그인 안내만 전달되며, 소유자 계정으로 로그인하면 기존
+글쓰기·카테고리 관리와 조회 통계를 이용할 수 있습니다. 관리자 주소를
+알고 있더라도 다른 계정은 관리 API와 통계를 조회할 수 없습니다.
+
+통계는 전체·오늘·최근 30일·페이지별 조회 수를 보여주며 날짜는 한국 시간
+기준입니다. 기능을 실제 배포한 이후부터 기록합니다. 과거 조회 수는 복원하지
+않습니다. 같은 탭에서 같은 페이지를 30분 이내에 다시 열면 중복 전송을 줄입니다.
+다른 탭·기기, 차단 도구, 네트워크 상태에 따라 실제 열람 수와 차이가 있으므로
+정확한 방문자 수는 아닙니다. 통계 DB에는 날짜·페이지·조회 수만 저장하며
+IP, 방문자 식별자, User-Agent, referrer, URL 쿼리는 저장하지 않습니다.
+수집 요청은 관리자 감사 로그에도 남기지 않습니다. 기존 인증/API 감사 로그는
+기존 정책을 유지합니다.
+
+#### 최초 DB 연결
+
+저장소 루트에서 Cloudflare에 로그인한 뒤 전용 D1 DB를 생성합니다.
+Node.js 24가 로컬 테스트와 CI 기준입니다.
+
+```sh
+npx wrangler login
+npx wrangler d1 create jh-log-analytics --config worker/wrangler.toml
+```
+
+생성 결과에 표시된 **실제 database_id**를 사용해 `worker/wrangler.toml`에
+아래 바인딩을 추가합니다. 예시 설명문을 UUID 대신 넣으면 안 됩니다.
+Wrangler가 설정을 자동 추가했다면 중복 바인딩을 만들지 말고 이름을 확인합니다.
+
+```toml
+[[d1_databases]]
+binding = "ANALYTICS_DB"
+database_name = "jh-log-analytics"
+database_id = "생성 결과에 나온 실제 UUID"
+migrations_dir = "migrations"
+```
+
+```sh
+npx wrangler d1 migrations apply ANALYTICS_DB --remote --config worker/wrangler.toml
+npm run deploy:admin
+npm run validate:blog
+```
+
+`deploy:admin`은 발행된 글 목록을 `worker/src/analytics-pages.json`으로 먼저
+생성하고 Worker를 배포합니다. 공개 글만 수집 대상으로 허용하므로 **새 글을
+발행하거나 삭제한 뒤에는 최신 main을 기준으로 `npm run deploy:admin`을 다시
+실행**해야 합니다. 그 전에는 새 글의 조회 수가 기록되지 않거나, 삭제된 글의
+기존 slug가 수집 허용 목록에 남을 수 있습니다. 기존 집계는 삭제해도 유지됩니다.
+공개 블로그 변경은 main에 반영한 뒤 기존 Pages 배포가 성공해야 적용됩니다.
+Worker 배포만으로 공개 페이지가 갱신되지는 않습니다.
+
+DB 미연결·장애 시 공개 글 읽기와 기존 글 관리는 계속 작동합니다. 통계에는
+숫자 0 대신 불러오기 실패 안내가 표시됩니다. 복구 후 통계의 새로고침을 누릅니다.
+읽기·집계 API는 공개하지 않으며 수집 API에만 공개 블로그 Origin을 허용합니다.
+수집은 별도의 `VIEW_RATE_LIMITER`로 주소별 분당 30회로 제한합니다.
+Origin과 요청 제한은 자동화된 허위 조회를 완전히 막는 수단은 아닙니다.
+
+배포 후 확인할 항목:
+
+- 로그아웃 상태의 관리자 `/`와 `/index.html`에 편집 폼이 없어야 합니다.
+- 로그아웃 상태의 `/api/analytics`는 `401`이어야 합니다.
+- 실제 공개 블로그의 홈·글을 연 뒤 본인 관리자 통계에서 증가를 확인합니다.
+- 공개 헤더와 글 상세에 관리 링크가 없어야 합니다.
+
+롤백은 이전 Worker 버전을 재배포하고 공개 페이지도 이전 커밋으로 배포합니다.
+D1 데이터베이스와 `daily_views` 테이블은 삭제하지 않습니다. 이전 Worker에서
+통계를 사용하지 않더라도 집계 데이터는 보존됩니다.
+
+참고: [D1 마이그레이션](https://developers.cloudflare.com/d1/reference/migrations/),
+[Worker 우선 실행과 정적 파일 인증](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/).
+
+### 요청 제한과 기존 감사 로그
 
 인증, 읽기, 변경 요청 제한은 `worker/wrangler.toml`의 `[[ratelimits]]`에서
 조정합니다. 값을 바꾼 뒤 Worker를 재배포하고 `429` 동작을 확인합니다. 변경 API는
