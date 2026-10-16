@@ -82,7 +82,31 @@ Client Character.ServerTryInteract(Door)
   → 결과 Replication
 ```
 
-서버가 Client RPC를 호출할 때도 대상 Actor의 owning connection을 사용해 어느 클라이언트에서 실행할지 정한다. 소유권이 없는 Actor의 Client RPC는 의도한 대상으로 가지 않는다.
+서버가 Client RPC를 호출할 때도 대상 Actor의 owning connection을 사용해 어느 클라이언트에서 실행할지 정한다. **서버에서 owning connection이 없는 Actor의 Client RPC를 호출하면, 클라이언트로 전달되지 않고 서버에서 실행된다.** `Client` 지정만으로 원하는 플레이어에게 전송되는 것은 아니다.
+
+예를 들어 클라이언트 A가 상자를 열었고, 서버가 A에게만 아이템 획득 UI를 보여주려 한다고 하자.
+
+```cpp
+// 서버에서 호출. Client_ShowItemUI는 Client RPC로 선언된 함수다.
+Chest->Client_ShowItemUI();
+```
+
+엔진은 “상자를 연 사람이 A이므로 A에게 보내야 한다”라고 추론하지 않는다. RPC를 호출한 대상인 `Chest`의 소유 관계로 수신자를 결정한다.
+
+| 서버에서 Client RPC를 호출한 대상 Actor의 소유 관계 | 실행 위치 |
+| --- | --- |
+| 클라이언트 A 소유 | 클라이언트 A |
+| 클라이언트 B 소유 | 클라이언트 B |
+| owning connection 없음 | 서버 |
+
+따라서 아무도 소유하지 않은 상자에서 호출하면 A의 컴퓨터에서는 함수가 실행되지 않아, 의도한 UI가 나타나지 않는다. 이 경우에는 A의 PlayerController에 Client RPC를 정의하고, 서버에서 해당 PlayerController를 통해 호출할 수 있다.
+
+```cpp
+// 서버에서 A의 PlayerController 인스턴스를 대상으로 호출
+PlayerControllerA->Client_ShowItemUI(ItemInfo);
+```
+
+이렇게 하면 A의 연결로 전달되며, UI에 필요한 아이템 정보는 인자로 넘길 수 있다. 핵심은 **Client RPC의 수신자가 이벤트에 관여한 플레이어가 아니라, 호출 대상 Actor의 owning connection으로 결정된다는 것**이다. 위 표는 서버에서 Client RPC를 호출하는 경우의 규칙이다.
 
 ## 조건부 복제와 Relevancy
 
@@ -136,3 +160,4 @@ RPC가 실행되지 않을 때 무작정 Reliable로 바꾸기보다 다음을 �
 - [DesignerD: UE 개념정리 - Network](https://designerd.tistory.com/category/%E2%AD%90%20Unreal%20Engine/UE%20%EA%B0%9C%EB%85%90%EC%A0%95%EB%A6%AC%20-%20Network?page=1)
 - [이게뭐영: 액터의 역할과 커넥션 핸드셰이킹](https://meo-young.tistory.com/126)
 - [Epic Games: Actor Owner and Owning Connection](https://dev.epicgames.com/documentation/unreal-engine/actor-owner-and-owning-connection-in-unreal-engine)
+- [Epic Games: Remote Procedure Calls — Matrix of RPC Execution](https://dev.epicgames.com/documentation/unreal-engine/remote-procedure-calls-in-unreal-engine#matrixofrpcexecution)
