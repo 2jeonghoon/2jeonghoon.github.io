@@ -1,15 +1,17 @@
 ---
 title: "언리얼 네트워크 공부 05: RPC, 전투 동기화와 지연 대응"
 description: "Server·Client·NetMulticast RPC의 실행 조건, Reliable 선택, 공격과 체력 동기화, 로컬 예측·패킷 지연 테스트·대역폭 최적화를 정리합니다."
-date: "2026-10-05"
+date: "2026-10-16"
+order: 3
 category: "Unreal Engine"
 subcategory: "UE Networking"
-tags: ["Unreal Engine", "Networking", "RPC", "Latency", "Combat"]
+tags: ["Unreal Engine","Networking","RPC","Latency","Combat"]
+image: ""
+readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 Property Replication이 현재 상태를 수렴시키는 장치라면 RPC는 다른 머신의 Actor 인스턴스에서 함수를 실행하도록 요청하는 장치다. 둘은 경쟁 관계가 아니라 역할이 다르다. 지속 상태를 RPC만으로 쌓거나 모든 순간 행동을 프로퍼티로 토글하면 늦은 참가, 유실, 호출 순서와 중복 처리 문제가 생긴다.
 
 ## RPC 종류
