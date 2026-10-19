@@ -1,17 +1,16 @@
 ---
-title: "게임 네트워킹 면접: 캐릭터가 뒤로 튕기는 이유"
+title: "캐릭터가 뒤로 튕기는 이유"
 description: "클라이언트 예측, 서버 재조정, 다른 플레이어의 보간과 Reliable 이동 전송의 한계를 정리한 면접 기록."
 date: "2026-10-19"
 category: "면접 대비"
 subcategory: ""
-tags: ["면접 기록", "Unreal Engine", "Networking", "Client Prediction"]
+tags: ["면접 기록","Unreal Engine","Networking","Client Prediction"]
 image: ""
-readingTime: "4 min read"
+readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
-
 매일 면접 질문 하나와 정답, 핵심 해설을 정리한다.
 
 ## 오늘의 질문
@@ -73,4 +72,3 @@ Reliable 전송은 재전송과 순서 보장에 비용이 든다. 같은 순서
 “클라이언트 예측과 서버 시뮬레이션이 어긋나 보정이 발생한 것으로 보겠습니다. 자기 캐릭터는 서버가 확인한 시점으로 보정한 뒤 미확인 입력을 재실행하고, 시각적 보정에는 스무딩을 적용합니다. 다른 플레이어는 일반적으로 수신 상태를 버퍼링해 보간하며, Unreal에서는 CharacterMovementComponent의 네트워크 스무딩 경로도 확인하겠습니다.
 
 모든 이동을 Reliable로 보내면 손실 시 재전송과 순서 대기로 지연이 커질 수 있습니다. RTT·지터·손실률뿐 아니라 보정 빈도·거리, 업데이트 수신 간격과 서버 틱 시간을 함께 측정해 원인을 좁히겠습니다.”
-
