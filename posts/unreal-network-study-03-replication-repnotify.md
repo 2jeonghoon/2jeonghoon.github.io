@@ -323,7 +323,81 @@ UHealthComponent::UHealthComponent()
 }
 ```
 
-일반 UObject는 독립적인 Actor처럼 자동으로 네트워크 채널을 갖지 않는다. 복제되는 Actor의 Subobject로 등록하고 수명과 생성 방식을 관리해야 한다. 인벤토리 항목 수가 많다면 각 항목을 UObject로 무조건 복제하기보다 Fast Array Serialization 같은 변경 목록용 구조를 검토한다.
+### SetIsReplicatedByDefault(true)는 무엇을 하는가?
+
+`SetIsReplicatedByDefault`는 매크로가 아니라 `UActorComponent`가 제공하는 함수다. `true`를 전달하면 **이 컴포넌트의 복제를 기본적으로 활성화한다**. 내부적으로 컴포넌트의 `bReplicates` 값을 설정하며, 컴포넌트 생성자에서 사용한다.
+
+위 예제는 “`UHealthComponent`는 기본적으로 복제 기능을 사용하는 컴포넌트다”라는 설정이다. 이름의 `ByDefault`는 생성 시의 기본 설정이라는 뜻이며, 초기 상태를 한 번만 보내는 `COND_InitialOnly`와는 다르다. 함수가 실행되는 순간 체력 값이나 컴포넌트 전체 메모리를 전송하는 것도 아니다.
+
+[공식 API 문서](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/UActorComponent/SetIsReplicatedByDefault)는 이 함수를 컴포넌트 생성 중에만 호출하도록 명시한다. 이미 생성된 컴포넌트의 복제 여부를 실행 중에 바꾸려면 `SetIsReplicated(true)` 또는 `SetIsReplicated(false)`를 사용한다.
+
+### Actor, Component, Property 설정은 각각 필요하다
+
+캐릭터의 체력 컴포넌트에서 `Health`를 복제하려면 세 단계의 설정을 구분한다.
+
+| 설정 | 의미 |
+| --- | --- |
+| Actor의 `bReplicates = true` | 소유 Actor를 네트워크 복제 대상으로 설정 |
+| Component 생성자의 `SetIsReplicatedByDefault(true)` | 해당 컴포넌트의 복제를 기본 활성화 |
+| Component의 `UPROPERTY(Replicated)`와 `DOREPLIFETIME` | 컴포넌트 안에서 어떤 변수를 동기화할지 지정 |
+
+예를 들어 Actor 생성자에서는 체력 컴포넌트를 기본 서브오브젝트로 생성할 수 있다. `HealthComponent`는 클래스에 선언한 멤버라고 가정한다.
+
+```cpp
+AStudyCharacter::AStudyCharacter()
+{
+    bReplicates = true;
+    HealthComponent = CreateDefaultSubobject<UHealthComponent>(
+        TEXT("HealthComponent"));
+}
+```
+
+컴포넌트에서는 복제를 활성화하고, 복제할 체력 프로퍼티도 별도로 선언·등록한다.
+
+```cpp
+// UHealthComponent 클래스 선언 안
+UPROPERTY(Replicated)
+float Health = 100.0f;
+
+virtual void GetLifetimeReplicatedProps(
+    TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+```
+
+```cpp
+// .cpp 파일: Net/UnrealNetwork.h 포함 필요
+UHealthComponent::UHealthComponent()
+{
+    SetIsReplicatedByDefault(true);
+}
+
+void UHealthComponent::GetLifetimeReplicatedProps(
+    TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(UHealthComponent, Health);
+}
+```
+
+`SetIsReplicatedByDefault(true)`만 호출했다고 모든 멤버 변수가 자동 복제되지는 않는다. `Health`를 컴포넌트가 가지고 있으므로 `DOREPLIFETIME`의 클래스 인자도 `AStudyCharacter`가 아닌 `UHealthComponent`다. UI 후처리가 필요하다면 이 프로퍼티에도 `ReplicatedUsing`과 OnRep를 사용할 수 있다.
+
+### 언제, 어떤 경로로 동기화되는가?
+
+서버가 체력 컴포넌트의 `Health`를 바꾸면, 이후 소유 Actor의 복제 업데이트를 통해 클라이언트의 대응 컴포넌트에 값이 적용된다. 컴포넌트가 독립적인 Actor처럼 별도의 네트워크 채널과 업데이트 주기를 갖는 것은 아니다. 소유 Actor의 relevancy와 dormancy 등 복제 상태에 영향을 받는다.
+
+```text
+서버의 AStudyCharacter                  클라이언트의 대응 캐릭터
+  └─ HealthComponent                     └─ HealthComponent
+       Health = 100                           Health = 100
+
+서버에서 컴포넌트의 Health를 80으로 변경
+  └── 소유 Actor의 복제 업데이트 ──────────→ Health = 80 적용
+```
+
+생성자에서 `CreateDefaultSubobject`로 만든 기본 컴포넌트는 서버와 클라이언트가 각자의 Actor 생성 과정에서 만든다. 컴포넌트 복제를 활성화하는 목적은 이렇게 대응하는 컴포넌트 사이에서 필요한 상태 등을 동기화하는 것이다. 서버에서 실행 중 동적으로 생성하는 컴포넌트는 생성·삭제 복제까지 고려해야 하므로 기본 컴포넌트와 생성 경로를 구분한다. 구체적인 설정은 [Epic Games의 컴포넌트 복제 문서](https://dev.epicgames.com/documentation/en-us/unreal-engine/replicating-actor-components-in-unreal-engine)를 참고한다.
+
+### 일반 UObject Subobject와의 차이
+
+일반 UObject는 독립적인 Actor처럼 자동으로 네트워크 채널을 갖지 않는다. `SetIsReplicatedByDefault`도 모든 UObject에 제공되는 함수가 아니라 ActorComponent의 함수다. 일반 UObject를 복제하려면 복제되는 Actor 또는 컴포넌트의 Subobject로 등록하고 수명과 생성 방식을 관리해야 한다. 인벤토리 항목 수가 많다면 각 항목을 UObject로 무조건 복제하기보다 Fast Array Serialization 같은 변경 목록용 구조를 검토한다.
 
 ## 초기 복제와 Late Join
 
