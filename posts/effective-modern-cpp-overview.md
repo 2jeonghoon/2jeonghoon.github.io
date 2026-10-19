@@ -2,7 +2,6 @@
 title: "Effective Modern C++: 타입 추론부터 동시성까지 핵심 정리"
 description: "Scott Meyers의 Effective Modern C++를 공부하기 위한 주제별 노트. 타입 추론, 초기화, 스마트 포인터, 이동과 전달, 람다, 동시성의 판단 기준을 예제로 정리합니다."
 date: "2026-10-19"
-order: 1
 category: "C++"
 subcategory: "Effective Modern C++"
 tags: ["C++", "Effective Modern C++", "C++11", "C++14", "Move Semantics", "Smart Pointer"]
@@ -20,6 +19,23 @@ aiGenerated: true
 이 글은 공개된 공식 목차와 저자 자료로 학습 주제를 선정하고, 언어 규칙을 참고해 재구성한 **핵심 개념 공부 노트**다. 책 전체 본문을 읽고 항목별로 완역한 요약은 아니다. 예제는 이 노트를 위해 작성했으며, 각 코드 블록은 별개의 예제다. C++17/20의 내용은 마지막 보충 절에서 구분한다.
 
 ## 전체 학습 지도
+
+학습 순서는 이 책을 먼저 공부한 뒤 [C++20 — The Complete Guide 학습 안내](/?post=cpp20-complete-guide-overview)로 넘어가는 것으로 잡는다. 이 책에서는 타입 추론·수명·소유권·이동·템플릿·람다·동시성의 판단 기준을 익히고, 다음 책에서는 C++20의 추가 기능을 장 순서대로 공부한다.
+
+장별 초안은 아래 목차에서 찾아갈 수 있다. 초안 단계에서는 공개 사이트의 글 목록과 글 링크로 열리지 않을 수 있으며, 저장소 또는 관리자 편집 화면에서 확인한다.
+
+| 장 | 공부 노트 | 항목 |
+| --- | --- | --- |
+| 1 | [타입 추론](/?post=effective-modern-cpp-01-deducing-types) | 1–4 |
+| 2 | [auto](/?post=effective-modern-cpp-02-auto) | 5–6 |
+| 3 | [현대 C++로 옮겨가기](/?post=effective-modern-cpp-03-moving-to-modern-cpp) | 7–17 |
+| 4 | [스마트 포인터](/?post=effective-modern-cpp-04-smart-pointers) | 18–22 |
+| 5 | [우측값 참조·이동·완벽 전달](/?post=effective-modern-cpp-05-rvalue-references-move-forwarding) | 23–30 |
+| 6 | [람다 표현식](/?post=effective-modern-cpp-06-lambda-expressions) | 31–34 |
+| 7 | [동시성 API](/?post=effective-modern-cpp-07-concurrency-api) | 35–40 |
+| 8 | [값 전달과 emplacement](/?post=effective-modern-cpp-08-tweaks) | 41–42 |
+
+장별 글에서 항목 순서대로 공부하고, 아래 종합 정리는 복습에 사용한다. 예제의 표준 범위는 기본적으로 C++11/14이며 이후 변경은 별도 보충으로 구분한다.
 
 [출판사 공식 목차](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/)의 구성을 기준으로 공부 순서를 잡는다. 아래 질문은 복습할 때 사용할 질문이다.
 
@@ -282,6 +298,14 @@ private:
 - 최적화 전후의 복사·이동 횟수와 실제 실행 시간을 측정한다.
 
 ## 참고 자료
+
+### 초안 검증 기록
+
+2026-10-19에 Visual Studio 2022의 MSVC로 장별 글의 C++ 코드 조각 54개를 `/std:c++14` 문법 검사했고, 템플릿을 실제로 인스턴스화하는 추가 검사 8개도 통과했다. PImpl의 헤더·구현과 앞 선언을 사용하는 호출부는 글에 표시한 문맥대로 함께 검사했다. 이는 컴파일 검증이며 모든 코드의 실행·동시성·성능 검증을 뜻하지 않는다.
+
+8장에 Item 1–42가 각각 한 번씩 있는지, 목차 링크와 초안 상태가 일치하는지도 확인했다.
+
+### 도서와 언어 규칙
 
 - [Scott Meyers: 도서 소개와 정오표 링크](https://www.aristeia.com/books.html)
 - [O'Reilly: Effective Modern C++ 공식 목차](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/)
