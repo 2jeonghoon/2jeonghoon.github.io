@@ -2,8 +2,8 @@
 title: "게임 네트워킹 면접: 캐릭터가 뒤로 튕기는 이유"
 description: "클라이언트 예측, 서버 재조정, 다른 플레이어의 보간과 Reliable 이동 전송의 한계를 정리한 면접 기록."
 date: "2026-10-19"
-category: "Study"
-subcategory: "Game Server"
+category: "면접 대비"
+subcategory: ""
 tags: ["면접 기록", "Unreal Engine", "Networking", "Client Prediction"]
 image: ""
 readingTime: "4 min read"

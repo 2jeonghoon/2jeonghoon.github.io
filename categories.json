@@ -1,6 +1,10 @@
 {
   "categories": [
     {
+      "name": "면접 대비",
+      "children": []
+    },
+    {
       "name": "Study",
       "children": [
         {
