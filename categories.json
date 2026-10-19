@@ -55,6 +55,22 @@
           "name": "AI"
         }
       ]
+    },
+    {
+      "name": "Mathematics",
+      "children": [
+        {
+          "name": "Introduction to Linear Algebra"
+        }
+      ]
+    },
+    {
+      "name": "Game Development",
+      "children": [
+        {
+          "name": "Game Physics Engine Development"
+        }
+      ]
     }
   ]
 }
