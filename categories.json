@@ -28,6 +28,9 @@
       "children": [
         {
           "name": "Effective C++"
+        },
+        {
+          "name": "Effective Modern C++"
         }
       ]
     },
