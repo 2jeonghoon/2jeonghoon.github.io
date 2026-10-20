@@ -4,12 +4,12 @@ description: "입력 번호와 위치 계산으로 이해하는 서버 재조정
 date: "2026-10-20"
 category: "면접 대비"
 subcategory: ""
-tags: ["면접 기록", "Networking", "Client Prediction", "Reconciliation", "Unreal Engine"]
+tags: ["면접 기록","Networking","Client Prediction","Reconciliation","Unreal Engine"]
 image: ""
 readingTime: ""
 featured: false
 draft: false
-aiGenerated: true
+aiGenerated: false
 ---
 매일 면접 질문 하나와 정답, 핵심 해설을 정리한다. [지난 글](?post=interview-2026-10-19-character-rubber-banding)에서 다룬 서버 재조정을 숫자로 따라가 본다.
 
