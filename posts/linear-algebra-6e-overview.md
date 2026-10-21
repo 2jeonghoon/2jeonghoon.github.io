@@ -1,17 +1,17 @@
 ---
 title: "Introduction to Linear Algebra 6판: 학습 안내와 전체 목차"
 description: "Gilbert Strang의 선형대수학 6판 실제 목차를 따라 벡터, 부분공간, 직교, 고유값, SVD와 응용을 공부합니다."
-date: "2026-10-19"
+date: "2026-10-21"
+order: 1
 category: "Mathematics"
 subcategory: "Introduction to Linear Algebra"
-tags: ["Linear Algebra", "Mathematics", "Gilbert Strang", "학습 목차"]
+tags: ["Linear Algebra","Mathematics","Gilbert Strang","학습 목차"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 ## 기준 도서와 공부 목적
 
 기준 도서는 **Gilbert Strang의 『Introduction to Linear Algebra』 6판(2023)**이다. 벡터와 행렬을 계산하는 방법뿐 아니라 해가 존재하는 공간, 직교 투영, 고유 방향을 이해하는 기초 공부로 선택했다. 판본과 공개 자료는 [저자의 공식 페이지](https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html)에서 확인할 수 있다.
