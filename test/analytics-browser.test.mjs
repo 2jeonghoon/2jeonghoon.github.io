@@ -138,3 +138,60 @@ test("unavailable statistics does not prevent authenticated editing and refresh 
     assert.equal(document.getElementById("analytics-total").textContent, "0");
   } finally { dom.window.close(); }
 });
+
+
+test("comments render safely, acknowledge explicitly, and preserve acknowledgement on failure", async () => {
+  const html = await readFile(new URL("../worker/public/index.html", import.meta.url), "utf8");
+  const source = await readFile(new URL("../worker/public/admin.js", import.meta.url), "utf8");
+  const dom = new JSDOM(html, {url: adminUrl});
+  let available = true;
+  const comment = {id: "one", author: "reader", body: "<img src=x onerror=alert(1)>", createdAt: "2026-10-19T00:00:00Z", slug: "safe-post", url: "https://github.com/2jeonghoon/2jeonghoon.github.io/discussions/1#discussioncomment-1"};
+  const context = vm.createContext({module: {exports: {}}, document: dom.window.document, location: dom.window.location, localStorage: dom.window.localStorage, URL, setTimeout, clearTimeout,
+    fetch: async path => ({ok: path !== "/api/comments" || available, status: 503, json: async () =>
+      path === "/api/session" ? {authenticated: true, csrfToken: "csrf"} :
+      path === "/api/categories" ? {categories: [], sha: "current"} :
+      path === "/api/posts" ? {posts: []} :
+      path === "/api/comments" ? {comments: [comment], limited: false} : {total: 0, today: 0, days: [], pages: []}})});
+  try {
+    vm.runInContext(source, context);
+    await context.module.exports.bootstrap(dom.window.document);
+    await new Promise(resolve => setImmediate(resolve));
+    const document = dom.window.document;
+    assert.equal(document.getElementById("comments-count").textContent, "새 댓글 1");
+    assert.equal(document.querySelector("#comment-list img"), null);
+    assert.match(document.getElementById("comment-list").textContent, /<img/);
+    assert.equal(document.querySelector('#comment-list a:last-child').href, "https://2jeonghoon.github.io/?post=safe-post");
+    assert.equal(dom.window.localStorage.length, 0);
+    document.getElementById("read-comments").click();
+    assert.equal(document.getElementById("comments-count").textContent, "");
+    assert.equal(dom.window.localStorage.getItem("jh-admin-comments-seen"), comment.createdAt);
+    available = false;
+    document.getElementById("refresh-comments").click();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(document.getElementById("comments-status").textContent, /불러오지 못/);
+    assert.equal(dom.window.localStorage.getItem("jh-admin-comments-seen"), comment.createdAt);
+    assert.equal(document.getElementById("workspace").hidden, false);
+  } finally { dom.window.close(); }
+});
+
+
+test("category failure does not hide published and draft post lists or show a false login prompt", async () => {
+  const html = await readFile(new URL("../worker/public/index.html", import.meta.url), "utf8");
+  const source = await readFile(new URL("../worker/public/admin.js", import.meta.url), "utf8");
+  const dom = new JSDOM(html, {url: adminUrl});
+  const context = vm.createContext({module: {exports: {}}, document: dom.window.document, location: dom.window.location, URL, setTimeout, clearTimeout,
+    fetch: async path => ({ok: path !== "/api/categories", status: path === "/api/categories" ? 502 : 200, json: async () =>
+      path === "/api/session" ? {authenticated: true, csrfToken: "csrf"} :
+      path === "/api/categories" ? {error: {message: "Category unavailable"}} :
+      path === "/api/posts" ? {posts: [{slug: "published", title: "Published post", draft: false}, {slug: "draft", title: "Draft post", draft: true}]} :
+      path === "/api/comments" ? {comments: [], limited: false} : {total: 0, today: 0, days: [], pages: []}})});
+  try {
+    vm.runInContext(source, context);
+    await context.module.exports.bootstrap(dom.window.document);
+    const document = dom.window.document;
+    assert.match(document.getElementById("post-list").textContent, /Published post/);
+    assert.match(document.getElementById("post-list").textContent, /Draft post/);
+    assert.equal(document.getElementById("signed-out").hidden, true);
+    assert.match(document.getElementById("category-status").textContent, /불러오지 못/);
+  } finally { dom.window.close(); }
+});

@@ -6,6 +6,12 @@ import {test} from "node:test";
 const require = createRequire(import.meta.url);
 const ui = require("../worker/public/admin.js");
 
+test("new comments compare creation time against the last explicit acknowledgement", () => {
+  const comments = [{createdAt: "2026-10-18T00:00:00Z"}, {createdAt: "2026-10-19T00:00:00Z"}];
+  assert.equal(ui.countNewComments(comments, "2026-10-18T00:00:00Z"), 1);
+  assert.equal(ui.countNewComments(comments, ""), 2);
+});
+
 test("constructs same-origin JSON mutations with CSRF and current SHA", () => {
   const {url, init} = ui.createApiRequest("/api/posts/safe-post", {
     method: "PUT", csrfToken: "csrf", body: {slug: "safe-post", sha: "current"}
@@ -118,7 +124,8 @@ test("ships accessible external-script UI and responsive editor styles", async (
 
 test("does not persist credentials or editor content in browser storage", async () => {
   const source = await readFile(new URL("../worker/public/admin.js", import.meta.url), "utf8");
-  assert.doesNotMatch(source, /localStorage|sessionStorage|GITHUB_APP_PRIVATE_KEY|CLIENT_SECRET/);
+  assert.doesNotMatch(source, /sessionStorage|GITHUB_APP_PRIVATE_KEY|CLIENT_SECRET/);
+  assert.deepEqual(source.match(/localStorage\.setItem\([^;]+/g), ["localStorage.setItem(commentsKey, seen)"]);
 });
 
 test("renders repository-controlled post titles as text", async () => {

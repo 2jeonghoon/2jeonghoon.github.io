@@ -103,12 +103,12 @@ export async function fetchOAuthUser({token, fetchImpl = fetch}) {
   return {id: body.id, login: body.login};
 }
 
-export async function createInstallationToken({appId, privateKey, installationId, now = Date.now(), fetchImpl = fetch}) {
+export async function createInstallationToken({appId, privateKey, installationId, permissions = {contents: "write"}, now = Date.now(), fetchImpl = fetch}) {
   const jwt = await appJwt({appId, privateKey, now});
   const response = await fetchImpl(`${API}/app/installations/${installationId}/access_tokens`, {
     method: "POST",
     headers: headers(jwt, {"Content-Type": "application/json"}),
-    body: JSON.stringify({repository_ids: [REPOSITORY_ID], permissions: {contents: "write"}})
+    body: JSON.stringify({repository_ids: [REPOSITORY_ID], permissions})
   });
   const body = await readJson(response);
   if (!response.ok || typeof body.token !== "string") throw mapError(response, body);
@@ -154,10 +154,71 @@ export function createGitHubContentsClient({token, fetchImpl = fetch}) {
       if (repository.id !== REPOSITORY_ID) throw new GitHubError("repository identity mismatch", {status: 503, code: "repository_mismatch"});
       return true;
     },
+    async listComments() {
+      const fields = "id body createdAt url author { login }";
+      const pageFields = "pageInfo { hasNextPage endCursor }";
+      const replyFields = `${fields} replies(first: 100) { ${pageFields} nodes { ${fields} } }`;
+      const query = `query { repository(owner: "${OWNER}", name: "${REPOSITORY}") {
+        discussions(first: 20, categoryId: "DIC_kwDOLpDtrM4DGKAp", orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pageInfo { hasNextPage }
+          nodes { id title comments(first: 100) { ${pageFields} nodes {
+            ${replyFields}
+          } } }
+        }
+      } }`;
+      const result = await request(`${API}/graphql`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+      if (result.errors?.length || !result.data?.repository?.discussions) throw new GitHubError("Discussions read permission required", {status: 502});
+      const discussions = result.data.repository.discussions;
+      let limited = discussions.pageInfo.hasNextPage;
+      let requests = 0;
+      async function allNodes(connection, id, type, field, selection) {
+        const nodes = [...connection.nodes];
+        while (connection.pageInfo.hasNextPage) {
+          if (++requests > 100) { limited = true; break; }
+          const query = `query($id: ID!, $after: String!) { node(id: $id) { ... on ${type} { ${field}(first: 100, after: $after) { ${pageFields} nodes { ${selection} } } } } }`;
+          const next = await request(`${API}/graphql`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query, variables: {id, after: connection.pageInfo.endCursor}})});
+          if (next.errors?.length || !next.data?.node?.[field]) throw new GitHubError("Comment pagination failed", {status: 502});
+          connection = next.data.node[field];
+          nodes.push(...connection.nodes);
+        }
+        return nodes;
+      }
+      const comments = [];
+      for (const discussion of discussions.nodes) {
+        const parents = await allNodes(discussion.comments, discussion.id, "Discussion", "comments", replyFields);
+        for (const parent of parents) {
+          const replies = await allNodes(parent.replies, parent.id, "DiscussionComment", "replies", fields);
+          for (const item of [parent, ...replies]) {
+            comments.push({id: item.id, body: item.body.slice(0, 2000), createdAt: item.createdAt, url: item.url,
+              author: item.author?.login || "탈퇴한 사용자", slug: discussion.title, reply: item !== parent});
+          }
+        }
+      }
+      comments.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      return {comments: comments.slice(0, 100), limited: Boolean(limited || comments.length > 100)};
+    },
     async listPostEntries() {
       const entries = await request(`${API}/repos/${OWNER}/${REPOSITORY}/contents/posts?ref=${BRANCH}`);
       if (!Array.isArray(entries)) throw new GitHubError("invalid repository response");
       return entries.filter(entry => /^posts\/[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(entry.path));
+    },
+    async listPostSources() {
+      const entries = await this.listPostEntries();
+      const sources = [];
+      // Batch immutable blobs so large post collections stay below Worker fetch limits.
+      for (let offset = 0; offset < entries.length; offset += 20) {
+        const batch = entries.slice(offset, offset + 20);
+        const fields = batch.map((entry, index) => `post${index}: object(expression: ${JSON.stringify(entry.sha)}) { ... on Blob { oid text isTruncated } }`).join("\n");
+        const query = `query { repository(owner: "${OWNER}", name: "${REPOSITORY}") { ${fields} } }`;
+        const result = await request(`${API}/graphql`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+        if (result.errors?.length || !result.data?.repository) throw new GitHubError("post batch query failed");
+        batch.forEach((entry, index) => {
+          const blob = result.data.repository[`post${index}`];
+          if (!blob || blob.oid !== entry.sha || typeof blob.text !== "string" || blob.isTruncated) throw new GitHubError("incomplete post batch response");
+          sources.push({name: entry.name, sha: blob.oid, source: blob.text});
+        });
+      }
+      return sources;
     },
     async getCategoryConfig() {
       try {

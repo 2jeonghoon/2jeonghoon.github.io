@@ -99,6 +99,11 @@
     rows("analytics-pages", data.pages, row => row.page === "/" ? "홈" : row.page);
   }
 
+  function countNewComments(comments, seen) {
+    const cutoff = Date.parse(seen) || 0;
+    return comments.filter(item => Date.parse(item.createdAt) > cutoff).length;
+  }
+
   function bootstrap(document) {
     if (!document) return;
     let csrfToken = "";
@@ -109,6 +114,47 @@
     let previewController;
     const get = id => document.getElementById(id);
     const form = get("post-form");
+    const commentsKey = "jh-admin-comments-seen";
+    let comments = [];
+    let seen = "";
+    try { seen = localStorage.getItem(commentsKey) || ""; } catch {}
+
+    function renderComments() {
+      const list = get("comment-list"); list.textContent = "";
+      const count = countNewComments(comments, seen);
+      get("comments-count").textContent = count ? `새 댓글 ${count}` : "";
+      get("read-comments").disabled = !count;
+      comments.forEach(item => {
+        const row = document.createElement("li");
+        const meta = document.createElement("p");
+        const body = document.createElement("p");
+        const link = document.createElement("a");
+        const fresh = countNewComments([item], seen) > 0;
+        meta.textContent = `${fresh ? "[새 댓글] " : ""}${item.author}${item.reply ? " · 답글" : ""} · ${new Date(item.createdAt).toLocaleString("ko-KR", {timeZone: "Asia/Seoul"})}`;
+        body.textContent = item.body;
+        link.textContent = `${item.slug} · 답글 / 관리`;
+        try { const url = new URL(item.url); if (url.origin === "https://github.com") link.href = url.href; } catch {}
+        link.target = "_blank"; link.rel = "noopener noreferrer";
+        row.append(meta, body, link);
+        if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)) {
+          const post = document.createElement("a"); post.textContent = "글 보기";
+          post.href = `https://2jeonghoon.github.io/?post=${encodeURIComponent(item.slug)}`;
+          post.target = "_blank"; post.rel = "noopener noreferrer"; row.append(post);
+        }
+        list.append(row);
+      });
+    }
+    async function loadComments() {
+      get("refresh-comments").disabled = true;
+      get("comments-status").textContent = "댓글을 불러오는 중…";
+      try {
+        const data = await api("/api/comments"); comments = data.comments;
+        renderComments();
+        get("comments-status").textContent = !comments.length ? "아직 댓글이 없습니다." : data.limited ? "최근 댓글 일부를 표시합니다. 전체 댓글은 GitHub에서 확인하세요." : `${comments.length}개의 댓글·답글을 표시합니다.`;
+      } catch {
+        get("comments-status").textContent = "댓글을 불러오지 못했습니다. 새로고침하거나 GitHub에서 확인하세요. GitHub App의 Discussions 읽기 권한도 확인해 주세요.";
+      } finally { get("refresh-comments").disabled = false; }
+    }
 
     async function api(url, options) {
       const request = createApiRequest(url, Object.assign({csrfToken}, options || {}));
@@ -202,11 +248,18 @@
         catch(error){if(error.name!=="AbortError")showError(error);}},300);
     }
     async function start() {
-      try {const session=await api("/api/session");if(!session.authenticated){get("signed-out").hidden=false;return;}csrfToken=session.csrfToken;get("workspace").hidden=false;get("logout").hidden=false;writeForm(model);void loadAnalytics();await loadCategories();await loadList();
-        const edit=new URL(location.href).searchParams.get("edit");if(edit)await loadPost(edit);}catch(error){get("signed-out").hidden=false;showError(error);}
+      try {const session=await api("/api/session");if(!session.authenticated){get("signed-out").hidden=false;return;}csrfToken=session.csrfToken;get("workspace").hidden=false;get("logout").hidden=false;writeForm(model);void loadAnalytics();void loadComments();await loadCategories().catch(()=>{get("category-status").textContent="카테고리를 불러오지 못했습니다. 페이지를 새로고침해 주세요.";});await loadList();
+        const edit=new URL(location.href).searchParams.get("edit");if(edit)await loadPost(edit);}catch(error){if(error.status===401)get("signed-out").hidden=false;showError(error);}
     }
     get("new-post").addEventListener("click",()=>writeForm(createEditorModel()));get("post-filter").addEventListener("change",loadList);
     get("refresh-analytics").addEventListener("click",loadAnalytics);
+    get("refresh-comments").addEventListener("click",loadComments);
+    get("read-comments").addEventListener("click",()=>{
+      seen = comments.reduce((latest, item) => item.createdAt > latest ? item.createdAt : latest, seen);
+      try { localStorage.setItem(commentsKey, seen); } catch {}
+      renderComments();
+      get("comments-status").textContent = "현재 표시된 댓글을 확인했습니다.";
+    });
     get("post-category").addEventListener("change",()=>{const selection=nextCategorySelection(categoryTree,get("post-category").value,get("post-subcategory").value);writeChildOptions(selection.category,selection.subcategory);});
     get("add-parent-category").addEventListener("click",addParentCategory);get("add-child-category").addEventListener("click",addChildCategory);
     get("save-draft").addEventListener("click",()=>save(true));get("publish").addEventListener("click",()=>save(false));get("post-body").addEventListener("input",schedulePreview);
@@ -215,5 +268,5 @@
     get("confirm-delete").addEventListener("click",async event=>{event.preventDefault();const confirmation=get("delete-confirmation").value;if(!canDelete(model.slug,confirmation))return;try{await api(`/api/posts/${encodeURIComponent(model.slug)}`,{method:"DELETE",body:{sha:model.sha,confirmation}});get("delete-dialog").close();writeForm(createEditorModel());await loadList();}catch(error){showError(error);}});
     form.addEventListener("submit",event=>event.preventDefault()); return start();
   }
-  return {createApiRequest,createEditorModel,parseOptionalOrder,groupAdminPosts,withRequestError,canEditSlug,canDelete,mergeCategoryTrees,childNamesFor,nextCategorySelection,renderAnalytics,bootstrap};
+  return {createApiRequest,createEditorModel,parseOptionalOrder,groupAdminPosts,withRequestError,canEditSlug,canDelete,mergeCategoryTrees,childNamesFor,nextCategorySelection,renderAnalytics,countNewComments,bootstrap};
 });

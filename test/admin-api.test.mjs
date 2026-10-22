@@ -70,6 +70,18 @@ async function request(path, {method = "GET", body, authenticated = true, header
   return worker.fetch(new Request(`${origin}${path}`, init), bindings);
 }
 
+test("comments require login and reject writes", async () => {
+  assert.equal((await request("/api/comments", {authenticated: false})).status, 401);
+  assert.equal((await request("/api/comments", {method: "POST", body: {}})).status, 405);
+});
+
+test("lists comments through the authenticated GitHub client", async () => {
+  const comments = [{id: "one", body: "Hello", createdAt: "2026-10-19T00:00:00Z"}];
+  const response = await request("/api/comments", {}, env({GITHUB_CLIENT: {listComments: async () => ({comments, limited: false})}}));
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).comments, comments);
+});
+
 test("serves assets without secrets but protects API configuration", async () => {
   const bindings = env({SESSION_SIGNING_KEY: undefined});
   const asset = await request("/admin.css", {authenticated: false}, bindings);

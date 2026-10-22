@@ -12,10 +12,10 @@ function commitResult(result) {
 export function createPostService(client) {
   return {
     async list() {
-      const entries = await client.listPostEntries();
+      const entries = client.listPostSources ? await client.listPostSources() : await client.listPostEntries();
       return Promise.all(entries.map(async entry => {
         const slug = validateSlug(entry.name.slice(0, -3));
-        const item = await client.getPost(slug);
+        const item = typeof entry.source === "string" ? entry : await client.getPost(slug);
         const post = parsePostSource({filePath: `${slug}.md`, source: item.source});
         return {
           slug,

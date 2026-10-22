@@ -61,7 +61,7 @@ function requireConfig(env) {
   }
 }
 
-async function githubClient(env) {
+async function githubClient(env, permissions) {
   if (env.GITHUB_CLIENT) return env.GITHUB_CLIENT;
   for (const name of ["GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY", "GITHUB_APP_INSTALLATION_ID"]) {
     if (!env[name]) throw new SecurityError("admin service is not configured", 503);
@@ -69,7 +69,8 @@ async function githubClient(env) {
   const token = await createInstallationToken({
     appId: env.GITHUB_APP_ID,
     privateKey: env.GITHUB_APP_PRIVATE_KEY,
-    installationId: env.GITHUB_APP_INSTALLATION_ID
+    installationId: env.GITHUB_APP_INSTALLATION_ID,
+    permissions
   });
   return createGitHubContentsClient({token});
 }
@@ -169,6 +170,11 @@ async function handleApi(request, env, url) {
   if (url.pathname === "/api/analytics") {
     if (request.method !== "GET") throw new SecurityError("method not allowed", 405);
     return jsonResponse(await readAnalytics(env.ANALYTICS_DB, now(env)));
+  }
+  if (url.pathname === "/api/comments") {
+    if (request.method !== "GET") throw new SecurityError("method not allowed", 405);
+    const client = await githubClient(env, {discussions: "read"});
+    return jsonResponse(await client.listComments());
   }
   const client = await githubClient(env);
   const service = createPostService(client);

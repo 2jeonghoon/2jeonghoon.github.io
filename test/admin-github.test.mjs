@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
+import {createPostService} from "../worker/src/post-service.mjs";
 
 import {
   GitHubError,
@@ -15,6 +16,27 @@ function response(body, status = 200, headers = {}) {
     headers: {"content-type": "application/json", ...headers}
   });
 }
+
+test("lists 107 published and draft posts within the Worker subrequest budget", async () => {
+  const entries = Array.from({length: 107}, (_, index) => ({name: `post-${index}.md`, path: `posts/post-${index}.md`, sha: `sha-${index}`}));
+  let calls = 0;
+  const client = createGitHubContentsClient({token: "token", fetchImpl: async (url, init) => {
+    assert.ok(++calls < 50, "Worker external subrequest budget exceeded");
+    if (url.includes("/contents/posts?")) return response(entries);
+    assert.equal(url, "https://api.github.com/graphql");
+    const query = JSON.parse(init.body).query;
+    const repository = {};
+    for (const match of query.matchAll(/(post\d+): object\(expression: "sha-(\d+)"\)/g)) {
+      repository[match[1]] = {oid: `sha-${match[2]}`, text: `---\ntitle: Post ${match[2]}\ndescription: Test\ndate: '2026-10-20'\ncategory: Test\ntags: [test]\naiGenerated: false\ndraft: ${Number(match[2]) % 2 === 0}\n---\nBody`, isTruncated: false};
+    }
+    return response({data: {repository}});
+  }});
+  const posts = await createPostService(client).list();
+  assert.equal(posts.length, 107);
+  assert.ok(posts.some(post => post.draft));
+  assert.ok(posts.some(post => !post.draft));
+  assert.ok(calls <= 7);
+});
 
 async function privateKeyPem() {
   const pair = await crypto.subtle.generateKey(
@@ -178,4 +200,42 @@ test("rejects every unsafe slug before constructing a GitHub request", async () 
     await assert.rejects(client.getPost(slug), /invalid slug/i);
   }
   assert.equal(calls, 0);
+});
+test("reads discussion comments and replies in newest-first order", async () => {
+  const pageInfo = {hasPreviousPage: false, hasNextPage: false};
+  const reply = {id: "reply", body: "Reply", createdAt: "2026-10-19T00:00:00Z", url: "https://github.com/reply", author: null};
+  const parent = {id: "parent", body: "First", createdAt: "2026-10-18T00:00:00Z", url: "https://github.com/comment", author: {login: "reader"}, replies: {pageInfo, nodes: [reply]}};
+  const discussion = {title: "safe-post", comments: {pageInfo, nodes: [parent]}};
+  const payload = {data: {repository: {discussions: {pageInfo, nodes: [discussion]}}}};
+  const client = createGitHubContentsClient({token: "test", fetchImpl: async () => response(payload)});
+  const result = await client.listComments();
+  assert.deepEqual(result.comments.map(item => item.id), ["reply", "parent"]);
+  assert.equal(result.comments[0].author, "탈퇴한 사용자");
+  assert.equal(result.limited, false);
+});
+
+test("does not treat GraphQL permission errors as an empty inbox", async () => {
+  const client = createGitHubContentsClient({token: "test", fetchImpl: async () => response({errors: [{message: "Forbidden"}]})});
+  await assert.rejects(client.listComments(), {status: 502});
+});
+
+test("paginates parents so a recent reply on an older comment is included", async () => {
+  const pageInfo = {hasNextPage: false};
+  const reply = {id: "new-reply", body: "Recent", createdAt: "2026-10-19T00:00:00Z", author: null};
+  const parent = {id: "old", body: "Old", createdAt: "2026-01-01T00:00:00Z", replies: {pageInfo, nodes: [reply]}};
+  let calls = 0;
+  const client = createGitHubContentsClient({token: "test", fetchImpl: async () => response(++calls === 1
+    ? {data: {repository: {discussions: {pageInfo, nodes: [{id: "discussion", title: "safe-post", comments: {pageInfo: {hasNextPage: true, endCursor: "next"}, nodes: []}}]}}}}
+    : {data: {node: {comments: {pageInfo, nodes: [parent]}}}})});
+  const result = await client.listComments();
+  assert.equal(result.comments[0].id, "new-reply");
+  assert.equal(calls, 2);
+  assert.equal(result.limited, false);
+});
+
+test("requests a separate read-only discussions token", async () => {
+  await createInstallationToken({appId: "123", privateKey: await privateKeyPem(), installationId: "456", permissions: {discussions: "read"}, fetchImpl: async (url, init) => {
+    assert.deepEqual(JSON.parse(init.body), {repository_ids: [781249964], permissions: {discussions: "read"}});
+    return response({token: "read-only-token"});
+  }});
 });

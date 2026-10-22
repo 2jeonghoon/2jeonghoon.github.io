@@ -474,7 +474,15 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 - 관리자 주소: `https://jh-log-admin.2jeonghoon.workers.dev`
 - GitHub App: 비공개 `JH.LOG Admin`, `2jeonghoon/2jeonghoon.github.io`에만 설치
-- 권한: Metadata 읽기(필수), Contents 읽기/쓰기만 허용
+- 권한: Metadata 읽기(필수), Contents 읽기/쓰기, Discussions 읽기(관리자 댓글 조회용)
+
+관리자 페이지의 ‘최근 댓글’에서 댓글·답글을 최신순으로 확인하고 GitHub로 이동해 답글과 관리를 할 수 있습니다.
+GitHub App 설정에서 Repository permissions → Discussions를 Read-only로 설정하고 설치 권한 변경을 승인해야 합니다.
+댓글 전용 토큰은 Discussions 읽기만 요청하며, 글 관리용 토큰은 기존 Contents 권한을 유지합니다.
+새 댓글은 이 브라우저에서 ‘모두 확인’을 마지막으로 누른 시점을 기준으로 표시합니다. 첫 방문에는 표시된 댓글 모두가 새 댓글입니다.
+확인 시각만 브라우저에 저장하며, 다른 브라우저와는 동기화하지 않습니다. 새로고침이나 재접속 시 댓글을 다시 조회합니다.
+최근 활동한 토론 20개의 댓글과 답글을 페이지별로 조회하고, 최신 100개까지 표시합니다.
+한 번에 추가 조회는 최대 100회로 제한합니다. 일부만 조회되거나 표시된 경우 안내가 표시되며, 전체 확인은 GitHub 링크를 이용하세요.
 - Webhook과 device flow는 사용하지 않음
 
 ### 일상적인 글 관리
