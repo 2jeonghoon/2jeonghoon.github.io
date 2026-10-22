@@ -12,7 +12,6 @@ featured: false
 draft: false
 aiGenerated: false
 ---
-
 ## 기준 도서와 공부 목적
 
 기준 도서는 **Gilbert Strang의 『Introduction to Linear Algebra』 6판(2023)**이다. 벡터와 행렬을 계산하는 방법뿐 아니라 해가 존재하는 공간, 직교 투영, 고유 방향을 이해하는 기초 공부로 선택했다. 판본과 공개 자료는 [저자의 공식 페이지](https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html)에서 확인할 수 있다.
