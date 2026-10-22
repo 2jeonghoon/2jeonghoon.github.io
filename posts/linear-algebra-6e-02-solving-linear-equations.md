@@ -2,7 +2,7 @@
 title: "02: 연립방정식 Ax = b 풀기"
 description: "소거, 역행렬, LU, 순열과 전치를 같은 연립방정식으로 연결한다."
 date: "2026-10-21"
-order: 2
+order: 3
 category: "Mathematics"
 subcategory: "Introduction to Linear Algebra"
 tags: ["Linear Algebra","Mathematics","Study Notes"]
