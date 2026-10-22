@@ -2,7 +2,7 @@
 title: "03: 네 가지 기본 부분공간"
 description: "열공간, 행공간, 영공간과 왼쪽 영공간으로 해의 구조를 정리한다."
 date: "2026-10-21"
-order: 3
+order: 4
 category: "Mathematics"
 subcategory: "Introduction to Linear Algebra"
 tags: ["Linear Algebra","Mathematics","Study Notes"]
