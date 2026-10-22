@@ -1,18 +1,17 @@
 ---
 title: "04: 직교와 최소제곱"
 description: "직교 분해에서 투영, 최소제곱, QR과 의사역행렬까지 공부한다."
-date: "2026-10-19"
-order: 4
+date: "2026-10-22"
+order: 1
 category: "Mathematics"
 subcategory: "Introduction to Linear Algebra"
-tags: ["Linear Algebra", "Mathematics", "Study Notes"]
+tags: ["Linear Algebra","Mathematics","Study Notes"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 [시리즈 학습 지도](/?post=linear-algebra-6e-overview)
 
 [6판 공식 목차](https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html)의 순서로 개념을 재구성한 개인 공부 노트다. 공개 목차와 MIT 강의 자료를 참고했으며 책 전체 본문을 읽고 축약한 글은 아니다. 계산과 연습 예제는 직접 구성했다.
