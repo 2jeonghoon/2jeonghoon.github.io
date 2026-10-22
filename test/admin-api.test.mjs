@@ -79,6 +79,23 @@ test("serves assets without secrets but protects API configuration", async () =>
   assert.equal((await request("/api/session", {authenticated: false}, bindings)).status, 503);
 });
 
+test("serves vendored math styles and fonts without opening other static routes", async () => {
+  const seen = [];
+  const bindings = env({ASSETS: {fetch: async req => {
+    seen.push(new URL(req.url).pathname);
+    return new Response("math asset");
+  }}});
+  for (const asset of ["/katex/katex.min.css", "/katex/fonts/KaTeX_Main-Regular.woff2"]) {
+    const response = await request(asset, {authenticated: false}, bindings);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "math asset");
+  }
+  assert.equal(seen.length, 2);
+  for (const denied of ["/katex/index.html", "/katex/fonts/secret.js", "/private.json"]) {
+    assert.equal((await request(denied, {authenticated: false}, bindings)).status, 404);
+  }
+});
+
 test("authenticates before inspecting an oversized body", async () => {
   const response = await request("/api/posts", {
     method: "POST", body: "x".repeat(300 * 1024), authenticated: false,

@@ -22,17 +22,17 @@ aiGenerated: true
 ## 14.1 충격량과 충격 토크
 
 힘을 짧은 시간에 걸쳐 적분한 충격량 J의 단위는 N·s다.
-병진 변화는 `Δv = J/m`이며 물체 크기가 아니라 질량에 의해 정해진다.
+병진 변화는 $\Delta\mathbf v=\frac{\mathbf J}{m}$이며 물체 크기가 아니라 질량에 의해 정해진다.
 질량중심에서 접촉점으로 향하는 레버암 r은 m 단위다.
-각운동량 변화는 `ΔL = r × J`다.
-충돌 순간의 자세를 고정하면 `Δω = I_world⁻¹ (r × J)`로 계산한다.
+각운동량 변화는 $\Delta L = r \times  J$다.
+충돌 순간의 자세를 고정하면 $\Delta \omega  = I_{\mathrm{world}}^{-1} (r \times  J)$로 계산한다.
 이는 유한 시간 동안의 일반적인 토크 적분식과 구분한다.
 
 이 글의 n은 B에서 A로 향하는 단위 법선이다.
-A에는 `+j n`, B에는 `−j n`을 적용한다.
-접촉점 속도는 `v_point = v_center + ω × r`다.
-상대 속도를 `u = vA_point − vB_point`로 정한다.
-정상 속도 `vn = u·n`이 음수면 접근, 양수면 분리다.
+A에는 $+j n$, B에는 $-j n$을 적용한다.
+접촉점 속도는 $v_{\mathrm{point}} = v_{\mathrm{center}} + \omega  \times  r$다.
+상대 속도를 $u = v_{A,\mathrm{point}} - v_{B,\mathrm{point}}$로 정한다.
+정상 속도 $v_n = u\cdot n$이 음수면 접근, 양수면 분리다.
 
 물체 중심 속도만 검사하면 회전 모서리의 충돌을 놓친다.
 중심이 정지해도 모서리는 바닥을 향해 움직일 수 있다.
@@ -42,22 +42,25 @@ A에는 `+j n`, B에는 `−j n`을 적용한다.
 
 ## 14.2 충돌 충격량
 
-마찰 없는 한 접촉에서 목표는 `vn_after = −e vn_before`다.
+마찰 없는 한 접촉에서 목표는 $v_{n,\mathrm{after}} = -e v_{n,\mathrm{before}}$다.
 반발계수 e는 이 예제에서 0 이상 1 이하로 제한한다.
 접근하는 접촉에만 반발 목표를 만든다.
 이미 분리하는 물체를 다시 끌어당기는 음수 정상 충격량을 적용하지 않는다.
 지속 접촉이나 작은 속도에서는 별도의 비탄성 정책이 유용하다.
 
-```text
-k = invMassA + invMassB
-  + n · ((invIA (rA × n)) × rA)
-  + n · ((invIB (rB × n)) × rB)
-j = −(1 + e) vn / k       # 접근 중인 단일 비마찰 접촉
-JA = j n
-JB = −j n
-```
+여기서 $w_A=1/m_A$, $w_B=1/m_B$는 역질량이며 고정 물체는 0을 사용한다.
 
-I의 역수는 세계 좌표계에서 평가한다.
+$$
+\begin{aligned}
+k &= w_A+w_B
++\mathbf n\cdot\left[\left(I_A^{-1}(\mathbf r_A\times\mathbf n)\right)\times\mathbf r_A\right]\\
+&\quad+\mathbf n\cdot\left[\left(I_B^{-1}(\mathbf r_B\times\mathbf n)\right)\times\mathbf r_B\right],\\
+j&=-\frac{(1+e)v_n}{k},\qquad
+\mathbf J_A=j\mathbf n,\quad \mathbf J_B=-j\mathbf n.
+\end{aligned}
+$$
+
+$I_A^{-1}$과 $I_B^{-1}$은 각 물체의 세계 좌표계 역관성 텐서다.
 분모 k의 단위는 1/kg이며 회전 항도 같은 단위다.
 물리적으로 유효한 관성에서 회전 항은 음수가 되지 않는다.
 두 물체가 모두 정적이면 k가 0이므로 풀이 대상에서 제외한다.
@@ -65,16 +68,16 @@ I의 역수는 세계 좌표계에서 평가한다.
 
 ### 직접 계산: 중심에서 벗어난 바닥 충돌
 
-A는 질량 `2 kg`, `Izz = 2 kg·m²`이고 B는 정적 바닥이다.
-`n = (0,1,0)`, `rA = (1,−0.5,0) m`로 둔다.
-초기 중심 속도는 `(0,−3,0) m/s`, 각속도는 0이다.
-마찰과 외력의 스텝 내 변화는 무시하고 `e = 0.5`로 둔다.
-`rA × n = (0,0,1) m`이므로 회전 기여는 `0.5 /kg`이다.
-병진 기여도 `0.5 /kg`이므로 `k = 1 /kg`다.
-`vn = −3 m/s`에서 `j = 4.5 N·s`를 얻는다.
-중심 y속도는 `−0.75 m/s`, z각속도는 `2.25 rad/s`가 된다.
-회전에 의한 접촉점 y속도는 `+2.25 m/s`다.
-따라서 접촉점 정상 속도는 `+1.5 m/s`로 목표와 일치한다.
+A는 질량 $2 \mathrm{kg}$, $I_{zz} = 2 \mathrm{kg}\cdot \mathrm{m}^2$이고 B는 정적 바닥이다.
+$n = (0,1,0)$, $r_A = (1,-0.5,0) \mathrm{m}$로 둔다.
+초기 중심 속도는 $(0,-3,0) \mathrm{m}/\mathrm{s}$, 각속도는 0이다.
+마찰과 외력의 스텝 내 변화는 무시하고 $e = 0.5$로 둔다.
+$r_A \times  n = (0,0,1) \mathrm{m}$이므로 회전 기여는 $0.5 /\mathrm{kg}$이다.
+병진 기여도 $0.5 /\mathrm{kg}$이므로 $k = 1 /\mathrm{kg}$다.
+$v_n = -3 \mathrm{m}/\mathrm{s}$에서 $j = 4.5 \mathrm{N}\cdot\mathrm{s}$를 얻는다.
+중심 y속도는 $-0.75 \mathrm{m}/\mathrm{s}$, z각속도는 $2.25 \mathrm{rad}/\mathrm{s}$가 된다.
+회전에 의한 접촉점 y속도는 $+2.25 \mathrm{m}/\mathrm{s}$다.
+따라서 접촉점 정상 속도는 $+1.5 \mathrm{m}/\mathrm{s}$로 목표와 일치한다.
 중심은 아직 아래로 움직여도 접촉점은 분리할 수 있다.
 
 ## 14.3 침투 해결

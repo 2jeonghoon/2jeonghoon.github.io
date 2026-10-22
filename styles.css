@@ -141,3 +141,5 @@ footer p { margin: 7px 0 0; color: #9da29d; font-size: 13px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; } }
 .manage-link { float: right; font-family: "DM Mono", monospace; font-size: .75rem; text-transform: uppercase; }
 .admin-handoff { max-width: 680px; margin: 12vh auto; padding: 2rem; }
+.article-body .katex-display { overflow-x: auto; overflow-y: hidden; padding: 12px 0; }
+.article-body .katex { font-size: 1.1em; }

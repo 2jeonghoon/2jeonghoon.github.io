@@ -135,7 +135,7 @@ export function assertMutationRequest(request, session, expectedOrigin) {
 
 export function securityHeaders() {
   return {
-    "Content-Security-Policy": "default-src 'self'; connect-src 'self'; img-src 'self' data: https://2jeonghoon.github.io; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'self' https://github.com; frame-ancestors 'none'",
+    "Content-Security-Policy": "default-src 'self'; connect-src 'self'; img-src 'self' data: https://2jeonghoon.github.io; style-src 'self'; style-src-attr 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'self' https://github.com; frame-ancestors 'none'",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()"

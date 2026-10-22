@@ -56,6 +56,26 @@ function published(filePath, date, overrides = {}) {
 
 const validSource = source();
 
+test("renders inline math and multiline matrices with accessible MathML", () => {
+  const html = renderMarkdown(String.raw`계수 $A=LU$.
+
+$$
+\begin{bmatrix}1&0\\2&1\end{bmatrix}
+$$`);
+  assert.match(html, /class="katex"/);
+  assert.match(html, /class="katex-display"/);
+  assert.match(html, /<math /);
+  assert.doesNotMatch(html, /katex-error/);
+});
+
+test("leaves code and escaped dollars alone and rejects unsafe math links", () => {
+  const html = renderMarkdown('`$A=LU$`\n\n```latex\n$$x$$\n```\n\n\\$5\n\n$\\href{javascript:alert(1)}{x}$');
+  assert.match(html, /<code>\$A=LU\$<\/code>/);
+  assert.match(html, /\$\$x\$\$/);
+  assert.match(html, /<p>\$5<\/p>/);
+  assert.doesNotMatch(html, /href=["']javascript:/i);
+});
+
 test("compiles a published Markdown post", () => {
   const post = parsePost(record("valid-post.md", validSource));
   assert.equal(post.slug, "valid-post");

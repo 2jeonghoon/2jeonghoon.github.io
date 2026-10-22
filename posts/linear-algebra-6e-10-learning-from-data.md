@@ -17,21 +17,19 @@ aiGenerated: true
 
 [6판 공식 목차](https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html)의 순서로 개념을 재구성한 개인 공부 노트다. 공개 목차와 MIT 자료를 참고했으며 책 전체 본문을 읽고 축약한 글은 아니다. 계산과 연습 예제는 직접 구성했다.
 
-기본은 실수 열벡터이며 `A^T`는 전치다. 복소수는 해당 절에서 별도로 다룬다.
+기본은 실수 열벡터이며 $A^{\mathsf T}$는 전치다. 복소수는 해당 절에서 별도로 다룬다.
 
 ## 10.1 조각별 선형 학습 함수
 
 선형변환을 몇 번 합성해도 전체는 선형변환이다.
 복잡한 관계를 학습하려면 중간에 비선형 연산이 필요하다.
-ReLU는 `ReLU(t)=max(0,t)`인 가장 간단한 예다.
+ReLU는 $\operatorname{ReLU}(t)=\max(0,t)$인 가장 간단한 예다.
 
-```text
-f(x)=ReLU(x)-2ReLU(x-1)+ReLU(x-2)
-x≤0       : f(x)=0
-0≤x≤1     : f(x)=x
-1≤x≤2     : f(x)=2-x
-x≥2       : f(x)=0
-```
+$$
+\begin{gathered}
+f(x)=\operatorname{ReLU}(x)-2\operatorname{ReLU}(x-1)+\operatorname{ReLU}(x-2)\\f(x)=\begin{cases}0&x\le0\\x&0\le x\le1\\2-x&1\le x\le2\\0&x\ge2\end{cases}
+\end{gathered}
+$$
 
 세 개의 꺾이는 지점을 조합해 삼각형 모양 함수를 얻었다.
 입력이 속한 구간이 고정되면 식은 일차식이지만 전체 함수는 하나의 직선이 아니다.
@@ -42,13 +40,14 @@ x≥2       : f(x)=0
 
 ### 고차원으로 확장
 
-신경망의 한 층은 `h=ReLU(Wx+b)`처럼 쓴다.
+신경망의 한 층은 $h=\operatorname{ReLU}(Wx+b)$처럼 쓴다.
 ReLU는 벡터의 각 성분에 따로 적용한다.
 
-```text
-W=[[1,0],[0,1]], b=(-1,0)
-x=(2,-3) → Wx+b=(1,-3) → h=(1,0)
-```
+$$
+\begin{gathered}
+W=\begin{bmatrix}1&0\\0&1\end{bmatrix},\quad b=\begin{bmatrix}-1\\0\end{bmatrix}\\x=\begin{bmatrix}2\\-3\end{bmatrix}\ \Longrightarrow\ Wx+b=\begin{bmatrix}1\\-3\end{bmatrix}\ \Longrightarrow\ h=\begin{bmatrix}1\\0\end{bmatrix}
+\end{gathered}
+$$
 
 어느 뉴런이 켜지는지 고정하면 그 영역 안에서는 행렬식으로 계산된다.
 다른 영역으로 이동하면 활성화 패턴과 식이 바뀐다.
@@ -58,14 +57,13 @@ x=(2,-3) → Wx+b=(1,-3) → h=(1,0)
 
 작은 실험에서는 목표 함수, 데이터 분할, 손실을 먼저 정한다.
 아래는 비공개 책의 실험을 재현한 것이 아닌 직접 만든 학습 과제다.
-목표 함수는 위 절의 삼각형 `f`다.
+목표 함수는 위 절의 삼각형 $f$다.
 
-```text
-학습 입력: -1, 0, 0.5, 1, 1.5, 2, 3
-정답:       0, 0, 0.5, 1, 0.5, 0, 0
-평가 입력: 0.25, 0.75, 1.25, 1.75
-평가 정답: 0.25, 0.75, 0.75, 0.25
-```
+$$
+\begin{gathered}
+\begin{array}{c|rrrrrrr}x_{\mathrm{train}}&-1&0&0.5&1&1.5&2&3\\f(x_{\mathrm{train}})&0&0&0.5&1&0.5&0&0\end{array}\\\begin{array}{c|rrrr}x_{\mathrm{eval}}&0.25&0.75&1.25&1.75\\f(x_{\mathrm{eval}})&0.25&0.75&0.75&0.25\end{array}
+\end{gathered}
+$$
 
 입력을 그냥 표로 외운 모델은 평가 지점에서 무엇을 할지 정의하지 못한다.
 앞 절의 ReLU 식은 그 지점에서도 정답을 계산한다.
@@ -74,11 +72,11 @@ x=(2,-3) → Wx+b=(1,-3) → h=(1,0)
 예를 들어 출력 가중치만 학습하면 ReLU 특징에 대한 선형 최소제곱 문제가 된다.
 꺾이는 위치까지 학습하면 전체 문제는 일반적으로 비볼록이다.
 
-```text
-φ(x)=(ReLU(x), ReLU(x-1), ReLU(x-2))
-학습할 출력 가중치 w, 예측=φ(x)·w
-목표 계수의 한 선택: w=(1,-2,1)
-```
+$$
+\begin{gathered}
+\phi(x)=\begin{bmatrix}\operatorname{ReLU}(x)\\\operatorname{ReLU}(x-1)\\\operatorname{ReLU}(x-2)\end{bmatrix}\\\widehat f(x)=\phi(x)^{\mathsf T}w,\quad w=\begin{bmatrix}1\\-2\\1\end{bmatrix}
+\end{gathered}
+$$
 
 학습오차가 작아도 보지 않은 구간에서의 오차는 따로 측정한다.
 평가 데이터를 보고 학습 설정을 반복 조정하면 평가 역할이 약해진다.
@@ -91,19 +89,16 @@ x=(2,-3) → Wx+b=(1,-3) → h=(1,0)
 공분산은 두 변수가 함께 평균보다 커지거나 작아지는 경향을 측정한다.
 다음 계산은 관측치 3개로 표본 통계를 구한다.
 
-```text
-관측: (1,2), (2,4), (3,6)
-평균 μ=(2,4)
-중심화: (-1,-2), (0,0), (1,2)
-제곱합: x는 2, y는 8, 교차곱합은 4
-표본분산: s_x²=2/(3-1)=1, s_y²=8/(3-1)=4
-표본공분산: s_xy=4/(3-1)=2
-```
+$$
+\begin{gathered}
+X_{\mathrm{raw}}=\begin{bmatrix}1&2\\2&4\\3&6\end{bmatrix},\quad \mu=(2,4),\quad X=\begin{bmatrix}-1&-2\\0&0\\1&2\end{bmatrix}\\\sum_i(x_i-\bar x)^2=2,\quad \sum_i(y_i-\bar y)^2=8,\quad \sum_i(x_i-\bar x)(y_i-\bar y)=4\\s_x^2=\frac2{3-1}=1,\quad s_y^2=\frac8{3-1}=4,\quad s_{xy}=\frac4{3-1}=2
+\end{gathered}
+$$
 
-표본 공분산행렬은 `[[1,2],[2,4]]`다.
+표본 공분산행렬은 $\begin{bmatrix}1&2\\2&4\end{bmatrix}$다.
 동일 관측 세 개를 균등한 확률질량 전체로 취급하면 분모는 3이 된다.
-표본에서 모분산을 추정하는 `n-1`과 기술적인 제곱편차 평균 `n`을 혼용하지 않는다.
-상관계수는 `s_xy/(s_x s_y)=2/(1×2)=1`이다.
+표본에서 모분산을 추정하는 $n-1$과 기술적인 제곱편차 평균 $n$을 혼용하지 않는다.
+상관계수는 $\frac{s_{xy}}{s_xs_y}=\frac2{1\cdot2}=1$이다.
 데이터가 정확한 양의 직선 관계에 있으므로 결과와 일치한다.
 
 공분산행렬은 대칭이며 양의 준정부호다.

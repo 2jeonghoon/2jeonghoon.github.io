@@ -279,7 +279,8 @@ async function fetchHandler(request, env) {
       return withRequestId(await serveWorkspace(request, env, url), id);
     }
     if (!url.pathname.startsWith("/api/") && !url.pathname.startsWith("/auth/")) {
-      if (!["/admin.js", "/admin.css", "/login", "/login.html"].includes(url.pathname)) throw new SecurityError("not found", 404);
+      const mathAsset = url.pathname === "/katex/katex.min.css" || /^\/katex\/fonts\/KaTeX_[A-Za-z0-9_-]+\.woff2$/.test(url.pathname);
+      if (!mathAsset && !["/admin.js", "/admin.css", "/login", "/login.html"].includes(url.pathname)) throw new SecurityError("not found", 404);
       return withRequestId(await env.ASSETS.fetch(request), id);
     }
     requireConfig(env);

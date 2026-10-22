@@ -30,14 +30,16 @@ aiGenerated: true
 상태 속도를 큰 벡터 v로 모으고 제약 야코비안을 J라 하자.
 여기서 J는 충격량 기호가 아니라 행렬 기호다.
 접촉 충격량 벡터를 λ로 구분한다.
-자유 속도 변화 뒤 접촉 속도는 `J v`로 추출한다.
-역질량과 역관성을 모은 블록 행렬을 `M⁻¹`로 둔다.
+자유 속도 변화 뒤 접촉 속도는 $J\mathbf v$로 추출한다.
+역질량과 역관성을 모은 블록 행렬을 $M^{-1}$로 둔다.
 
-```text
-v_after = v_free + M⁻¹ Jᵀ λ
-u_after = J v_free + (J M⁻¹ Jᵀ) λ
-A = J M⁻¹ Jᵀ
-```
+$$
+\begin{aligned}
+\mathbf v_{\mathrm{after}}&=\mathbf v_{\mathrm{free}}+M^{-1}J^{\mathsf T}\boldsymbol\lambda,\\
+\mathbf u_{\mathrm{after}}&=J\mathbf v_{\mathrm{free}}+(JM^{-1}J^{\mathsf T})\boldsymbol\lambda,\\
+A&=JM^{-1}J^{\mathsf T}.
+\end{aligned}
+$$
 
 A의 대각 항은 각 제약의 자체 반응이다.
 비대각 항은 한 접촉 충격량이 다른 접촉 속도를 바꾸는 효과다.
@@ -48,7 +50,7 @@ A가 대각 행렬이라고 가정하면 공유 물체의 결합을 버리게 �
 정상 접촉만 있는 이상적인 비탄성 조건은 상보성으로 나타낼 수 있다.
 접촉이 떨어지면 정상 충격량은 0이어야 한다.
 압축 반응이 생기면 정상 분리 조건을 만족하도록 속도를 제한한다.
-간단히 `λn ≥ 0`, `w ≥ 0`, `λn w = 0` 같은 형태를 생각할 수 있다.
+간단히 $\lambda _n \ge  0$, $w\ge0$, $\lambda _n w = 0$ 같은 형태를 생각할 수 있다.
 여기서 w는 바이어스 등을 포함해 정의한 제약 잔차이며 실제 속도와 항상 같지는 않다.
 
 반발은 접근하는 충돌에만 목표 속도로 추가한다.
@@ -61,20 +63,22 @@ A가 대각 행렬이라고 가정하면 공유 물체의 결합을 버리게 �
 
 질량 1 kg인 A가 바닥에, 질량 1 kg인 B가 A 위에 놓여 있다.
 회전과 마찰을 생략하고 위쪽을 양수로 둔다.
-중력 `10 m/s²`가 `0.01 s` 동안 작용해 자유 속도는 둘 다 `−0.1 m/s`다.
+중력 $10 \mathrm{m}/\mathrm{s}^2$가 $0.01\,\mathrm{s}$ 동안 작용해 자유 속도는 둘 다 $-0.1 \mathrm{m}/\mathrm{s}$다.
 접촉 1은 바닥에서 A를 밀고, 접촉 2는 A에서 B를 민다.
-λ1은 A에 위로, λ2는 B에 위로 그리고 A에 아래로 작용한다.
+$\lambda_1$은 A에 위로, $\lambda_2$는 B에 위로 그리고 A에 아래로 작용한다.
 
-```text
-vA_after = −0.1 + λ1 − λ2
-vB_after = −0.1 + λ2
-u1 = vA_after
-u2 = vB_after − vA_after
-A = [[ 1, −1], [−1, 2]] / kg
-```
+$$
+\begin{aligned}
+v_{A,\mathrm{after}}&=-0.1+\lambda_1-\lambda_2,\\
+v_{B,\mathrm{after}}&=-0.1+\lambda_2,\\
+u_1&=v_{A,\mathrm{after}},\qquad
+u_2=v_{B,\mathrm{after}}-v_{A,\mathrm{after}},\\
+A&=\begin{pmatrix}1&-1\\-1&2\end{pmatrix}\,\mathrm{kg}^{-1}.
+\end{aligned}
+$$
 
-두 정상 접촉을 유지해 최종 속도를 0으로 만들면 `λ2 = 0.1 N·s`다.
-A의 식에 넣으면 `λ1 = 0.2 N·s`를 얻는다.
+두 정상 접촉을 유지해 최종 속도를 0으로 만들면 $\lambda_2 = 0.1 \mathrm{N}\cdot\mathrm{s}$다.
+A의 식에 넣으면 $\lambda_1 = 0.2 \mathrm{N}\cdot\mathrm{s}$를 얻는다.
 바닥은 두 물체의 총무게를 지지하고 위 접촉은 B의 무게만 지지한다.
 바닥 접촉을 고립시켜 0.1 N·s만 적용하면 A 위의 하중을 놓친다.
 이 예제는 결합 항의 의미를 보여 주며 강체 회전 일반 해법을 대신하지 않는다.
@@ -89,20 +93,21 @@ A의 식에 넣으면 `λ1 = 0.2 N·s`를 얻는다.
 
 아래 예제는 평면에서 길이 l인 질량 없는 막대 끝의 질점이다.
 각도 θ는 아래 수직선에서 오른쪽으로 기울어진 각이다.
-위치가 `(l sinθ, −l cosθ)`이므로 길이는 언제나 l이다.
+위치가 $(l \sin \theta , -l \cos \theta )$이므로 길이는 언제나 l이다.
 아래쪽 중력 크기 g와 질점 질량 m에 대해 각도 운동을 유도한다.
 공기 저항과 피벗 마찰은 여기서 무시한다.
 
-```text
-x = l sinθ
-y = −l cosθ
-θ̈ = −(g/l) sinθ
-```
+$$
+\begin{aligned}
+x&=l\sin\theta,\qquad y=-l\cos\theta,\\
+\ddot\theta&=-\frac{g}{l}\sin\theta.
+\end{aligned}
+$$
 
-`l = 2 m`, `g = 10 m/s²`, `θ = 30°`이면 초기 각가속도는 `−2.5 rad/s²`다.
+$l = 2 \mathrm{m}$, $g = 10 \mathrm{m}/\mathrm{s}^2$, $\theta  = 30^\circ$이면 초기 각가속도는 $-2.5 \mathrm{rad}/\mathrm{s}^2$다.
 질량은 이 이상적인 식에서 소거되지만 모든 관절계가 그런 것은 아니다.
 막대에 분포 질량이 있거나 여러 링크가 연결되면 질량행렬이 달라진다.
-작은 각도 근사 `sinθ ≈ θ`는 rad 단위에서만 쓰며 적용 범위를 따로 검토한다.
+작은 각도 근사 $\sin \theta  \approx  \theta$는 rad 단위에서만 쓰며 적용 범위를 따로 검토한다.
 축소 좌표도 수치 적분 오차와 충돌 처리를 없애지는 않는다.
 
 트리 관절계는 적은 좌표로 표현하기 쉽지만 닫힌 고리는 추가 조건이 필요하다.

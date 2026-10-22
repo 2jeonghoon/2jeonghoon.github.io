@@ -35,21 +35,21 @@ Ian Millington의 2판(2010) [공개 목차](https://www.oreilly.com/library/vie
 
 ## 10.2 회전의 뉴턴 제2법칙
 
-질량중심에 대한 토크는 `τ=r×F`다.
-월드 좌표계에서 각운동량은 `L=I_world ω`이며 `τ=dL/dt`다.
-일반 비등방성 강체에서는 `τ=I_world α + ω×(I_world ω)`다.
+질량중심에 대한 토크는 $\tau =r\times F$다.
+월드 좌표계에서 각운동량은 $L=I_{\mathrm{world}} \omega$이며 $\boldsymbol\tau=\frac{d\mathbf L}{dt}$다.
+일반 비등방성 강체에서는 $\tau =I_{\mathrm{world}} \alpha  + \omega \times (I_{\mathrm{world}} \omega )$다.
 
-따라서 일반식은 `α=I_world⁻¹(τ−ω×(I_world ω))`다.
-항상 `α=I⁻¹τ`라고 쓰면 자유 회전의 자이로스코픽 효과를 놓친다.
+따라서 일반식은 $\alpha =I_{\mathrm{world}}^{-1}(\tau -\omega \times (I_{\mathrm{world}} \omega ))$다.
+항상 $\alpha =I^{-1}\tau$라고 쓰면 자유 회전의 자이로스코픽 효과를 놓친다.
 구처럼 관성이 등방성이거나 해당 항이 0인 제한 조건에서는 단순식이 맞는다.
 
-자세 R이 물체에서 월드로의 회전이면 `I_world=R I_body Rᵀ`다.
-역관성 텐서도 `I_world⁻¹=R I_body⁻¹ Rᵀ`로 변환한다.
+자세 R이 물체에서 월드로의 회전이면 $I_{\mathrm{world}}=R I_{\mathrm{body}} R^{\mathsf T}$다.
+역관성 텐서도 $I_{\mathrm{world}}^{-1}=R I_{\mathrm{body}}^{-1} R^{\mathsf T}$로 변환한다.
 
 ## 10.3 회전에 적용한 달랑베르 원리
 
 회전 운동 방정식을 평형 형태로 쓰면 토크와 관성 항의 균형을 볼 수 있다.
-월드 표현에서는 `τ−Iα−ω×(Iω)=0`이다.
+월드 표현에서는 $\tau -I\alpha -\omega \times (I\omega )=0$이다.
 관성 항은 외부에서 다시 적용하는 실제 토크 생성기가 아니다.
 
 여러 힘의 합은 병진 운동에, 각 작용점의 토크 합은 회전 운동에 사용한다.
@@ -62,8 +62,8 @@ Ian Millington의 2판(2010) [공개 목차](https://www.oreilly.com/library/vie
 책의 공개 구현을 읽을 때는 선택된 근사와 갱신 순서를 그대로 확인한다.
 일반 회전 방정식과 교육용 엔진의 단순화된 가속도 계산은 같은 것으로 취급하지 않는다.
 
-쿼터니언은 Hamilton 곱, `(w,x,y,z)`, 물체→월드 능동 회전이라는 규약을 쓴다.
-월드 각속도라면 `q̇=0.5(0,ω)q`를 사용하고 갱신 뒤 정규화한다.
+쿼터니언은 Hamilton 곱, $(w,x,y,z)$, 물체→월드 능동 회전이라는 규약을 쓴다.
+월드 각속도라면 $\dot q=\frac12(0,\boldsymbol\omega)q$를 사용하고 갱신 뒤 정규화한다.
 자세가 바뀌면 변환 행렬과 월드 역관성 텐서도 새 자세로 갱신한다.
 
 이번 스텝 토크를 지우지 않으면 이전 외력이 다음 스텝에도 중복된다.
@@ -77,12 +77,12 @@ Ian Millington의 2판(2010) [공개 목차](https://www.oreilly.com/library/vie
 ### 직접 계산해 보는 작은 예제
 
 자작 예제는 오른손 월드 좌표계이며 r=(0,1,0) m, F=(2,0,0) N이다.
-토크는 `r×F=(0,0,−2) N·m`다.
-질량 2 kg이면 질량중심 병진 가속도는 `(1,0,0) m/s²`다.
+토크는 $r\times F=(0,0,-2) \mathrm{N}\cdot \mathrm{m}$다.
+질량 2 kg이면 질량중심 병진 가속도는 $(1,0,0) \mathrm{m}/\mathrm{s}^2$다.
 
-등방성 관성 `I=2 kg·m² × 단위행렬`인 물체로 한정한다.
-이 경우 `ω×Iω=0`이므로 각가속도는 `(0,0,−1) rad/s²`다.
-초기 각속도가 0이고 h=0.1 s이면 한 스텝 각속도는 `(0,0,−0.1) rad/s`다.
+등방성 관성 $I=2\,\mathrm{kg\,m^2}\,E$인 물체로 한정한다.
+이 경우 $\omega \times I\omega =0$이므로 각가속도는 $(0,0,-1) \mathrm{rad}/\mathrm{s}^2$다.
+초기 각속도가 0이고 h=0.1 s이면 한 스텝 각속도는 $(0,0,-0.1) \mathrm{rad}/\mathrm{s}$다.
 
 ## 10.6 자작 학습 문제
 

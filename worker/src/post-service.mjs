@@ -1,8 +1,6 @@
-import MarkdownIt from "markdown-it";
+import {renderMarkdown} from "../../lib/markdown.mjs";
 
 import {ContractError, parsePostSource, serializePostSource, validatePostInput, validateSlug} from "../../lib/post-contract.mjs";
-
-const markdown = new MarkdownIt({html: false, linkify: false, typographer: false});
 
 function commitResult(result) {
   return {
@@ -38,7 +36,7 @@ export function createPostService(client) {
     },
     preview(input) {
       const post = validatePostInput(input);
-      return {html: markdown.render(post.body)};
+      return {html: renderMarkdown(post.body)};
     },
     async create(input) {
       const post = validatePostInput(input);
