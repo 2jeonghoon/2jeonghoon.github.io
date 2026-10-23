@@ -1,18 +1,17 @@
 ---
 title: "07: 특잇값 분해와 PCA"
 description: "직사각형 행렬을 정규직교 방향과 배율로 분해하고 저랭크 근사를 이해한다."
-date: "2026-10-19"
-order: 7
+date: "2026-10-23"
+order: 2
 category: "Mathematics"
 subcategory: "Introduction to Linear Algebra"
-tags: ["Linear Algebra", "Mathematics", "Study Notes"]
+tags: ["Linear Algebra","Mathematics","Study Notes"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 [시리즈 학습 지도](/?post=linear-algebra-6e-overview)
 
 [6판 공식 목차](https://math.mit.edu/~gs/linearalgebra/ila6/indexila6.html)의 순서로 개념을 재구성한 개인 공부 노트다. 공개 목차와 MIT 자료를 참고했으며 책 전체 본문을 읽고 축약한 글은 아니다. 계산과 연습 예제는 직접 구성했다.
