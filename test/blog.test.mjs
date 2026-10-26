@@ -71,6 +71,34 @@ const categorizedPosts = [
   {title: "Unity", description: "", content: "", category: "Games", subcategory: "Unity", tags: []}
 ];
 
+test("homepage paginates notes and resets the page when searching", () => {
+  const nodes = new Map();
+  const node = selector => {
+    if (!nodes.has(selector)) nodes.set(selector, {
+      innerHTML: "", handlers: {},
+      addEventListener(type, handler) { this.handlers[type] = handler; },
+      querySelector() { return null; },
+      querySelectorAll() { return []; }
+    });
+    return nodes.get(selector);
+  };
+  const app = {innerHTML: "", querySelector: node};
+  require("../blog.js").bootstrap({
+    BLOG_POSTS: Array.from({length: 23}, (_, i) => ({
+      slug: `note-${i}`, title: `Note ${i}`, date: "2026-10-26",
+      category: "Notes", tags: [], description: "", content: ""
+    })), location: {search: ""}
+  }, {getElementById: () => app, querySelector: () => null});
+  const count = () => (node(".post-list").innerHTML.match(/class="post-card"/g) || []).length;
+  assert.equal(count(), 10);
+  node(".pagination").handlers.click({target: {closest: () => ({dataset: {page: "3"}})}});
+  assert.equal(count(), 3);
+  assert.match(node(".pagination").innerHTML, /aria-current="page"[^>]*>3</);
+  node(".search").handlers.input({target: {value: "Note 22"}});
+  assert.equal(count(), 1);
+  assert.equal(node(".pagination").innerHTML, "");
+});
+
 test("sorts browser posts newest first and same-date posts by title", () => {
   assert.equal(typeof sortPosts, "function");
   const posts = sortPosts([

@@ -356,7 +356,7 @@
         </a>` : ""}
         <section class="writing" id="writing">
           <div class="section-head"><div><p class="section-kicker">01 / WRITING</p><h2>Latest notes</h2></div><span class="post-count">${String(posts.length).padStart(2, "0")} POSTS</span></div>
-          <div class="writing-layout"><div class="writing-main"><div class="filters"><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div><div class="post-list" aria-live="polite"></div></div><div class="category-sidebar-shell"></div></div>
+          <div class="writing-layout"><div class="writing-main"><div class="filters"><input class="search" type="search" aria-label="글 검색" placeholder="Search notes…" /></div><div class="post-list" aria-live="polite"></div><nav class="pagination" aria-label="글 목록 페이지"></nav></div><div class="category-sidebar-shell"></div></div>
         </section>
         <section class="about" id="about"><div class="about-inner">
           <div><p class="section-kicker">02 / ABOUT</p><h2>안녕하세요</h2></div>
@@ -366,12 +366,24 @@
 
       let {category: activeCategory, subcategory: activeSubcategory} = categorySelectionFromSearch(browser.location.search, categories);
       let query = "";
+      let currentPage = 1;
+      const pageSize = 10;
+      const pagination = app.querySelector(".pagination");
       const list = app.querySelector(".post-list");
       const sidebarShell = app.querySelector(".category-sidebar-shell");
       function renderList() {
         const filtered = filterPosts(posts, {category: activeCategory, subcategory: activeSubcategory, query});
+        const totalPages = Math.ceil(filtered.length / pageSize);
+        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+        const visible = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        pagination.innerHTML = totalPages > 1
+          ? `<button type="button" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>← 이전</button>${Array.from({length: totalPages}, (_, index) => {
+              const number = index + 1;
+              return `<button type="button" data-page="${number}" ${number === currentPage ? `aria-current="page"` : ""}>${number}</button>`;
+            }).join("")}<button type="button" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>다음 →</button>`
+          : "";
         list.innerHTML = filtered.length
-          ? filtered
+          ? visible
               .map(
                 post =>
                   `<a class="post-card" href="${postUrl(post.slug)}">${meta(post)}<h3>${escapeHtml(post.title)}</h3><p class="post-description">${escapeHtml(post.description)}</p><span class="post-arrow" aria-hidden="true">↗</span></a>`
@@ -387,6 +399,7 @@
         sidebarShell.querySelectorAll(".category-link").forEach(link =>
           link.addEventListener("click", event => {
             event.preventDefault();
+            currentPage = 1;
             activeCategory = link.dataset.category || "";
             activeSubcategory = link.dataset.subcategory || "";
             if (browser.history?.pushState) {
@@ -401,11 +414,13 @@
         );
       }
       app.querySelector(".search").addEventListener("input", event => {
+        currentPage = 1;
         query = event.target.value;
         renderList();
       });
       if (typeof browser.addEventListener === "function") {
         browser.addEventListener("popstate", () => {
+          currentPage = 1;
           const selection = categorySelectionFromSearch(browser.location.search, categories);
           activeCategory = selection.category;
           activeSubcategory = selection.subcategory;
@@ -413,6 +428,13 @@
           updateCategorySidebarState(sidebarShell, selection);
         });
       }
+      pagination.addEventListener("click", event => {
+        const button = event.target.closest("button[data-page]");
+        if (!button || button.disabled) return;
+        currentPage = Number(button.dataset.page);
+        renderList();
+        pagination.querySelector(`[data-page="${currentPage}"]`)?.focus();
+      });
       renderSidebar();
       renderList();
     }
