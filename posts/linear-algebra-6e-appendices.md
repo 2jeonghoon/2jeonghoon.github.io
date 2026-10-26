@@ -1,18 +1,17 @@
 ---
 title: "부록 1–10: 행렬 분해, 수치 계산과 그래픽스"
 description: "6판 부록 순서에 맞춰 랭크, 분해, 매개변수 수, Jordan 형식, 텐서, 조건수, Markov 행렬과 그래픽스를 복습합니다."
-date: "2026-10-19"
-order: 11
+date: "2026-10-26"
+order: 4
 category: "Mathematics"
 subcategory: "Introduction to Linear Algebra"
-tags: ["Linear Algebra", "Matrix Factorization", "Numerical Analysis", "Computer Graphics"]
+tags: ["Linear Algebra","Matrix Factorization","Numerical Analysis","Computer Graphics"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 [전체 학습 안내](/?post=linear-algebra-6e-overview)
 
 『Introduction to Linear Algebra』 6판의 공개 목차에 있는 부록 순서대로 공부할 개념을 모았다. 설명과 숫자 예제는 독립적으로 작성했으며, 공개되지 않은 부록 전체 본문의 번역이나 연습문제 해설이 아니다. 본문의 개념을 실제 계산으로 옮길 때 다시 찾아보는 참고 노트다.
