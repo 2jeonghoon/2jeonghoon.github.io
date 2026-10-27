@@ -1,17 +1,17 @@
 ---
 title: "Effective Modern C++: 타입 추론부터 동시성까지 핵심 정리"
 description: "Scott Meyers의 Effective Modern C++를 공부하기 위한 주제별 노트. 타입 추론, 초기화, 스마트 포인터, 이동과 전달, 람다, 동시성의 판단 기준을 예제로 정리합니다."
-date: "2026-10-19"
+date: "2026-10-27"
+order: 1
 category: "C++"
 subcategory: "Effective Modern C++"
-tags: ["C++", "Effective Modern C++", "C++11", "C++14", "Move Semantics", "Smart Pointer"]
+tags: ["C++","Effective Modern C++","C++11","C++14","Move Semantics","Smart Pointer"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 ## 어떤 책을 기준으로 공부할까?
 
 기준 도서는 Scott Meyers의 **『Effective Modern C++』(O'Reilly, 2014)**다. C++11/14의 기능을 올바르게 사용하는 42개 항목을 다루며, 이 블로그의 기존 『Effective C++』 노트에서 소유권과 현대적인 문법으로 공부를 이어가기 좋다. 서지와 범위는 [저자의 도서 소개](https://www.aristeia.com/books.html)에서 확인할 수 있다.
