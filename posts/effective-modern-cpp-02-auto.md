@@ -1,18 +1,17 @@
 ---
 title: "02: auto"
 description: "Item 5–6. auto를 기본 선택으로 쓰되 프록시와 지연 표현식의 경계를 확인합니다."
-date: "2026-10-19"
+date: "2026-10-27"
 order: 2
 category: "C++"
 subcategory: "Effective Modern C++"
-tags: ["C++", "Effective Modern C++", "auto", "프록시"]
+tags: ["C++","Effective Modern C++","auto","프록시"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 [공식 목차](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/)의 2장, Item 5–6을 순서대로 정리한다. 공개 자료와 언어 참조를 바탕으로 직접 작성한 학습 노트이며 책 본문을 완역한 글이 아니다. 예제의 기준은 C++11/14다.
 
 ## Item 5. 명시적인 타입보다 auto를 먼저 검토하기
