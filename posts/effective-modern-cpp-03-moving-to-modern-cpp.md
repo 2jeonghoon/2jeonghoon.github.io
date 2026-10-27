@@ -1,18 +1,17 @@
 ---
 title: "03: 현대 C++로 옮겨가기"
 description: "Item 7–17. 초기화, 인터페이스, 예외 계약과 특수 멤버 함수의 기준을 정리합니다."
-date: "2026-10-19"
+date: "2026-10-27"
 order: 3
 category: "C++"
 subcategory: "Effective Modern C++"
-tags: ["C++", "Effective Modern C++", "초기화", "인터페이스"]
+tags: ["C++","Effective Modern C++","초기화","인터페이스"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 [공식 목차](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/)의 3장, Item 7–17을 따라 작성한 개인 학습 노트다. 공개 목차와 언어 참조를 연결했으며 책 전체 본문의 번역이 아니다. 예제는 C++11/14의 독립적인 선언·함수 조각이고 실행하려면 필요한 호출부를 별도로 구성한다.
 
 ## Item 7. 괄호와 중괄호의 생성자 선택을 구별하기
