@@ -1,18 +1,17 @@
 ---
 title: "01: 타입 추론"
 description: "Item 1–4. 템플릿, auto, decltype의 추론 규칙과 확인 방법을 공부합니다."
-date: "2026-10-19"
+date: "2026-10-27"
 order: 1
 category: "C++"
 subcategory: "Effective Modern C++"
-tags: ["C++", "Effective Modern C++", "타입 추론", "decltype"]
+tags: ["C++","Effective Modern C++","타입 추론","decltype"]
 image: ""
 readingTime: ""
 featured: false
-draft: true
-aiGenerated: true
+draft: false
+aiGenerated: false
 ---
-
 공개된 [공식 목차](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/)의 1장, Item 1–4 순서로 공부한다. 책 전체 본문의 번역이 아니라 언어 규칙과 직접 만든 예제를 연결한 개인 학습 노트다. 기준은 C++11/14이며 현재 작업 초안의 이후 기능과 구분한다.
 
 ## Item 1. 템플릿 타입 추론을 세 가지 경우로 나누기
