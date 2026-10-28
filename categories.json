@@ -2,7 +2,11 @@
   "categories": [
     {
       "name": "면접 대비",
-      "children": []
+      "children": [
+        {
+          "name": "Linux"
+        }
+      ]
     },
     {
       "name": "Study",
