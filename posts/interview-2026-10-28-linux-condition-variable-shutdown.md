@@ -11,11 +11,7 @@ aiGenerated: true
 
 ## 오늘의 질문
 
-여러 작업 스레드가 하나의 큐를 공유한다. 큐가 비면 조건 변수로 기다린다. 조건 확인과 작업 추가를 어떻게 동기화하고 종료 시 대기 스레드를 어떻게 깨울까?
-
-## 사용자 답변 요지
-
-세마포어를 사용하고 서버 종료 시 모든 작업 스레드가 종료될 때까지 기다린다는 답변이었다.
+여러 작업 스레드가 하나의 큐에서 작업을 꺼냅니다. 큐가 비었을 때 조건 변수로 기다리도록 구현하려고 합니다. 대기 조건 확인과 작업 추가를 어떤 동기화 규칙으로 묶겠습니까? 서버 종료 시 대기 중인 스레드는 어떻게 종료하겠습니까?
 
 ## 핵심 해설
 
@@ -161,4 +157,3 @@ notify_all은 실행 중인 작업을 강제로 중단하지 않는다. 운영 �
 
 - [Microsoft: condition_variable의 mutex, 조건 검사와 알림](https://learn.microsoft.com/en-us/cpp/standard-library/condition-variable?view=msvc-170)
 - [C++ Core Guidelines: CP.42](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rconc-wait)
-
